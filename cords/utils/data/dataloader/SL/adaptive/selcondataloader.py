@@ -5,9 +5,12 @@ import time, copy
 
 # SELCONstrategy
 class SELCONDataLoader(AdaptiveDSSDataLoader):
+    """
+    Implementation of SELCONdataloader that serves as the dataloader for SELCON algorithm.
+    """
     def __init__(self, trainset, validset, train_loader, val_loader, dss_args, logger, *args, **kwargs):
         """
-         Arguments assertion check
+        Constructor function
         """
         assert "model" in dss_args.keys(), "'model' is a compulsory argument. Include it as a key in dss_args"
         assert "loss" in dss_args.keys(), "'loss' is a compulsory argument. Include it as a key in dss_args"
