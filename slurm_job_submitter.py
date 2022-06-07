@@ -44,16 +44,16 @@ def run_jobs_slurm(jobs_path: str, conda_environment: str, partition: str = None
             command += f"""\n#SBATCH --nodes=1
 #SBATCH --cores=7
 #SBATCH --gres=gpu:1"""
-            if partition == 'Intel':
+            if cluster == 'Intel':
                 command += f"\n#SBATCH --mem=100G"
             else:
-                command += f"\n#SBATCH --mem=20G"
+                command += f"\n#SBATCH --mem=40G"
             command += """\n#SBATCH --mem=100G
 source ~/.bashrc
 source activate {conda_environment}
 cd ~/ResearchFramework
-export TMPDIR=/home/$USER/tmp
-export PYTHONPATH=$PYTHONPATH:.:third_party/training_extensions/external/mmdetection
+
+
 {python_command}
             """
             job_sh_path = f"job{line_num}.sh"
