@@ -5,6 +5,7 @@ from cords.utils.config_utils import load_config_data
 print("test!")
 config_file = "./configs/SL/config_gradmatch_cifar10.py"
 cfg = load_config_data(config_file)
+cfg.train_args.num_epochs = 60
 print(cfg)
 clf = TrainClassifier(cfg)
 clf.train()
