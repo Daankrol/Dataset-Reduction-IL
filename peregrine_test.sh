@@ -5,7 +5,7 @@
 #SBATCH --mail-type=BEGIN,END,FAIL,REQUEUE
 #SBATCH --mail-user=d.j.krol.1@student.rug.nl
 #SBATCH --array=1
-#SBATCH --partition=gpu-short
+#SBATCH --partition=gpushort
 #SBATCH --gres=gpu:v100:1
 
 
