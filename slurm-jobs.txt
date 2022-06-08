@@ -1,3 +1,0 @@
-python3 run_experiment.py --config ./exp-configs/config_gradmatchpb_cifar10.yaml
-python3 run_experiment.py --config ./exp-configs/config_gradmatch_cifar10.yaml
-python3 run_experiment.py --config ./exp-configs/config_random_cifar10.yaml
