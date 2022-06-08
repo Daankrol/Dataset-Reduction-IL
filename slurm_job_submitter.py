@@ -25,7 +25,7 @@ def run_jobs_slurm(jobs_path: str, partition: str = None, cluster: str = 'intel'
     """
     if partition is None:
         if cluster == 'intel':
-            partition = 'main'
+            partition = 'short'
         else:
             partition = 'gpu'
 
@@ -59,12 +59,14 @@ def run_jobs_slurm(jobs_path: str, partition: str = None, cluster: str = 'intel'
 """
             if cluster == 'intel':
                 command += "#SBATCH --gres=gpu:1\n"
+
             elif cluster == 'rug':
                 command += "#SBATCH --gres=gpu:v100:1\n"
             if cluster == 'rug':
                 command += f"""
 #SBATCH --mail-type=BEGIN,END,FAIL,REQUEUE
 #SBATCH --mail-user=d.j.krol.1@student.rug.nl
+#SBATCH --time=2:00:00
 
 module purge
 module load Python/3.8.6-GCCcore-10.2.0
