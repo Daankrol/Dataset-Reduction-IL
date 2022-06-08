@@ -59,11 +59,11 @@ def run_jobs_slurm(jobs_path: str, partition: str = None, cluster: str = 'intel'
 """
             if cluster == 'intel':
                 command += "#SBATCH --gres=gpu:1\n"
+                if partition == 'short':
+                    command += "#SBATCH --time=23:00:00\n"
 
             elif cluster == 'rug':
-                command += "#SBATCH --gres=gpu:v100:1\n"
-            if cluster == 'rug':
-                command += f"""
+                command += f"""#SBATCH --gres=gpu:v100:1
 #SBATCH --mail-type=BEGIN,END,FAIL,REQUEUE
 #SBATCH --mail-user=d.j.krol.1@student.rug.nl
 #SBATCH --time=2:00:00
