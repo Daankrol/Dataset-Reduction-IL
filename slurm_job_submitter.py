@@ -48,32 +48,36 @@ def run_jobs_slurm(jobs_path: str, partition: str = None, cluster: str = 'intel'
             job_name = f"job{line_num}"
 
             command = f"""#!/bin/bash
-            #SBATCH --job-name={job_name}
-            #SBATCH --array=1"""
+#SBATCH --job-name={job_name}
+#SBATCH --array=1"""
             if partition is not None:
                 command += f"\n#SBATCH --partition={partition}"
-            command += f"""\n#SBATCH --nodes=1
-            #SBATCH --cores=7
-            #SBATCH --gres={cluster=='intel' :'gpu:1' ? 'gpu:v100:1'}
-            #SBATCH --mem=100G
-            """
+            command += f"""
+#SBATCH --nodes=1
+#SBATCH --cores=7
+#SBATCH --mem=100G
+"""
+            if cluster == 'intel':
+                command += "#SBATCH --gres=gpu:1\n"
+            elif cluster == 'rug':
+                command += "#SBATCH --gres=gpu:v100:1\n"
             if cluster == 'rug':
                 command += f"""
-                #SBATCH --mail-type=BEGIN,END,FAIL,REQUEUE
-                #SBATCH --mail-user=d.j.krol.1@student.rug.nl
+#SBATCH --mail-type=BEGIN,END,FAIL,REQUEUE
+#SBATCH --mail-user=d.j.krol.1@student.rug.nl
 
-                module purge
-                module load Python/3.8.6-GCCcore-10.2.0
-                source /data/$USER/.envs/DatasetReduction/bin/activate
-                cd /data/$USER/Dataset-Reduction-IL/
-                {python_command}
-                """
+module purge
+module load Python/3.8.6-GCCcore-10.2.0
+source /data/$USER/.envs/DatasetReduction/bin/activate
+cd /data/$USER/Dataset-Reduction-IL/
+{python_command}
+"""
             elif cluster == 'intel':
                 command += f"""
-                source ~/.bashrc
-                source activate /home/daankrol/miniconda3/envs/DatasetReduction/
-                cd ~/Dataset-Reduction-IL
-                {python_command} """
+source ~/.bashrc
+source activate /home/daankrol/miniconda3/envs/DatasetReduction/
+cd ~/Dataset-Reduction-IL
+{python_command} """
 
             job_sh_path = f"job{line_num}.sh"
             with open(job_sh_path, "w") as f:
