@@ -99,7 +99,7 @@ if __name__ == "__main__":
         type=str,
         choices=["short", "main", "gpu", "gpushort"],
         default=None,
-        help="The SLURM partition to put this job in (options (intel): [short, main], (rug): [gpu, gpushort]).",
+        help="The SLURM partition to put this job in. options: \n(intel): [short, main] \n(rug): [gpu, gpushort]",
     )
     parser.add_argument(
         "--cluster",
@@ -110,5 +110,10 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
+
+    # if jobs_path is empty, show help mesage of argparse and exit
+    if args.jobs_path is None:
+        parser.print_help()
+        exit(1)
 
     run_jobs_slurm(args.jobs_path, cluster=args.cluster, partition=args.partition)
