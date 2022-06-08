@@ -1,6 +1,7 @@
 # Dataset reduction using CORDS
 from train_sl import TrainClassifier
 from cords.utils.config_utils import load_config_data
+import argparse
 
 parser = argparse.ArgumentParser(description="Run experiments with config file\n ./configs/SL/conig_gradmatch_cifar10.py")
 parser.add_argument(
