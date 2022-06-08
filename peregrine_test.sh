@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --time=00m:59:00
+#SBATCH --time=00:59:00
 #SBATCH --job-name=peregrine_test
 #SBATCH --mem=100G
 #SBATCH --mail-type=BEGIN,END,FAIL,REQUEUE
@@ -16,7 +16,7 @@ module load Python/3.8.6-GCCcore-10.2.0
 # python -m pip install --use-feature=2020-resolver -r requirements/requirements.txt
 
 source /data/$USER/.envs/DatasetReduction/bin/activate
-
 # do a wandb relogin with api key 
+export WANDB_API_KEY=a3c0932a7937da444ca4c32cc2a14a4d20c0649f
 cd /data/$USER/Dataset-Reduction-IL/
 python main.py
