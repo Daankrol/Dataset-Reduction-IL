@@ -3,7 +3,7 @@ import os
 from time import sleep
 
 
-def run_jobs_slurm(jobs_path: str, conda_environment: str, partition: str = None, cluster: str = 'Intel'):
+def run_jobs_slurm(jobs_path: str, partition: str = None, cluster: str = 'intel'):
     """
     SLURM job runner
     Run in folder where you want to create jobs, e.g.
@@ -19,8 +19,17 @@ def run_jobs_slurm(jobs_path: str, conda_environment: str, partition: str = None
     python scripts/run_experiment2.py --task classification --dataset pap --epochs 30 --rounds -1 --runs 5 --debug --active_learning_sample_size 50 --disable_output_embedding --active_learning uncertainty_exploration
     job files are created in the current directory as job<line_number>.sh, where line_number refers to `jobs_path`
     :param jobs_path: path to txt file containing jobs
-    :param conda_environment:
+    :param conda_environment: path to conda env
+    :param partition: partition to submit to. E.g. 'gpu', 'gpushort'
+    :param cluster: cluster to submit to, can be 'intel' or 'rug'
     """
+    if partition is None:
+        if cluster == 'intel':
+            partition = 'main'
+        else:
+            partition = 'gpu'
+
+
     with open(jobs_path, "r") as f:
         lines = f.readlines()
     os.chdir(
@@ -37,25 +46,35 @@ def run_jobs_slurm(jobs_path: str, conda_environment: str, partition: str = None
             # write SLURM bash script
             python_command = line
             job_name = f"job{line_num}"
+
             command = f"""#!/bin/bash
-#SBATCH --job-name={job_name}"""
+            #SBATCH --job-name={job_name}
+            #SBATCH --array=1"""
             if partition is not None:
                 command += f"\n#SBATCH --partition={partition}"
             command += f"""\n#SBATCH --nodes=1
-#SBATCH --cores=7
-#SBATCH --gres=gpu:1"""
-            if cluster == 'Intel':
-                command += f"\n#SBATCH --mem=100G"
-            else:
-                command += f"\n#SBATCH --mem=40G"
-            command += """\n#SBATCH --mem=100G
-source ~/.bashrc
-source activate {conda_environment}
-cd ~/ResearchFramework
-
-
-{python_command}
+            #SBATCH --cores=7
+            #SBATCH --gres={cluster=='intel' :'gpu:1' ? 'gpu:v100:1'}
+            #SBATCH --mem=100G
             """
+            if cluster == 'rug':
+                command += f"""
+                #SBATCH --mail-type=BEGIN,END,FAIL,REQUEUE
+                #SBATCH --mail-user=d.j.krol.1@student.rug.nl
+
+                module purge
+                module load Python/3.8.6-GCCcore-10.2.0
+                source /data/$USER/.envs/DatasetReduction/bin/activate
+                cd /data/$USER/Dataset-Reduction-IL/
+                {python_command}
+                """
+            elif cluster == 'intel':
+                command += f"""
+                source ~/.bashrc
+                source activate /home/daankrol/miniconda3/envs/DatasetReduction/
+                cd ~/Dataset-Reduction-IL
+                {python_command} """
+
             job_sh_path = f"job{line_num}.sh"
             with open(job_sh_path, "w") as f:
                 f.write(command)
@@ -76,19 +95,20 @@ if __name__ == "__main__":
         help="Path of a .txt file that contains a list of jobs to be submitted.",
     )
     parser.add_argument(
-        "--conda_env",
-        type=str,
-        default=None,
-        help="The existing conda virtual environment to activate for this job.",
-    )
-    parser.add_argument(
         "--partition",
         type=str,
-        choices=["short", "main"],
+        choices=["short", "main", "gpu", "gpushort"],
         default=None,
-        help="The SLURM partition to put this job in (options: [short, main])",
+        help="The SLURM partition to put this job in (options (intel): [short, main], (rug): [gpu, gpushort]).",
+    )
+    parser.add_argument(
+        "--cluster",
+        type=str,
+        choices=["intel", "rug"],
+        default="intel",
+        help="The SLURM cluster to put this job in (options: [intel, rug]).",
     )
 
     args = parser.parse_args()
 
-    run_jobs_slurm(args.jobs_path, args.conda_env, partition=args.partition)
+    run_jobs_slurm(args.jobs_path, cluster=args.cluster, partition=args.partition)
