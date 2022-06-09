@@ -61,6 +61,13 @@ def run_jobs_slurm(jobs_path: str, partition: str = None, cluster: str = 'intel'
                 command += "#SBATCH --gres=gpu:1\n"
                 if partition == 'short':
                     command += "#SBATCH --time=23:00:00\n"
+                else:
+                    command += "#SBATCH --time=1-23:00:00\n"
+                command += f"""
+source ~/.bashrc
+source activate /home/daankrol/miniconda3/envs/DatasetReduction/
+cd ~/Dataset-Reduction-IL
+{python_command} """
 
             elif cluster == 'rug':
                 command += f"""#SBATCH --gres=gpu:v100:1
@@ -74,12 +81,7 @@ source /data/$USER/.envs/DatasetReduction/bin/activate
 cd /data/$USER/Dataset-Reduction-IL/
 {python_command}
 """
-            elif cluster == 'intel':
-                command += f"""
-source ~/.bashrc
-source activate /home/daankrol/miniconda3/envs/DatasetReduction/
-cd ~/Dataset-Reduction-IL
-{python_command} """
+                
 
             job_sh_path = f"job{line_num}.sh"
             with open(job_sh_path, "w") as f:
