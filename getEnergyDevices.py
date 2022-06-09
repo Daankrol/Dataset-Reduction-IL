@@ -1,4 +1,4 @@
-from pyjoules.energy_meter import measure_energy, EnergyMeter
+from pyJoules.energy_meter import measure_energy, EnergyMeter
 from pyJoules.device.rapl_device import RaplPackageDomain
 from pyJoules.device.nvidia_device import NvidiaGPUDomain
 from pyJoules.handler.csv_handler import CSVHandler
