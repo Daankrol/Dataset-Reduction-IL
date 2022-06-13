@@ -71,7 +71,7 @@ args = parser.parse_args()
 cfg = load_config_data(args.config)
 clf = TrainClassifier(cfg)
 
-if args.measure_energy:
+if cfg.measure_energy:
     cpu_id_list = getCPUGPUIDs()
     print(f"Running with GPU {args.gpu} and CPU IDs: {cpu_id_list} ")
 
