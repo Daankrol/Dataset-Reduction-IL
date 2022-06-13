@@ -3,15 +3,19 @@ from train_sl import TrainClassifier
 from cords.utils.config_utils import load_config_data
 import argparse
 import os
+import os.path as osp
+from pyJoules.energy_meter import measure_energy, EnergyMeter, EnergyContext
+from pyJoules.device.rapl_device import RaplPackageDomain
+from pyJoules.device.nvidia_device import NvidiaGPUDomain
+from pyJoules.handler.csv_handler import CSVHandler
+from pyJoules.device.device_factory import DeviceFactory
 
 
-def getCPUGPUIDs():
+
+def getCPUIDs():
     """Get the IDs of the GPU and CPUs that are assigned to this job. 
     SLURM IDs are mapped to the psysical IDs.
     """
-    # GPU ID can be found using the environment variable SLURM_JOB_GPU
-    gpu_id = os.environ.get("SLURM_JOB_GPU")
-
     # CPU IDs can be found by using the bash command "cat /proc/self/status | grep Cpus_allowed_list"
     # This will return a string with the format "Cpus_allowed_list:	39-41,49,95-97,105"
     # For IDS that are separated by a '-' we also want the ids that are in between the '-'
@@ -40,7 +44,7 @@ def getCPUGPUIDs():
         if cpu_id in mapping:
             cpu_id_list[cpu_id_list.index(cpu_id)] = mapping[cpu_id]
 
-    return gpu_id, cpu_id_list
+    return cpu_id_list
 
 parser = argparse.ArgumentParser(description="Run experiments with config file\n ./configs/SL/config_gradmatch_cifar10.py")
 parser.add_argument(
@@ -62,15 +66,32 @@ parser.add_argument(
     help="GPU id"
 )
 
-
 args = parser.parse_args()
 
-if args.cluster == "intel":
-    gpu_id, cpu_id_list = getCPUGPUIDs()
+cpu_id_list = getCPUGPUIDs()
 
-gpu_id = args.gpu
+print(f"Running with GPU {args.gpu} and CPU IDs: {cpu_id_list} ")
+cfg = load_config_data(args.config)
+clf = TrainClassifier(cfg)
 
-print(f"Running with GPU {gpu_id} and CPU IDs: {cpu_id_list} ")
-# cfg = load_config_data(args.config)
-# clf = TrainClassifier(cfg)
-# clf.train() # train and evaluate
+domains = [RaplPackageDomain(id) for id in cpu_id_list] + [NvidiaGPUDomain(args.gpu)]
+
+results_dir = osp.abspath(osp.expanduser(cfg.train_args.results_dir))
+if cfg.dss_args.type != "Full":
+    all_logs_dir = os.path.join(results_dir, cfg.setting,
+                                cfg.dss_args.type,
+                                cfg.dataset.name,
+                                str(cfg.dss_args.fraction),
+                                str(cfg.dss_args.select_every))
+else:
+    all_logs_dir = os.path.join(results_dir, cfg.setting,
+                                cfg.dss_args.type,
+                                cfg.dataset.name)
+
+os.makedirs(all_logs_dir, exist_ok=True)
+csv_handler = CSVHandler(all_logs_dir + "/energy_consumption.csv")
+
+with EnergyContext(handler=csv_handler, domains=domains) as meter:
+    clf.train() # train and evaluate
+
+csv_handler.save_data()
