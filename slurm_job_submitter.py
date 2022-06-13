@@ -64,6 +64,7 @@ def run_jobs_slurm(jobs_path: str, partition: str = None, cluster: str = 'intel'
 """
             if cluster == 'intel':
                 command += "#SBATCH --gres=gpu:1\n"
+                python_command += " --gpu ${SLURM_JOB_GPUS}"
                 if partition == 'short':
                     command += "#SBATCH --time=23:00:00\n"
                 else:
@@ -72,7 +73,7 @@ def run_jobs_slurm(jobs_path: str, partition: str = None, cluster: str = 'intel'
 source ~/.bashrc
 source activate /home/daankrol/miniconda3/envs/DatasetReduction/
 cd ~/Dataset-Reduction-IL
-{python_command} --cluster {cluster} --gpu $\{SLURM_JOB_GPUS\}"""
+{python_command} --cluster {cluster} --gpu ${{SLURM_JOB_GPUS}}"""
 
             elif cluster == 'rug':
                 command += f"""#SBATCH --gres=gpu:v100:1
@@ -84,7 +85,7 @@ module purge
 module load Python/3.8.6-GCCcore-10.2.0
 source /data/$USER/.envs/DatasetReduction/bin/activate
 cd /data/$USER/Dataset-Reduction-IL/
-{python_command} --cluster {cluster}
+{python_command} --cluster {cluster} --gpu ${{SLURM_JOB_GPUS}}
 """
             job_sh_path = f"job{line_num}.sh"
             with open(job_sh_path, "w") as f:
