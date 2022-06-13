@@ -1,5 +1,6 @@
 # Learning setting
 config = dict(setting="SL",
+              measure_energy=True,
               is_reg = False,
               dataset=dict(name="cifar10",
                            datadir="../data",
@@ -33,7 +34,7 @@ config = dict(setting="SL",
 
               dss_args=dict(type="Random",
                                 fraction=0.1,
-                                select_every=20,
+                                select_every=10,
                                 kappa=0),
 
               train_args=dict(num_epochs=20,

@@ -1,6 +1,7 @@
 # Learning setting
 config = dict(setting="SL",
               is_reg = False,
+              measure_energy=True,
               dataset=dict(name="cifar10",
                            datadir="../data",
                            feature="dss",
