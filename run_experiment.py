@@ -2,6 +2,7 @@
 from train_sl import TrainClassifier
 from cords.utils.config_utils import load_config_data
 import argparse
+import os
 
 
 def getCPUGPUIDs():
@@ -55,12 +56,19 @@ parser.add_argument(
     help="Either 'intel' or 'rug'"
 )
 
+parser.add_argument(
+    "--gpu",
+    type=int,
+    help="GPU id"
+)
 
 
 args = parser.parse_args()
 
 if args.cluster == "intel":
     gpu_id, cpu_id_list = getCPUGPUIDs()
+
+gpu_id = args.gpu
 
 print(f"Running with GPU {gpu_id} and CPU IDs: {cpu_id_list} ")
 # cfg = load_config_data(args.config)

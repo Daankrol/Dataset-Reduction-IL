@@ -2,30 +2,12 @@ import argparse
 import os
 from time import sleep
 
-
-
-
-
-
-
-    # echo "GPU ID: ${SLURM_JOB_GPUS}"
+# echo "GPU ID: ${SLURM_JOB_GPUS}"
 # cat /proc/self/status | grep Cpus_allowed_list
 
 # OUTPUT:
 # GPU ID: 7
 # Cpus_allowed_list:	39-41,49,95-97,105
-
-
-
-# running the commmand "lstopo --only pu" gives a mapping from logical to physical IDs of the GPUs
-# OUTPUT:
-# PU L#1 (P#56)
-# PU L#2 (P#1)
-# PU L#3 (P#57)
-# PU L#4 (P#2)
-# PU L#5 (P#58)
-
-
 
 def run_jobs_slurm(jobs_path: str, partition: str = None, cluster: str = 'intel'):
     """
@@ -90,7 +72,7 @@ def run_jobs_slurm(jobs_path: str, partition: str = None, cluster: str = 'intel'
 source ~/.bashrc
 source activate /home/daankrol/miniconda3/envs/DatasetReduction/
 cd ~/Dataset-Reduction-IL
-{python_command} --cluster {cluster}"""
+{python_command} --cluster {cluster} --gpu $\{SLURM_JOB_GPUS\}"""
 
             elif cluster == 'rug':
                 command += f"""#SBATCH --gres=gpu:v100:1
