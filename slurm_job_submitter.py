@@ -3,6 +3,30 @@ import os
 from time import sleep
 
 
+
+
+
+
+
+    # echo "GPU ID: ${SLURM_JOB_GPUS}"
+# cat /proc/self/status | grep Cpus_allowed_list
+
+# OUTPUT:
+# GPU ID: 7
+# Cpus_allowed_list:	39-41,49,95-97,105
+
+
+
+# running the commmand "lstopo --only pu" gives a mapping from logical to physical IDs of the GPUs
+# OUTPUT:
+# PU L#1 (P#56)
+# PU L#2 (P#1)
+# PU L#3 (P#57)
+# PU L#4 (P#2)
+# PU L#5 (P#58)
+
+
+
 def run_jobs_slurm(jobs_path: str, partition: str = None, cluster: str = 'intel'):
     """
     SLURM job runner
@@ -26,9 +50,9 @@ def run_jobs_slurm(jobs_path: str, partition: str = None, cluster: str = 'intel'
     if partition is None:
         if cluster == 'intel':
             partition = 'short'
+            gpu_id, cpu_id_list = getCPUGPUIDs()
         else:
             partition = 'gpu'
-
 
     with open(jobs_path, "r") as f:
         lines = f.readlines()
@@ -48,13 +72,12 @@ def run_jobs_slurm(jobs_path: str, partition: str = None, cluster: str = 'intel'
             job_name = f"job{line_num}"
 
             command = f"""#!/bin/bash
-#SBATCH --job-name={job_name}
-#SBATCH --array=1"""
+#SBATCH --job-name={job_name}"""
             if partition is not None:
                 command += f"\n#SBATCH --partition={partition}"
             command += f"""
 #SBATCH --nodes=1
-#SBATCH --cores=7
+#SBATCH --cores=6
 #SBATCH --mem=100G
 """
             if cluster == 'intel':
@@ -67,7 +90,7 @@ def run_jobs_slurm(jobs_path: str, partition: str = None, cluster: str = 'intel'
 source ~/.bashrc
 source activate /home/daankrol/miniconda3/envs/DatasetReduction/
 cd ~/Dataset-Reduction-IL
-{python_command} """
+{python_command} --cluster {cluster}"""
 
             elif cluster == 'rug':
                 command += f"""#SBATCH --gres=gpu:v100:1
@@ -79,10 +102,8 @@ module purge
 module load Python/3.8.6-GCCcore-10.2.0
 source /data/$USER/.envs/DatasetReduction/bin/activate
 cd /data/$USER/Dataset-Reduction-IL/
-{python_command}
+{python_command} --cluster {cluster}
 """
-                
-
             job_sh_path = f"job{line_num}.sh"
             with open(job_sh_path, "w") as f:
                 f.write(command)

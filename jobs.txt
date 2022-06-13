@@ -3,6 +3,6 @@
 #python3 run_experiment.py --config ./exp_configs/config_random_cifar10.py
 #python3 run_experiment.py --config ./exp_configs/test.py
 
-python3 getSLURMenv.py
+#python3 getSLURMenv.py
 
-# short gpu socket id is 7
+python3 run_experiment.py --config ./exp_configs/config_gradmatch_cifar10.py

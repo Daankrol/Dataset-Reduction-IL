@@ -22,4 +22,3 @@ logging.info(f'cpu ids: {get_cpu_ids()}')
 logging.info(f'gpu ids: {get_gpu_ids()}')
 logging.info(f'cpu bind list: {get_cpu_bind_list()}')
 logging.info(f'gpu bind list: {get_gpu_bind_list()}')
-
