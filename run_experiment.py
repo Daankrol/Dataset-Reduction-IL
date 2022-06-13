@@ -72,7 +72,7 @@ cfg = load_config_data(args.config)
 clf = TrainClassifier(cfg)
 
 if cfg.measure_energy:
-    cpu_id_list = getCPUGPUIDs()
+    cpu_id_list = getCPUIDs()
     print(f"Running with GPU {args.gpu} and CPU IDs: {cpu_id_list} ")
 
     domains = [RaplPackageDomain(id) for id in cpu_id_list] + [NvidiaGPUDomain(args.gpu)]
