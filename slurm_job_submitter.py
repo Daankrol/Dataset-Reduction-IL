@@ -32,7 +32,6 @@ def run_jobs_slurm(jobs_path: str, partition: str = None, cluster: str = 'intel'
     if partition is None:
         if cluster == 'intel':
             partition = 'short'
-            gpu_id, cpu_id_list = getCPUGPUIDs()
         else:
             partition = 'gpu'
 
