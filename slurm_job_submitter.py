@@ -72,7 +72,7 @@ def run_jobs_slurm(jobs_path: str, partition: str = None, cluster: str = 'intel'
 source ~/.bashrc
 source activate /home/daankrol/miniconda3/envs/DatasetReduction/
 cd ~/Dataset-Reduction-IL
-{python_command} --cluster {cluster} --gpu ${{SLURM_JOB_GPUS}}"""
+{python_command}"""
 
             elif cluster == 'rug':
                 command += f"""#SBATCH --gres=gpu:v100:1

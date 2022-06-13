@@ -77,7 +77,7 @@ if cfg.measure_energy:
     print(f"Running with GPU {args.gpu} and CPU IDs: {cpu_id_list} ")
 
     # domains = [RaplPackageDomain(id) for id in cpu_id_list] + [NvidiaGPUDomain(args.gpu)]
-    domains = [NvidiaGPUDomain(args.gpu)]
+    domains = [NvidiaGPUDomain(0)]
     results_dir = osp.abspath(osp.expanduser(cfg.train_args.results_dir))
     if cfg.dss_args.type != "Full":
         all_logs_dir = os.path.join(results_dir, cfg.setting,
