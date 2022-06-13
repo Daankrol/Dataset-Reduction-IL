@@ -21,6 +21,7 @@ def getCPUIDs():
     # For IDS that are separated by a '-' we also want the ids that are in between the '-'
 
     cpu_id_string = os.popen("cat /proc/self/status | grep Cpus_allowed_list").read()
+    print(cpu_id_string)
     cpu_id_string = cpu_id_string.split(":")[1].strip()
     cpu_id_list = []
     for cpu_id_string in cpu_id_string.split(","):
@@ -75,8 +76,8 @@ if cfg.measure_energy:
     cpu_id_list = getCPUIDs()
     print(f"Running with GPU {args.gpu} and CPU IDs: {cpu_id_list} ")
 
-    domains = [RaplPackageDomain(id) for id in cpu_id_list] + [NvidiaGPUDomain(args.gpu)]
-
+    # domains = [RaplPackageDomain(id) for id in cpu_id_list] + [NvidiaGPUDomain(args.gpu)]
+    domains = [NvidiaGPUDomain(args.gpu)]
     results_dir = osp.abspath(osp.expanduser(cfg.train_args.results_dir))
     if cfg.dss_args.type != "Full":
         all_logs_dir = os.path.join(results_dir, cfg.setting,
