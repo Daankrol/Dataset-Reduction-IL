@@ -8,3 +8,5 @@ from pyJoules.device.device_factory import DeviceFactory
 devices = DeviceFactory.create_devices()
 # meter = EnergyMeter(devices)
 print(devices)
+for device in devices:
+    print(device.available_domains())
