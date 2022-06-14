@@ -34,8 +34,8 @@
     - type: Subset Selection Algorithm
     - fraction: Percentage of data used for training
     - select_every: Subset selection every N epochs
-    - kappa: Kappa value
-    - lam: Lambda value
+    - kappa: Kappa value (used when doing a warmup. Fraction of the epochs used to do warm up before doing dss.)
+    - lam: Lambda value (Regularization constant of OMP solver)
     - valid: For class imbalance training
   - train_args
     - num_epochs: Number of epochs to train the model

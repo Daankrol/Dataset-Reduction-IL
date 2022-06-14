@@ -21,3 +21,5 @@ setuptools
 ray[tune]
 ray[default]
 datasets
+pyJoules
+wandb

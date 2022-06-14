@@ -19,6 +19,7 @@ from cords.utils.data.datasets.SL import gen_dataset
 from cords.utils.models import *
 from cords.utils.data.data_utils.collate import *
 import pickle
+import wandb
 
 
 class TrainClassifier:
@@ -53,6 +54,28 @@ class TrainClassifier:
         f_handler.setLevel(logging.DEBUG)
         self.logger.addHandler(f_handler)
         self.logger.propagate = False
+
+        if self.cfg.wandb != False:
+            wandb.init(project="Dataset Reduction for IL", entity="daankrol",
+                name = self.cfg.dss_args.type + "_" + self.cfg.dataset.name + "_" + str(self.cfg.dss_args.fraction) + "_" + str(self.cfg.dss_args.select_every),
+                config = {
+                "dataset": self.cfg.dataset.name,
+                "dss_type": self.cfg.dss_args.type,
+                "fraction": self.cfg.dss_args.fraction,
+                # "selection_type": self.cfg.dss_args.selection_type,
+                "class_imbalance_training" : self.cfg.dss_args.valid,
+                "select_every": self.cfg.dss_args.select_every,
+                "setting": self.cfg.setting,
+                "model": self.cfg.model.architecture,
+                "model_type": self.cfg.model.type,
+                "epochs": self.cfg.train_args.epochs,
+                "batch_size": self.cfg.dataloader.batch_size,
+                "lr": self.cfg.train_args.lr,
+                "optimizer" : self.cfg.optimizer.type,
+                "scheduler" : self.cfg.scheduler.type,
+                }
+            )
+
 
     """
     ############################## Loss Evaluation ##############################
@@ -210,25 +233,6 @@ class TrainClassifier:
 
         batch_sampler = lambda _, __: None
         drop_last = False
-        if self.cfg.dss_args.type in ['SELCON']:
-            drop_last = True
-            assert (self.cfg.dataset.name in ['LawSchool_selcon', 'Community_Crime'])
-            if self.cfg.dss_arg.batch_sampler == 'sequential':
-                batch_sampler = lambda dataset, bs: torch.utils.data.BatchSampler(
-                    torch.utils.data.SequentialSampler(dataset), batch_size=bs, drop_last=True
-                )  # sequential
-            elif self.cfg.dss_arg.batch_sampler == 'random':
-                batch_sampler = lambda dataset, bs: torch.utils.data.BatchSampler(
-                    torch.utils.data.RandomSampler(dataset), batch_size=bs, drop_last=True
-                )  # random
-
-        if self.cfg.dataset.name == "sst2_facloc" and self.count_pkl(
-                self.cfg.dataset.ss_path) == 1 and self.cfg.dss_args.type == 'FacLoc':
-            self.cfg.dss_args.type = 'Full'
-            file_ss = open(self.cfg.dataset.ss_path, 'rb')
-            ss_indices = pickle.load(file_ss)
-            file_ss.close()
-            trainset = torch.utils.data.Subset(trainset, ss_indices)
 
         if 'collate_fn' not in self.cfg.dataloader.keys():
             collate_fn = None
@@ -615,41 +619,51 @@ class TrainClassifier:
                 """
                 ################################################# Results Printing #################################################
                 """
-
+                metrics = {}
                 for arg in print_args:
 
                     if arg == "val_loss":
                         print_str += " , " + "Validation Loss: " + str(val_losses[-1])
+                        metrics["val_loss"] = val_losses[-1]
 
                     if arg == "val_acc":
                         print_str += " , " + "Validation Accuracy: " + str(val_acc[-1])
+                        metrics["val_acc"] = val_acc[-1]
 
                     if arg == "tst_loss":
                         print_str += " , " + "Test Loss: " + str(tst_losses[-1])
+                        metrics["tst_loss"] = tst_losses[-1]
 
                     if arg == "tst_acc":
                         print_str += " , " + "Test Accuracy: " + str(tst_acc[-1])
+                        metrics["tst_acc"] = tst_acc[-1]
 
                     if arg == "trn_loss":
                         print_str += " , " + "Training Loss: " + str(trn_losses[-1])
+                        metrics["trn_loss"] = trn_losses[-1]
 
                     if arg == "trn_acc":
                         print_str += " , " + "Training Accuracy: " + str(trn_acc[-1])
+                        metrics["trn_acc"] = trn_acc[-1]
 
                     if arg == "subtrn_loss":
                         print_str += " , " + "Subset Loss: " + str(subtrn_losses[-1])
+                        metrics["subtrn_loss"] = subtrn_losses[-1]
 
                     if arg == "subtrn_acc":
                         print_str += " , " + "Subset Accuracy: " + str(subtrn_acc[-1])
+                        metrics["subtrn_acc"] = subtrn_acc[-1]
 
                     if arg == "time":
                         print_str += " , " + "Timing: " + str(timing[-1])
+                        metrics["time"] = timing[-1]
 
                 # report metric to ray for hyperparameter optimization
                 if 'report_tune' in self.cfg and self.cfg.report_tune and len(dataloader):
                     tune.report(mean_accuracy=val_acc[-1])
 
                 logger.info(print_str)
+                wandb.log(metrics)
 
             """
             ################################################# Checkpoint Saving #################################################

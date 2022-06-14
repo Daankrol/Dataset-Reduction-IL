@@ -1,6 +1,6 @@
 # Learning setting
 config = dict(setting="SL",
-              measure_energy=True,
+              measure_energy=False,
               is_reg = False,
               dataset=dict(name="cifar10",
                            datadir="../data",
@@ -34,12 +34,12 @@ config = dict(setting="SL",
 
               dss_args=dict(type="Random",
                                 fraction=0.1,
-                                select_every=10,
+                                select_every=1,
                                 kappa=0),
 
-              train_args=dict(num_epochs=20,
-                              device="cuda",
-                              print_every=10,
+              train_args=dict(num_epochs=2,
+                              device="cpu",
+                              print_every=1,
                               results_dir='results/',
                               print_args=["val_loss", "val_acc", "tst_loss", "tst_acc", "time"],
                               return_args=[]

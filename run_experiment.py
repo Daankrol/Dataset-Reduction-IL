@@ -67,6 +67,7 @@ parser.add_argument(
     help="GPU id"
 )
 
+
 args = parser.parse_args()
 
 cfg = load_config_data(args.config)
