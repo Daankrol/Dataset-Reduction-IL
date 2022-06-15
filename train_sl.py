@@ -235,7 +235,6 @@ class TrainClassifier:
                 wandb.log({f'energy': sample.energy,
                            'duration': sample.duration,
                            'cumulative_energy': self.total_energy,
-                           'tag': sample.tag,
                            })
 
     def start_energy_measurement(self, tag):
