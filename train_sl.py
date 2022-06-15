@@ -20,6 +20,12 @@ from cords.utils.models import *
 from cords.utils.data.data_utils.collate import *
 import pickle
 import wandb
+from pyJoules.energy_meter import EnergyMeter
+from pyJoules.device.nvidia_device import NvidiaGPUDomain
+from pyJoules.handler.print_handler import PrintHandler
+from pyJoules.device.device_factory import DeviceFactory
+
+
 
 
 class TrainClassifier:
@@ -73,8 +79,16 @@ class TrainClassifier:
                 "lr": self.cfg.train_args.lr,
                 "optimizer" : self.cfg.optimizer.type,
                 "scheduler" : self.cfg.scheduler.type,
+                "measure_energy": (self.cfg.measure_energy == True),
                 }
             )
+
+        if self.cfg.measure_energy:
+            domains = [NvidiaGPUDomain(0)]
+            devices = DeviceFactory.create_devices(domains)
+            self.energy_meter = EnergyMeter(devices)
+            self.energy_log_handler = PrintHandler()
+
 
 
     """
@@ -196,6 +210,29 @@ class TrainClassifier:
         file.close()
         return return_val
 
+    def report_energy(self, epoch=None):
+        if not self.cfg.measure_energy:
+            return
+        self.energy_meter.stop()
+        energy_samples = self.energy_meter.get_trace()
+        for sample in energy_samples:
+            if epoch != None:
+                self.wandb.log({
+                    f'energy': sample.energy,
+                    'duration': sample.duration,
+                    'tag': sample.tag,
+                    }, step=epoch)
+            else:
+                self.wandb.log({f'energy': sample.energy,
+                    'duration': sample.duration,
+                    'tag': sample.tag,
+                    })
+
+    def start_energy_measurement(self, tag):
+        if not self.cfg.measure_energy:
+            return
+        self.energy_meter.start(tag)
+
     def train(self):
         """
         ############################## General Training Loop with Data Selection Strategies ##############################
@@ -203,6 +240,10 @@ class TrainClassifier:
         # Loading the Dataset
         logger = self.logger
         logger.info(self.cfg)
+
+        # Start energy measurement
+        self.start_energy_measurement(tag="data_loading")
+
         if self.cfg.dataset.feature == 'classimb':
             trainset, validset, testset, num_cls = gen_dataset(self.cfg.dataset.datadir,
                                                                self.cfg.dataset.name,
@@ -434,6 +475,8 @@ class TrainClassifier:
         else:
             is_selcon = False
 
+        self.report_energy()
+
         """
         ################################################# Checkpoint Loading #################################################
         """
@@ -466,8 +509,10 @@ class TrainClassifier:
         """
         ################################################# Training Loop #################################################
         """
-
+        
+        
         for epoch in range(start_epoch, self.cfg.train_args.num_epochs):
+            self.start_energy_measurement(tag='training')
             subtrn_loss = 0
             subtrn_correct = 0
             subtrn_total = 0
@@ -619,12 +664,12 @@ class TrainClassifier:
                 """
                 ################################################# Results Printing #################################################
                 """
-                metrics = {}
+                
                 for arg in print_args:
 
                     if arg == "val_loss":
                         print_str += " , " + "Validation Loss: " + str(val_losses[-1])
-                        metrics["val_loss"] = val_losses[-1]
+                        
 
                     if arg == "val_acc":
                         print_str += " , " + "Validation Accuracy: " + str(val_acc[-1])
@@ -663,7 +708,21 @@ class TrainClassifier:
                     tune.report(mean_accuracy=val_acc[-1])
 
                 logger.info(print_str)
-                wandb.log(metrics)
+            """
+            Report to WandB every epoch.
+            """
+            metrics = {}
+            metrics["val_loss"] = val_losses[-1]
+            metrics["val_acc"] = val_acc[-1]
+            metrics["tst_loss"] = tst_losses[-1]
+            metrics["tst_acc"] = tst_acc[-1]
+            metrics["trn_loss"] = trn_losses[-1]
+            metrics["trn_acc"] = trn_acc[-1]
+            metrics["subtrn_loss"] = subtrn_losses[-1]
+            metrics["subtrn_acc"] = subtrn_acc[-1]
+            metrics["time"] = timing[-1]
+            wandb.log(metrics, step=epoch)
+            self.report_energy(epoch=epoch)
 
             """
             ################################################# Checkpoint Saving #################################################
@@ -751,3 +810,6 @@ class TrainClassifier:
         omp_timing = np.array(timing)
         omp_cum_timing = list(self.generate_cumulative_timing(omp_timing))
         logger.info("Total time taken by %s = %.4f ", self.cfg.dss_args.type, omp_cum_timing[-1])
+        self.wandb.run.summary["total_time_taken"] = omp_cum_timing[-1]
+        self.wandb.run.summary["best_test_accuracy"] = max(tst_acc)
+        self.wandb.finish()

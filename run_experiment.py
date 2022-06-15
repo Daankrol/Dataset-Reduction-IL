@@ -64,40 +64,13 @@ parser.add_argument(
 parser.add_argument(
     "--gpu",
     type=int,
+    default=0,
     help="GPU id"
 )
 
 
 args = parser.parse_args()
-
 cfg = load_config_data(args.config)
+
 clf = TrainClassifier(cfg)
-
-if cfg.measure_energy:
-    cpu_id_list = getCPUIDs()
-    print(f"Running with GPU {args.gpu} and CPU IDs: {cpu_id_list} ")
-
-    # domains = [RaplPackageDomain(id) for id in cpu_id_list] + [NvidiaGPUDomain(args.gpu)]
-    domains = [NvidiaGPUDomain(0)]
-    results_dir = osp.abspath(osp.expanduser(cfg.train_args.results_dir))
-    if cfg.dss_args.type != "Full":
-        all_logs_dir = os.path.join(results_dir, cfg.setting,
-                                    cfg.dss_args.type,
-                                    cfg.dataset.name,
-                                    str(cfg.dss_args.fraction),
-                                    str(cfg.dss_args.select_every))
-    else:
-        all_logs_dir = os.path.join(results_dir, cfg.setting,
-                                    cfg.dss_args.type,
-                                    cfg.dataset.name)
-
-    os.makedirs(all_logs_dir, exist_ok=True)
-    csv_handler = CSVHandler(all_logs_dir + "/energy_consumption.csv")
-
-    with EnergyContext(handler=csv_handler, domains=domains) as meter:
-        clf.train() # train and evaluate
-
-    csv_handler.save_data()
-
-else:
-    clf.train()
+clf.train()
