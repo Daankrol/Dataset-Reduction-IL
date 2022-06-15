@@ -63,7 +63,6 @@ def run_jobs_slurm(jobs_path: str, partition: str = None, cluster: str = 'intel'
 """
             if cluster == 'intel':
                 command += "#SBATCH --gres=gpu:1\n"
-                python_command += " --gpu ${SLURM_JOB_GPUS}"
                 if partition == 'short':
                     command += "#SBATCH --time=23:00:00\n"
                 else:
@@ -84,7 +83,7 @@ module purge
 module load Python/3.8.6-GCCcore-10.2.0
 source /data/$USER/.envs/DatasetReduction/bin/activate
 cd /data/$USER/Dataset-Reduction-IL/
-{python_command} --cluster {cluster} --gpu ${{SLURM_JOB_GPUS}}
+{python_command}
 """
             job_sh_path = f"job{line_num}.sh"
             with open(job_sh_path, "w") as f:
@@ -103,6 +102,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--jobs_path",
         type=str,
+        required=True,
         help="Path of a .txt file that contains a list of jobs to be submitted.",
     )
     parser.add_argument(
