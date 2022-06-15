@@ -1,8 +1,8 @@
 # Learning setting
 config = dict(setting="SL",
-              is_reg=False,
-              wandb=True,
               measure_energy=True,
+              wandb=True,
+              is_reg=False,
               dataset=dict(name="cifar10",
                            datadir="../data",
                            feature="dss",
@@ -15,12 +15,12 @@ config = dict(setting="SL",
               model=dict(architecture='ResNet18',
                          type='pre-defined',
                          numclasses=10),
-
+              
               ckpt=dict(is_load=False,
                         is_save=False,
                         dir='results/',
                         save_every=20),
-
+              
               loss=dict(type='CrossEntropyLoss',
                         use_sigmoid=False),
 
@@ -33,10 +33,7 @@ config = dict(setting="SL",
               scheduler=dict(type="cosine_annealing",
                              T_max=300),
 
-              dss_args=dict(type="Random",
-                            fraction=0.1,
-                            select_every=10,
-                            kappa=0),
+              dss_args=dict(type="Full"),
 
               train_args=dict(num_epochs=300,
                               device="cuda",

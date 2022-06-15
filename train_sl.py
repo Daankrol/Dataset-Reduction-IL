@@ -26,8 +26,6 @@ from pyJoules.handler.print_handler import PrintHandler
 from pyJoules.device.device_factory import DeviceFactory
 
 
-
-
 class TrainClassifier:
     def __init__(self, config_file_data):
         self.cfg = config_file_data
@@ -61,35 +59,44 @@ class TrainClassifier:
         self.logger.addHandler(f_handler)
         self.logger.propagate = False
 
-        if self.cfg.wandb != False:
+        if self.cfg.wandb:
+            name = self.cfg.dss_args.type + '_' + self.cfg.dataset.name
+            if self.cfg.dss_args.fraction:
+                name += f'_{str(self.cfg.dss_args.fraction)}'
+            if self.cfg.dss_args.select_every:
+                name += f'_{str(self.cfg.dss_args.select_every)}'
+            if self.cfg.model.type == 'pre-trained':
+                name += '_Pre-trained'
+            if self.cfg.scheduler.type is None:
+                name += '_NoSched'
+
             wandb.init(project="Dataset Reduction for IL", entity="daankrol",
-                name = self.cfg.dss_args.type + "_" + self.cfg.dataset.name + "_" + str(self.cfg.dss_args.fraction) + "_" + str(self.cfg.dss_args.select_every),
-                config = {
-                "dataset": self.cfg.dataset.name,
-                "dss_type": self.cfg.dss_args.type,
-                "fraction": self.cfg.dss_args.fraction,
-                # "selection_type": self.cfg.dss_args.selection_type,
-                "class_imbalance_training" : self.cfg.dss_args.valid,
-                "select_every": self.cfg.dss_args.select_every,
-                "setting": self.cfg.setting,
-                "model": self.cfg.model.architecture,
-                "model_type": self.cfg.model.type,
-                "epochs": self.cfg.train_args.epochs,
-                "batch_size": self.cfg.dataloader.batch_size,
-                "lr": self.cfg.train_args.lr,
-                "optimizer" : self.cfg.optimizer.type,
-                "scheduler" : self.cfg.scheduler.type,
-                "measure_energy": (self.cfg.measure_energy == True),
-                }
-            )
+                       name=name,
+                       config={
+                           "dataset": self.cfg.dataset.name,
+                           "dss_type": self.cfg.dss_args.type,
+                           "fraction": self.cfg.dss_args.fraction,
+                           # "selection_type": self.cfg.dss_args.selection_type,
+                           "class_imbalance_training": self.cfg.dss_args.valid,
+                           "select_every": self.cfg.dss_args.select_every,
+                           "setting": self.cfg.setting,
+                           "model": self.cfg.model.architecture,
+                           "model_type": self.cfg.model.type,
+                           "epochs": self.cfg.train_args.epochs,
+                           "batch_size": self.cfg.dataloader.batch_size,
+                           "lr": self.cfg.train_args.lr,
+                           "optimizer": self.cfg.optimizer.type,
+                           "scheduler": self.cfg.scheduler.type,
+                           "measure_energy": self.cfg.measure_energy,
+                       }
+                       )
 
         if self.cfg.measure_energy:
             domains = [NvidiaGPUDomain(0)]
             devices = DeviceFactory.create_devices(domains)
             self.energy_meter = EnergyMeter(devices)
             self.energy_log_handler = PrintHandler()
-
-
+            self.total_energy = 0.0
 
     """
     ############################## Loss Evaluation ##############################
@@ -131,10 +138,10 @@ class TrainClassifier:
             model = ThreeLayerNet(self.cfg.model.input_dim, self.cfg.model.numclasses,
                                   self.cfg.model.h1, self.cfg.model.h2)
         elif self.cfg.model.architecture == 'LSTM':
-            model = LSTMClassifier(self.cfg.model.numclasses, self.cfg.model.wordvec_dim, \
-                                   self.cfg.model.weight_path, self.cfg.model.num_layers, self.cfg.model.hidden_size)
+            model = LSTMClassifier(self.cfg.model.numclasses, self.cfg.model.wordvec_dim, self.cfg.model.weight_path,
+                                   self.cfg.model.num_layers, self.cfg.model.hidden_size)
         else:
-            raise (NotImplementedError)
+            raise NotImplementedError
         model = model.to(self.cfg.train_args.device)
         return model
 
@@ -216,17 +223,20 @@ class TrainClassifier:
         self.energy_meter.stop()
         energy_samples = self.energy_meter.get_trace()
         for sample in energy_samples:
+            for device in sample.energy:
+                self.total_energy += sample.energy[device]
             if epoch != None:
-                self.wandb.log({
-                    f'energy': sample.energy,
+                wandb.log({
+                    'energy': sample.energy,
                     'duration': sample.duration,
-                    'tag': sample.tag,
-                    }, step=epoch)
+                    'cumulative_energy': self.total_energy,
+                }, step=epoch)
             else:
-                self.wandb.log({f'energy': sample.energy,
-                    'duration': sample.duration,
-                    'tag': sample.tag,
-                    })
+                wandb.log({f'energy': sample.energy,
+                           'duration': sample.duration,
+                           'cumulative_energy': self.total_energy,
+                           'tag': sample.tag,
+                           })
 
     def start_energy_measurement(self, tag):
         if not self.cfg.measure_energy:
@@ -267,11 +277,6 @@ class TrainClassifier:
             file_ss.close()
             trainset = torch.utils.data.Subset(trainset, ss_indices)
 
-        if 'collate_fn' not in self.cfg.dataloader.keys():
-            collate_fn = None
-        else:
-            collate_fn = self.cfg.dataloader.collate_fn
-
         batch_sampler = lambda _, __: None
         drop_last = False
 
@@ -302,6 +307,7 @@ class TrainClassifier:
         tst_losses = list()
         subtrn_losses = list()
         timing = list()
+        total_timing = 0.0
         trn_acc = list()
         val_acc = list()  # np.zeros(cfg['train_args']['num_epochs'])
         tst_acc = list()  # np.zeros(cfg['train_args']['num_epochs'])
@@ -322,6 +328,9 @@ class TrainClassifier:
 
         # Loss Functions
         criterion, criterion_nored = self.loss_function()
+
+        if self.cfg.wandb:
+            wandb.watch(model, criterion, log='all')
 
         # Getting the optimizer and scheduler
         optimizer, scheduler = self.optimizer_with_scheduler(model)
@@ -509,8 +518,7 @@ class TrainClassifier:
         """
         ################################################# Training Loop #################################################
         """
-        
-        
+
         for epoch in range(start_epoch, self.cfg.train_args.num_epochs):
             self.start_energy_measurement(tag='training')
             subtrn_loss = 0
@@ -551,6 +559,7 @@ class TrainClassifier:
             if not scheduler == None:
                 scheduler.step()
             timing.append(epoch_time)
+            total_timing += epoch_time
             print_args = self.cfg.train_args.print_args
 
             """
@@ -664,64 +673,46 @@ class TrainClassifier:
                 """
                 ################################################# Results Printing #################################################
                 """
-                
-                for arg in print_args:
 
+                metrics = {}
+                for arg in print_args:
                     if arg == "val_loss":
                         print_str += " , " + "Validation Loss: " + str(val_losses[-1])
-                        
-
+                        metrics["val_loss"] = val_losses[-1]
                     if arg == "val_acc":
                         print_str += " , " + "Validation Accuracy: " + str(val_acc[-1])
                         metrics["val_acc"] = val_acc[-1]
-
                     if arg == "tst_loss":
                         print_str += " , " + "Test Loss: " + str(tst_losses[-1])
                         metrics["tst_loss"] = tst_losses[-1]
-
                     if arg == "tst_acc":
                         print_str += " , " + "Test Accuracy: " + str(tst_acc[-1])
                         metrics["tst_acc"] = tst_acc[-1]
-
                     if arg == "trn_loss":
                         print_str += " , " + "Training Loss: " + str(trn_losses[-1])
                         metrics["trn_loss"] = trn_losses[-1]
-
                     if arg == "trn_acc":
                         print_str += " , " + "Training Accuracy: " + str(trn_acc[-1])
                         metrics["trn_acc"] = trn_acc[-1]
-
                     if arg == "subtrn_loss":
                         print_str += " , " + "Subset Loss: " + str(subtrn_losses[-1])
                         metrics["subtrn_loss"] = subtrn_losses[-1]
-
                     if arg == "subtrn_acc":
                         print_str += " , " + "Subset Accuracy: " + str(subtrn_acc[-1])
                         metrics["subtrn_acc"] = subtrn_acc[-1]
-
                     if arg == "time":
                         print_str += " , " + "Timing: " + str(timing[-1])
                         metrics["time"] = timing[-1]
+                        metrics["cumulative_time"] = total_timing
 
                 # report metric to ray for hyperparameter optimization
                 if 'report_tune' in self.cfg and self.cfg.report_tune and len(dataloader):
                     tune.report(mean_accuracy=val_acc[-1])
 
                 logger.info(print_str)
-            """
-            Report to WandB every epoch.
-            """
-            metrics = {}
-            metrics["val_loss"] = val_losses[-1]
-            metrics["val_acc"] = val_acc[-1]
-            metrics["tst_loss"] = tst_losses[-1]
-            metrics["tst_acc"] = tst_acc[-1]
-            metrics["trn_loss"] = trn_losses[-1]
-            metrics["trn_acc"] = trn_acc[-1]
-            metrics["subtrn_loss"] = subtrn_losses[-1]
-            metrics["subtrn_acc"] = subtrn_acc[-1]
-            metrics["time"] = timing[-1]
-            wandb.log(metrics, step=epoch)
+                wandb.log(metrics, step=epoch)
+
+            #  report energy every epoch.
             self.report_energy(epoch=epoch)
 
             """
@@ -810,6 +801,6 @@ class TrainClassifier:
         omp_timing = np.array(timing)
         omp_cum_timing = list(self.generate_cumulative_timing(omp_timing))
         logger.info("Total time taken by %s = %.4f ", self.cfg.dss_args.type, omp_cum_timing[-1])
-        self.wandb.run.summary["total_time_taken"] = omp_cum_timing[-1]
-        self.wandb.run.summary["best_test_accuracy"] = max(tst_acc)
-        self.wandb.finish()
+        wandb.run.summary["total_time_taken"] = omp_cum_timing[-1]
+        wandb.run.summary["best_test_accuracy"] = max(tst_acc)
+        wandb.finish()

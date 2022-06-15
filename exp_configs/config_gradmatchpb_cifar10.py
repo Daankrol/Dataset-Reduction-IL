@@ -1,7 +1,8 @@
 # Learning setting
 config = dict(setting="SL",
               measure_energy=True,
-              is_reg = False,
+              wandb=True,
+              is_reg=False,
               dataset=dict(name="cifar10",
                            datadir="../data",
                            feature="dss",
@@ -16,7 +17,7 @@ config = dict(setting="SL",
                          numclasses=10),
 
               ckpt=dict(is_load=False,
-                        is_save=True,
+                        is_save=False,
                         dir='results/',
                         save_every=20),
 
@@ -34,7 +35,7 @@ config = dict(setting="SL",
 
               dss_args=dict(type="GradMatchPB",
                             fraction=0.1,
-                            select_every=20,
+                            select_every=10,
                             lam=0,
                             selection_type='PerBatch',
                             v1=True,
@@ -45,9 +46,10 @@ config = dict(setting="SL",
 
               train_args=dict(num_epochs=300,
                               device="cuda",
-                              print_every=10,
+                              print_every=1,
                               results_dir='results/',
-                              print_args=["val_loss", "val_acc", "tst_loss", "tst_acc", "time"],
+                              print_args=["val_loss", "val_acc", "tst_loss", "tst_acc", "trn_loss", "trn_acc",
+                                          "time"],
                               return_args=[]
                               )
               )

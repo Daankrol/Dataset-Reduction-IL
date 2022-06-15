@@ -11,7 +11,6 @@ from pyJoules.handler.csv_handler import CSVHandler
 from pyJoules.device.device_factory import DeviceFactory
 
 
-
 def getCPUIDs():
     """Get the IDs of the GPU and CPUs that are assigned to this job. 
     SLURM IDs are mapped to the psysical IDs.
@@ -47,30 +46,50 @@ def getCPUIDs():
 
     return cpu_id_list
 
-parser = argparse.ArgumentParser(description="Run experiments with config file\n ./configs/SL/config_gradmatch_cifar10.py")
+
+parser = argparse.ArgumentParser(
+    description="Run experiments with config file\n ./configs/SL/config_gradmatch_cifar10.py")
+
 parser.add_argument(
     "--config",
     type=str,
+    required=True,
     help="Path of the experiment config file",
 )
 
 parser.add_argument(
-    "--cluster",
-    type=str,
-    choices=["intel", "rug"],
-    help="Either 'intel' or 'rug'"
+    "--fraction",
+    type=float,
+    help="Fraction of data to select with DSS"
 )
-
 parser.add_argument(
-    "--gpu",
+    "--select_every",
     type=int,
-    default=0,
-    help="GPU id"
+    help="Select a new subset every X epochs."
 )
-
+parser.add_argument(
+    "--epochs",
+    type=int,
+    help="number of epochs to train"
+)
+parser.add_argument(
+    "--disable_scheduler",
+    type=bool,
+    default=False,
+    help="Whether to disable Cosine Annealing"
+)
 
 args = parser.parse_args()
 cfg = load_config_data(args.config)
+
+if args.fraction is not None:
+    cfg.dss_args.fraction = args.fraction
+if args.select_every is not None:
+    cfg.dss_args.select_every = args.select_every
+if args.epochs is not None:
+    cfg.train_args.num_epochs = args.epochs
+if args.disable_scheduler:
+    cfg.scheduler.type = None
 
 clf = TrainClassifier(cfg)
 clf.train()
