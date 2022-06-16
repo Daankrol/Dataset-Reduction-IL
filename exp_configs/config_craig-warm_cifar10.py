@@ -46,7 +46,7 @@ config = dict(setting="SL",
               train_args=dict(num_epochs=300,
                               device="cuda",
                               print_every=1,
-                              results_dir='results/',
+                              results_dir='../results/',
                               print_args=["val_loss", "val_acc", "tst_loss", "tst_acc", "trn_loss", "trn_acc",
                                           "time"],
                               return_args=[]
