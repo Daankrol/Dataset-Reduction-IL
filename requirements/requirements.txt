@@ -24,3 +24,4 @@ datasets
 pyJoules
 wandb
 pynvml
+torchmetrics

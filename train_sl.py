@@ -30,6 +30,7 @@ from pyJoules.energy_meter import EnergyMeter
 from pyJoules.device.nvidia_device import NvidiaGPUDomain
 from pyJoules.handler.print_handler import PrintHandler
 from pyJoules.device.device_factory import DeviceFactory
+import torchmetrics
 
 
 class TrainClassifier:
@@ -749,18 +750,6 @@ class TrainClassifier:
                                     _, predicted = outputs.max(1)
                                 trn_total += targets.size(0)
                                 trn_correct += predicted.eq(targets).sum().item()
-                            if "trn_recall" in print_args:
-                                # save number of correct and total of samples per class
-                                for i in range(self.cfg.model.numclasses):
-                                    trn_total_per_class[i] += targets[
-                                        targets == i
-                                    ].size(0)
-                                    trn_correct_per_class[i] += (
-                                        predicted[predicted == i]
-                                        .eq(targets[targets == i])
-                                        .sum()
-                                        .item()
-                                    )
 
                         trn_loss = trn_loss / samples
                         trn_losses.append(trn_loss)
@@ -769,12 +758,10 @@ class TrainClassifier:
                         trn_acc.append(trn_correct / trn_total)
                     if "trn_recall" in print_args:
                         # Do macro averaging recall over all classes
-                        trn_recall = 0
-                        for i in range(self.cfg.model.numclasses):
-                            trn_recall += (
-                                trn_correct_per_class[i] / trn_total_per_class[i]
-                            )
-                        trn_recall = trn_recall / self.cfg.model.numclasses
+                        recall = torchmetrics.Recall(
+                            average="macro", num_classes=self.cfg.model.numclasses
+                        )
+                        trn_recall = recall(outputs, targets).item()
                         trn_recalls.append(trn_recall)
 
                 if ("val_loss" in print_args) or ("val_acc" in print_args):
@@ -800,18 +787,7 @@ class TrainClassifier:
                                     _, predicted = outputs.max(1)
                                 val_total += targets.size(0)
                                 val_correct += predicted.eq(targets).sum().item()
-                            if "val_recall" in print_args:
-                                # save number of correct and total of samples per class
-                                for i in range(self.cfg.model.numclasses):
-                                    val_total_per_class[i] += targets[
-                                        targets == i
-                                    ].size(0)
-                                    val_correct_per_class[i] += (
-                                        predicted[predicted == i]
-                                        .eq(targets[targets == i])
-                                        .sum()
-                                        .item()
-                                    )
+
                         val_loss = val_loss / samples
                         val_losses.append(val_loss)
 
@@ -819,12 +795,10 @@ class TrainClassifier:
                         val_acc.append(val_correct / val_total)
                     if "val_recall" in print_args:
                         # Do macro averaging recall over all classes
-                        val_recall = 0
-                        for i in range(self.cfg.model.numclasses):
-                            val_recall += (
-                                val_correct_per_class[i] / val_total_per_class[i]
-                            )
-                        val_recall = val_recall / self.cfg.model.numclasses
+                        recall = torchmetrics.Recall(
+                            average="macro", num_classes=self.cfg.model.numclasses
+                        )
+                        val_recall = recall(outputs, targets).item()
                         val_recalls.append(val_recall)
 
                 if ("tst_loss" in print_args) or ("tst_acc" in print_args):
@@ -850,18 +824,6 @@ class TrainClassifier:
                                     _, predicted = outputs.max(1)
                                 tst_total += targets.size(0)
                                 tst_correct += predicted.eq(targets).sum().item()
-                            if "tst_recall" in print_args:
-                                # save number of correct and total of samples per class
-                                for i in range(self.cfg.model.numclasses):
-                                    tst_total_per_class[i] += targets[
-                                        targets == i
-                                    ].size(0)
-                                    tst_correct_per_class[i] += (
-                                        predicted[predicted == i]
-                                        .eq(targets[targets == i])
-                                        .sum()
-                                        .item()
-                                    )
                         tst_loss = tst_loss / samples
                         tst_losses.append(tst_loss)
 
@@ -869,12 +831,10 @@ class TrainClassifier:
                         tst_acc.append(tst_correct / tst_total)
                     if "tst_recall" in print_args:
                         # Do macro averaging recall over all classes
-                        tst_recall = 0
-                        for i in range(self.cfg.model.numclasses):
-                            tst_recall += (
-                                tst_correct_per_class[i] / tst_total_per_class[i]
-                            )
-                        tst_recall = tst_recall / self.cfg.model.numclasses
+                        recall = torchmetrics.Recall(
+                            average="macro", num_classes=self.cfg.model.numclasses
+                        )
+                        tst_recall = recall(outputs, targets).item()
                         tst_recalls.append(tst_recall)
 
                 if "subtrn_acc" in print_args:
