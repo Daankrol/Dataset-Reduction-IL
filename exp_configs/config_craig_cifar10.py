@@ -14,10 +14,10 @@ config = dict(
     ),
     scheduler=dict(type="cosine_annealing", T_max=300),
     dss_args=dict(
-        type="CRAIG-Warm",
+        type="CRAIG",
         fraction=0.1,
         select_every=20,
-        kappa=0.5,
+        kappa=0,
         linear_layer=False,
         optimizer="lazy",
         selection_type="PerClass",
