@@ -1,9 +1,9 @@
 from cgi import test
 import numpy as np
 import os
-from cords.utils.data.datasets.SL.custom_dataset_selcon import (
-    CustomDataset_WithId_SELCON,
-)
+# from cords.utils.data.datasets.SL.custom_dataset_selcon import (
+#     CustomDataset_WithId_SELCON,
+# )
 import torch
 import torchvision
 from sklearn import datasets
@@ -14,13 +14,13 @@ from torchvision import transforms
 import PIL.Image as Image
 import PIL
 from sklearn.datasets import load_boston
-from cords.utils.data.data_utils import *
+# from cords.utils.data.data_utils import *
 import re
 import pandas as pd
 import torch
 import torchtext.data
 import pickle
-from cords.utils.data.data_utils import WeightedSubset
+# from cords.utils.data.data_utils import WeightedSubset
 
 from datasets import load_dataset
 
@@ -1897,7 +1897,8 @@ def gen_dataset(datadir, dset_name, feature, isnumpy=False, **kwargs):
             transforms.Resize((32, 32)),
             transforms.RandomHorizontalFlip(),  # solo se train
             transforms.ToTensor(),
-            transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
+            # Note: Normalization is calculated by using 32x32 images of the whole train set
+            transforms.Normalize((0.4857, 0.4996, 0.4325), (0.2067, 0.2019, 0.2422)),
         ])
 
         cubs_tst_transform = transforms.Compose([
@@ -1906,7 +1907,7 @@ def gen_dataset(datadir, dset_name, feature, isnumpy=False, **kwargs):
             transforms.Resize((32, 32)),
             # transforms.RandomHorizontalFlip(), # solo se train
             transforms.ToTensor(),
-            transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
+            transforms.Normalize((0.4857, 0.4996, 0.4325), (0.2067, 0.2019, 0.2422)),
         ])
 
         num_cls = 200
@@ -2689,9 +2690,29 @@ def gen_dataset(datadir, dset_name, feature, isnumpy=False, **kwargs):
     else:
         raise NotImplementedError
 
-if __name__ == '__main__':
-    cubs = CUB200('/home/daankrol/data/cubs')
-    cubs_test = CUB200('/home/daankrol/data/cubs', train=False)
 
-    print(len(cubs), len(cubs_test))
-    print(cubs[0])
+def mean_std(loader):
+    """
+    Can be used to calculate normalizing paramaters. E.g:
+    from torch.utils.data import DataLoader
+    transform = transforms.Compose([
+        transforms.Resize((32,32)),
+        transforms.ToTensor()
+    ])
+    cubs_train = CUB200('/home/daankrol/data', transform=transform)
+    image_data_loader = DataLoader(
+        cubs_train,
+        # batch size is whole dataset
+        batch_size=len(cubs_train),
+        shuffle=False,
+        num_workers=0)
+
+    mean, std = mean_std(image_data_loader)
+    print(mean, std)
+    :param loader:
+    :return:
+    """
+    images, lebels = next(iter(loader))
+    # shape of images = [b,c,w,h]
+    mean, std = images.mean([0, 2, 3]), images.std([0, 2, 3])
+    return mean, std

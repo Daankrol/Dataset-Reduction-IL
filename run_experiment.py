@@ -56,6 +56,12 @@ parser.add_argument(
     required=True,
     help="Path of the experiment config file",
 )
+parser.add_argument(
+    "--dataset",
+    type=str,
+    choices=["cifar10", "cifar100", "cub200"],
+    default="cifar10"
+)
 
 parser.add_argument(
     "--fraction",
@@ -82,6 +88,7 @@ parser.add_argument(
 args = parser.parse_args()
 cfg = load_config_data(args.config)
 
+cfg.dataset.name = args.dataset
 if args.fraction is not None:
     cfg.dss_args.fraction = args.fraction
 if args.select_every is not None:

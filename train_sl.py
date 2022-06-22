@@ -323,6 +323,7 @@ class TrainClassifier:
         os.makedirs(ckpt_dir, exist_ok=True)
 
         # Model Creation
+        self.cfg.model.numclasses = num_cls
         model = self.create_model()
 
         # Loss Functions

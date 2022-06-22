@@ -13,8 +13,7 @@ config = dict(setting="SL",
                               pin_memory=True),
 
               model=dict(architecture='ResNet18',
-                         type='pre-defined',
-                         numclasses=200),
+                         type='pre-defined'),
 
               ckpt=dict(is_load=False,
                         is_save=False,
