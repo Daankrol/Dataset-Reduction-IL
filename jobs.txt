@@ -1,4 +1,4 @@
-# python3 run_experiment.py --config ./exp_configs/config_full_cifar10.py # ok
+#python3 run_experiment.py --config ./exp_configs/config_full_cifar10.py # ok
 #python3 run_experiment.py --config ./exp_configs/config_random_cifar10.py
 #python3 run_experiment.py --config ./exp_configs/config_gradmatchpb_cifar10.py
 #python3 run_experiment.py --config ./exp_configs/config_gradmatch_cifar10.py
@@ -16,3 +16,5 @@
 #python3 run_experiment.py --config ./exp_configs/config_gradmatch_cifar10.py --select_every 20 --disable_scheduler True
 #python3 run_experiment.py --config ./exp_configs/config_glister_cifar10.py --select_every 20 --disable_scheduler True
 #python3 run_experiment.py --config ./exp_configs/config_craig_cifar10.py --select_every 20  --disable_scheduler True
+# python3 run_experiment.py --config ./exp_configs/config_full_cifar10.py # ok
+
