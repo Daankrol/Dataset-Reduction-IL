@@ -88,6 +88,8 @@ class TrainClassifier:
                 name += "_Pre-trained"
             if self.cfg.scheduler.type is None:
                 name += "_NoSched"
+            if self.cfg.dss_args.kappa:
+                name += f"_k-{str(self.cfg.dss_args.kappa)}"
 
             wandb.init(
                 project="Dataset Reduction for IL",
@@ -103,12 +105,14 @@ class TrainClassifier:
                     "setting": self.cfg.setting,
                     "model": self.cfg.model.architecture,
                     "model_type": self.cfg.model.type,
-                    "epochs": self.cfg.train_args.epochs,
+                    "epochs": self.cfg.train_args.num_epochs,
                     "batch_size": self.cfg.dataloader.batch_size,
-                    "lr": self.cfg.train_args.lr,
-                    "optimizer": self.cfg.optimizer.type,
+                    "lr": self.cfg.optimizer.lr,
+                    "optimizer_type": self.cfg.optimizer.type,
                     "scheduler": self.cfg.scheduler.type,
                     "measure_energy": self.cfg.measure_energy,
+                    "optimizer": self.cfg.optimizer,
+                    "dss_args" : self.cfg.dss_args,
                 },
             )
 
