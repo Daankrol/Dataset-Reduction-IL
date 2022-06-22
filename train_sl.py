@@ -760,7 +760,7 @@ class TrainClassifier:
                         # Do macro averaging recall over all classes
                         recall = torchmetrics.Recall(
                             average="macro", num_classes=self.cfg.model.numclasses
-                        )
+                        ).to(self.cfg.train_args.device)
                         trn_recall = recall(outputs, targets).item()
                         trn_recalls.append(trn_recall)
 
@@ -797,7 +797,7 @@ class TrainClassifier:
                         # Do macro averaging recall over all classes
                         recall = torchmetrics.Recall(
                             average="macro", num_classes=self.cfg.model.numclasses
-                        )
+                        ).to(self.cfg.train_args.device)
                         val_recall = recall(outputs, targets).item()
                         val_recalls.append(val_recall)
 
@@ -833,7 +833,7 @@ class TrainClassifier:
                         # Do macro averaging recall over all classes
                         recall = torchmetrics.Recall(
                             average="macro", num_classes=self.cfg.model.numclasses
-                        )
+                        ).to(self.cfg.train_args.device)
                         tst_recall = recall(outputs, targets).item()
                         tst_recalls.append(tst_recall)
 
