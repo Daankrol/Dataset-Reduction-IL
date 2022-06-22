@@ -69,6 +69,11 @@ parser.add_argument(
     help="Fraction of data to select with DSS"
 )
 parser.add_argument(
+    "--kappa",
+    type=float,
+    help="Fraction of epochs to use for warm up."
+)
+parser.add_argument(
     "--select_every",
     type=int,
     help="Select a new subset every X epochs."
@@ -97,6 +102,8 @@ if args.epochs is not None:
     cfg.train_args.num_epochs = args.epochs
 if args.disable_scheduler:
     cfg.scheduler.type = None
+if args.kappa is not None:
+    cfg.dss_args.kappa = args.kappa
 
 clf = TrainClassifier(cfg)
 clf.train()
