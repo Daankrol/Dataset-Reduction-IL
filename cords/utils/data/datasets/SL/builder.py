@@ -1,6 +1,7 @@
 from cgi import test
 import numpy as np
 import os
+
 # from cords.utils.data.datasets.SL.custom_dataset_selcon import (
 #     CustomDataset_WithId_SELCON,
 # )
@@ -14,12 +15,14 @@ from torchvision import transforms
 import PIL.Image as Image
 import PIL
 from sklearn.datasets import load_boston
+
 # from cords.utils.data.data_utils import *
 import re
 import pandas as pd
 import torch
 import torchtext.data
 import pickle
+
 # from cords.utils.data.data_utils import WeightedSubset
 
 from datasets import load_dataset
@@ -44,7 +47,7 @@ class standard_scaling:
 
 
 def clean_data(sentence, type=0, TREC=False):
-#     From yoonkim: https://github.com/yoonkim/CNN_sentence/blob/master/process_data.py
+    #     From yoonkim: https://github.com/yoonkim/CNN_sentence/blob/master/process_data.py
     if type == 0:
         """
         Tokenization for SST
@@ -167,120 +170,6 @@ class SSTDataset(Dataset):
         return len(self.phrase_vec)
 
 
-# class Cub2011(Dataset):
-#     """CUB-200-2011 bird dataset."""
-#
-#     # Adapted from source. Source: https://github.com/TDeVries/cub2011_dataset/blob/master/cub2011.py
-#     # TODO: https://github.com/HaoMood/bilinear-cnn/blob/master/src/cub200.py
-#     base_folder = "CUB_200_2011/images"
-#
-#     def __init__(
-#         self,
-#         data_path,
-#         transform=None,
-#         train=True,
-#         loader=torchvision.datasets.folder.default_loader,
-#     ):
-#         # Note: data_path = data/CUB_200_2011.
-#         # Inside this dir is another CUB_200_2011 dir.
-#         self.data_path = os.path.expanduser(data_path)
-#         self.transform = transform
-#         self.train = train
-#         self.loader = default_loader
-#
-#         if not self._check_integrity():
-#             raise RuntimeError(
-#                 "Dataset not found. Manually download it first and place in data folder"
-#             )
-#
-#     def _load_metadata(self):
-#         images = pd.read_csv(
-#             os.path.join(self.data_path, "CUB_200_2011", "images.txt"),
-#             sep=" ",
-#             names=["img_id", "filepath"],
-#         )
-#         image_class_labels = pd.read_csv(
-#             os.path.join(self.data_path, "CUB_200_2011", "image_class_labels.txt"),
-#             sep=" ",
-#             names=["img_id", "target"],
-#         )
-#         train_test_split = pd.read_csv(
-#             os.path.join(self.data_path, "CUB_200_2011", "train_test_split.txt"),
-#             sep=" ",
-#             names=["img_id", "is_training_img"],
-#         )
-#
-#         data = images.merge(image_class_labels, on="img_id")
-#         self.data = data.merge(train_test_split, on="img_id")
-#
-#         if self.train:
-#             self.data = self.data[self.data.is_training_img == 1]
-#         else:
-#             self.data = self.data[self.data.is_training_img == 0]
-#
-#     def _extract(self):
-#         """Prepare the data for train/test split and save onto disk."""
-#         image_path = os.path.join(self._root, 'raw/CUB_200_2011/images/')
-#         # Format of images.txt: <image_id> <image_name>
-#         id2name = np.genfromtxt(os.path.join(
-#             self._root, 'raw/CUB_200_2011/images.txt'), dtype=str)
-#         # Format of train_test_split.txt: <image_id> <is_training_image>
-#         id2train = np.genfromtxt(os.path.join(
-#             self._root, 'raw/CUB_200_2011/train_test_split.txt'), dtype=int)
-#
-#         train_data = []
-#         train_labels = []
-#         test_data = []
-#         test_labels = []
-#         for id_ in range(id2name.shape[0]):
-#             image = PIL.Image.open(os.path.join(image_path, id2name[id_, 1]))
-#             label = int(id2name[id_, 1][:3]) - 1  # Label starts with 0
-#
-#             # Convert gray scale image to RGB image.
-#             if image.getbands()[0] == 'L':
-#                 image = image.convert('RGB')
-#             image_np = np.array(image)
-#             image.close()
-#
-#             if id2train[id_, 1] == 1:
-#                 train_data.append(image_np)
-#                 train_labels.append(label)
-#             else:
-#                 test_data.append(image_np)
-#                 test_labels.append(label)
-#
-#         pickle.dump((train_data, train_labels),
-#                     open(os.path.join(self._root, 'processed/train.pkl'), 'wb'))
-#         pickle.dump((test_data, test_labels),
-#                     open(os.path.join(self._root, 'processed/test.pkl'), 'wb'))
-#
-#     def _check_integrity(self):
-#         try:
-#             self._load_metadata()
-#         except Exception:
-#             return False
-#
-#         for index, row in self.data.iterrows():
-#             filepath = os.path.join(self.root, self.base_folder, row.filepath)
-#             if not os.path.isfile(filepath):
-#                 print(filepath)
-#                 return False
-#         return True
-#
-#     def __len__(self):
-#         return len(self.data)
-#
-#     def __getitem__(self, idx):
-#         sample = self.data.iloc[idx]
-#         path = os.path.join(self.root, self.base_folder, sample.filepath)
-#         target = sample.target - 1  # Targets start at 1 by default, so shift to 0
-#         img = self.loader(path)
-#
-#         if self.transform is not None:
-#             img = self.transform(img)
-#
-#         return img, target
-
 class CUB200(torch.utils.data.Dataset):
     """CUB200 dataset.
     Args:
@@ -295,8 +184,10 @@ class CUB200(torch.utils.data.Dataset):
         _test_data, list of np.ndarray.
         _test_labels, list of int.
     """
-    def __init__(self, root, train=True, transform=None, target_transform=None,
-                 download=False):
+
+    def __init__(
+        self, root, train=True, transform=None, target_transform=None, download=False
+    ):
         """Load the dataset.
         Args
             root, str: Root directory of the dataset.
@@ -309,35 +200,42 @@ class CUB200(torch.utils.data.Dataset):
                 internet and puts it in root directory. If dataset is already
                 downloaded, it is not downloaded again.
         """
-        self._root = os.path.expanduser(root + '/cub200')  # Replace ~ by the complete dir
+        self._root = os.path.expanduser(
+            root + "/cub200"
+        )  # Replace ~ by the complete dir
         self._train = train
         self._transform = transform
         self._target_transform = target_transform
 
         if self._checkIntegrity():
-            print('Files already downloaded and verified.')
+            print("Files already downloaded and verified.")
         elif download:
-            url = ('http://www.vision.caltech.edu/visipedia-data/CUB-200-2011/'
-                   'CUB_200_2011.tgz')
-            print('Download CUB200 from https://drive.google.com/uc?id=1U655cnOmqRZHEindgJgIQ49Cm-Kgro8d')
+            url = (
+                "http://www.vision.caltech.edu/visipedia-data/CUB-200-2011/"
+                "CUB_200_2011.tgz"
+            )
+            print(
+                "Download CUB200 from https://drive.google.com/uc?id=1U655cnOmqRZHEindgJgIQ49Cm-Kgro8d"
+            )
             exit()
             self._download(url)
             self._extract()
         else:
             raise RuntimeError(
-                'Dataset not found. You can use download=True to download it.')
+                "Dataset not found. You can use download=True to download it."
+            )
 
         # Now load the picked data.
         if self._train:
-            self._train_data, self._train_labels = pickle.load(open(
-                os.path.join(self._root, 'processed/train.pkl'), 'rb'))
-            assert (len(self._train_data) == 5994
-                    and len(self._train_labels) == 5994)
+            self._train_data, self._train_labels = pickle.load(
+                open(os.path.join(self._root, "processed/train.pkl"), "rb")
+            )
+            assert len(self._train_data) == 5994 and len(self._train_labels) == 5994
         else:
-            self._test_data, self._test_labels = pickle.load(open(
-                os.path.join(self._root, 'processed/test.pkl'), 'rb'))
-            assert (len(self._test_data) == 5794
-                    and len(self._test_labels) == 5794)
+            self._test_data, self._test_labels = pickle.load(
+                open(os.path.join(self._root, "processed/test.pkl"), "rb")
+            )
+            assert len(self._test_data) == 5794 and len(self._test_labels) == 5794
 
     def __getitem__(self, index):
         """
@@ -375,9 +273,9 @@ class CUB200(torch.utils.data.Dataset):
         Returns:
             flag, bool: True if we have already processed the data.
         """
-        return (
-            os.path.isfile(os.path.join(self._root, 'processed/train.pkl'))
-            and os.path.isfile(os.path.join(self._root, 'processed/test.pkl')))
+        return os.path.isfile(
+            os.path.join(self._root, "processed/train.pkl")
+        ) and os.path.isfile(os.path.join(self._root, "processed/test.pkl"))
 
     def _download(self, url):
         """Download and uncompress the tar.gz file from a given URL.
@@ -387,42 +285,44 @@ class CUB200(torch.utils.data.Dataset):
         import six.moves
         import tarfile
 
-        raw_path = os.path.join(self._root, 'raw')
-        processed_path = os.path.join(self._root, 'processed')
+        raw_path = os.path.join(self._root, "raw")
+        processed_path = os.path.join(self._root, "processed")
         if not os.path.isdir(raw_path):
             os.mkdir(raw_path, mode=0o775)
         if not os.path.isdir(processed_path):
             os.mkdir(processed_path, mode=0o775)
 
         # Downloads file.
-        fpath = os.path.join(self._root, 'raw/CUB_200_2011.tgz')
+        fpath = os.path.join(self._root, "raw/CUB_200_2011.tgz")
         try:
-            print('Downloading ' + url + ' to ' + fpath)
+            print("Downloading " + url + " to " + fpath)
             six.moves.urllib.request.urlretrieve(url, fpath)
         except six.moves.urllib.error.URLError:
-            if url[:5] == 'https:':
-                self._url = self._url.replace('https:', 'http:')
-                print('Failed download. Trying https -> http instead.')
-                print('Downloading ' + url + ' to ' + fpath)
+            if url[:5] == "https:":
+                self._url = self._url.replace("https:", "http:")
+                print("Failed download. Trying https -> http instead.")
+                print("Downloading " + url + " to " + fpath)
                 six.moves.urllib.request.urlretrieve(url, fpath)
 
         # Extract file.
         cwd = os.getcwd()
-        tar = tarfile.open(fpath, 'r:gz')
-        os.chdir(os.path.join(self._root, 'raw'))
+        tar = tarfile.open(fpath, "r:gz")
+        os.chdir(os.path.join(self._root, "raw"))
         tar.extractall()
         tar.close()
         os.chdir(cwd)
 
     def _extract(self):
         """Prepare the data for train/test split and save onto disk."""
-        image_path = os.path.join(self._root, 'raw/CUB_200_2011/images/')
+        image_path = os.path.join(self._root, "raw/CUB_200_2011/images/")
         # Format of images.txt: <image_id> <image_name>
-        id2name = np.genfromtxt(os.path.join(
-            self._root, 'raw/CUB_200_2011/images.txt'), dtype=str)
+        id2name = np.genfromtxt(
+            os.path.join(self._root, "raw/CUB_200_2011/images.txt"), dtype=str
+        )
         # Format of train_test_split.txt: <image_id> <is_training_image>
-        id2train = np.genfromtxt(os.path.join(
-            self._root, 'raw/CUB_200_2011/train_test_split.txt'), dtype=int)
+        id2train = np.genfromtxt(
+            os.path.join(self._root, "raw/CUB_200_2011/train_test_split.txt"), dtype=int
+        )
 
         train_data = []
         train_labels = []
@@ -433,8 +333,8 @@ class CUB200(torch.utils.data.Dataset):
             label = int(id2name[id_, 1][:3]) - 1  # Label starts with 0
 
             # Convert gray scale image to RGB image.
-            if image.getbands()[0] == 'L':
-                image = image.convert('RGB')
+            if image.getbands()[0] == "L":
+                image = image.convert("RGB")
             image_np = np.array(image)
             image.close()
 
@@ -445,10 +345,15 @@ class CUB200(torch.utils.data.Dataset):
                 test_data.append(image_np)
                 test_labels.append(label)
 
-        pickle.dump((train_data, train_labels),
-                    open(os.path.join(self._root, 'processed/train.pkl'), 'wb'))
-        pickle.dump((test_data, test_labels),
-                    open(os.path.join(self._root, 'processed/test.pkl'), 'wb'))
+        pickle.dump(
+            (train_data, train_labels),
+            open(os.path.join(self._root, "processed/train.pkl"), "wb"),
+        )
+        pickle.dump(
+            (test_data, test_labels),
+            open(os.path.join(self._root, "processed/test.pkl"), "wb"),
+        )
+
 
 class Trec6Dataset(Dataset):
     def __init__(
@@ -1891,24 +1796,32 @@ def gen_dataset(datadir, dset_name, feature, isnumpy=False, **kwargs):
         torch.manual_seed(42)
 
         # read dataset
-        cubs_transform = transforms.Compose([
-            # transforms.Resize((600, 600), Image.BILINEAR),
-            # transforms.CenterCrop((448, 448)),
-            transforms.Resize((32, 32)),
-            transforms.RandomHorizontalFlip(),  # solo se train
-            transforms.ToTensor(),
-            # Note: Normalization is calculated by using 32x32 images of the whole train set
-            transforms.Normalize((0.4857, 0.4996, 0.4325), (0.2067, 0.2019, 0.2422)),
-        ])
+        cubs_transform = transforms.Compose(
+            [
+                # transforms.Resize((600, 600), Image.BILINEAR),
+                # transforms.CenterCrop((448, 448)),
+                transforms.Resize((32, 32)),
+                transforms.RandomHorizontalFlip(),  # solo se train
+                transforms.ToTensor(),
+                # Note: Normalization is calculated by using 32x32 images of the whole train set
+                transforms.Normalize(
+                    (0.4857, 0.4996, 0.4325), (0.2067, 0.2019, 0.2422)
+                ),
+            ]
+        )
 
-        cubs_tst_transform = transforms.Compose([
-            # transforms.Resize((600, 600), Image.BILINEAR),
-            # transforms.CenterCrop((448, 448)),
-            transforms.Resize((32, 32)),
-            # transforms.RandomHorizontalFlip(), # solo se train
-            transforms.ToTensor(),
-            transforms.Normalize((0.4857, 0.4996, 0.4325), (0.2067, 0.2019, 0.2422)),
-        ])
+        cubs_tst_transform = transforms.Compose(
+            [
+                # transforms.Resize((600, 600), Image.BILINEAR),
+                # transforms.CenterCrop((448, 448)),
+                transforms.Resize((32, 32)),
+                # transforms.RandomHorizontalFlip(), # solo se train
+                transforms.ToTensor(),
+                transforms.Normalize(
+                    (0.4857, 0.4996, 0.4325), (0.2067, 0.2019, 0.2422)
+                ),
+            ]
+        )
 
         num_cls = 200
         fullset = CUB200(root=datadir, train=True, transform=cubs_transform)
@@ -1962,8 +1875,6 @@ def gen_dataset(datadir, dset_name, feature, isnumpy=False, **kwargs):
         trainset, valset = random_split(fullset, [num_trn, num_val])
 
         return trainset, valset, testset, num_cls
-
-
 
     elif dset_name == "cifar10":
         torch.cuda.manual_seed(42)
