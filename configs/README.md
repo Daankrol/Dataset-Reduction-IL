@@ -44,3 +44,4 @@
     - results_dir: Output log directory
     - print_args: Values to be logged to file - val_loss, val_acc, tst_loss, tst_acc, trn_loss, trn_acc, subtrn_loss, subtrn_acc, time
     - return_args: Arguments to be returned
+    - logging: 'INFO', 'DEBUG'

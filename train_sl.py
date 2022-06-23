@@ -61,11 +61,14 @@ class TrainClassifier:
             "[%(asctime)s] %(name)s %(levelname)s: %(message)s",
             datefmt="%m/%d %H:%M:%S",
         )
+        log_level = logging.INFO
+        if self.cfg.logging is 'DEBUG':
+            log_level = logging.DEBUG
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.INFO)
+        self.logger.setLevel(log_level)
         s_handler = logging.StreamHandler(stream=sys.stdout)
         s_handler.setFormatter(plain_formatter)
-        s_handler.setLevel(logging.INFO)
+        s_handler.setLevel(log_level)
         self.logger.addHandler(s_handler)
         f_handler = logging.FileHandler(
             os.path.join(
@@ -74,7 +77,7 @@ class TrainClassifier:
             )
         )
         f_handler.setFormatter(plain_formatter)
-        f_handler.setLevel(logging.DEBUG)
+        f_handler.setLevel(log_level)
         self.logger.addHandler(f_handler)
         self.logger.propagate = False
 

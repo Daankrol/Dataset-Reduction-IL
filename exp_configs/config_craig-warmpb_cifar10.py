@@ -21,7 +21,7 @@ config = dict(
         kappa=0.05,
         linear_layer=False,
         optimizer="lazy",
-        selection_type="PerClass",
+        selection_type="PerBatch",
         if_convex=False,
     ),
     train_args=dict(
