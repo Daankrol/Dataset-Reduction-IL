@@ -191,6 +191,7 @@ def test():
     x = torch.randn(2, 3, 32, 32)
     y = net(x)
     print(y.shape)
+    x = torch.randn
 
 
 if __name__ == '__main__':

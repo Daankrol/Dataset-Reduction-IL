@@ -94,8 +94,17 @@ parser.add_argument(
     type=float,
     help="regularization constant for OMP solver (GradMatch)"
 )
+parser.add_argument(
+    "--early_stopping",
+    type=bool,
+    help="Enable early stopping. NOTE: has to be used with --disable_scheduler"
+)
 
 args = parser.parse_args()
+if args.config is None:
+    parser.print_help()
+    exit(1)
+
 cfg = load_config_data(args.config)
 
 cfg.dataset.name = args.dataset
@@ -107,9 +116,14 @@ if args.epochs is not None:
     cfg.train_args.num_epochs = args.epochs
 if args.disable_scheduler:
     cfg.scheduler.type = None
+if args.early_stopping:
+    cfg.early_stopping = True
+    cfg.scheduler.type = None
 if args.kappa is not None:
     cfg.dss_args.kappa = args.kappa
 if args.lam is not None:
     cfg.dss_args.lam = args.lam
+
+
 clf = TrainClassifier(cfg)
 clf.train()

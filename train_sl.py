@@ -32,6 +32,8 @@ from pyJoules.handler.print_handler import PrintHandler
 from pyJoules.device.device_factory import DeviceFactory
 import torchmetrics
 
+from cords.utils.utils import EarlyStopping
+
 
 class TrainClassifier:
     def __init__(self, config_file_data):
@@ -62,7 +64,7 @@ class TrainClassifier:
             datefmt="%m/%d %H:%M:%S",
         )
         log_level = logging.INFO
-        if self.cfg.logging is 'DEBUG':
+        if self.cfg.logging == 'DEBUG':
             log_level = logging.DEBUG
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(log_level)
@@ -417,6 +419,12 @@ class TrainClassifier:
         # Getting the optimizer and scheduler
         optimizer, scheduler = self.optimizer_with_scheduler(model)
 
+        # Early stopping
+        if self.cfg.early_stopping is not None and scheduler is not None:
+            raise Exception('Do not use early stopping AND a lr scheduler')
+        if self.cfg.early_stopping:
+            early_stopping = EarlyStopping(patience=5, min_delta=0, logger=logger)
+
         """
         ############################## Custom Dataloader Creation ##############################
         """
@@ -721,19 +729,13 @@ class TrainClassifier:
             ):
                 trn_loss = 0
                 trn_correct = 0
-                trn_correct_per_class = [0] * self.cfg.model.numclasses
-                trn_total_per_class = [0] * self.cfg.model.numclasses
                 trn_total = 0
                 val_loss = 0
                 val_correct = 0
                 val_total = 0
-                val_correct_per_class = [0] * self.cfg.model.numclasses
-                val_total_per_class = [0] * self.cfg.model.numclasses
                 tst_correct = 0
                 tst_total = 0
                 tst_loss = 0
-                tst_correct_per_class = [0] * self.cfg.model.numclasses
-                tst_total_per_class = [0] * self.cfg.model.numclasses
                 model.eval()
 
                 if ("trn_loss" in print_args) or ("trn_acc" in print_args):
@@ -799,6 +801,13 @@ class TrainClassifier:
 
                         val_loss = val_loss / samples
                         val_losses.append(val_loss)
+
+                        if self.cfg.early_stopping:
+                            early_stopping(val_loss)
+                            if early_stopping.early_stop:
+                                logger.info("Stopped because of EarlyStopping")
+                                break
+
 
                     if "val_acc" in print_args:
                         val_acc.append(val_correct / val_total)

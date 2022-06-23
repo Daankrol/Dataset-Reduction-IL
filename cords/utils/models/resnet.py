@@ -9,7 +9,21 @@ Reference
 import torch.nn as nn
 import torch.nn.functional as F
 import torch
+import torchvision.models as models
 
+
+def resnet50(pretrained=True, requires_grad=False):
+    model = models.resnet50(progress=True, pretrained=pretrained)
+    # either freeze or train the hidden layer parameters
+    if not requires_grad:
+        for param in model.parameters():
+            param.requires_grad = False
+    elif requires_grad:
+        for param in model.parameters():
+            param.requires_grad = True
+    # make the classification layer learnable
+    model.fc = nn.Linear(2048, 2)
+    return model
 
 class BasicBlock(nn.Module):
     expansion = 1
