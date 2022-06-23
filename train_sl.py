@@ -90,8 +90,10 @@ class TrainClassifier:
             if self.cfg.dss_args.select_every is not None:
                 name += f"_{str(self.cfg.dss_args.select_every)}"
             if self.cfg.model.type == "pre-trained":
-                name += "_Pre-trained"
-            if self.cfg.scheduler.type is None:
+                name += "_PT"
+            if self.cfg.early_stopping:
+                name += "_ES"
+            if self.cfg.scheduler.type is None and not self.cfg.early_stopping:
                 name += "_NoSched"
             if self.cfg.dss_args.kappa is not None:
                 name += f"_k-{str(self.cfg.dss_args.kappa)}"
