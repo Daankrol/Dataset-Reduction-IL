@@ -89,6 +89,11 @@ parser.add_argument(
     default=False,
     help="Whether to disable Cosine Annealing"
 )
+parser.add_argument(
+    "--lam",
+    type=float,
+    help="regularization constant for OMP solver (GradMatch)"
+)
 
 args = parser.parse_args()
 cfg = load_config_data(args.config)
@@ -104,6 +109,7 @@ if args.disable_scheduler:
     cfg.scheduler.type = None
 if args.kappa is not None:
     cfg.dss_args.kappa = args.kappa
-
+if args.lam is not None:
+    cfg.dss_args.lam = args.lam
 clf = TrainClassifier(cfg)
 clf.train()
