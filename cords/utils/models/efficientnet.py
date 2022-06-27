@@ -198,6 +198,14 @@ def EfficientNetB0_PyTorch(num_classes=10, pretrained=True, fine_tune=True):
     # make a function on the model that returns the embedding dim
     model.get_embedding_dim = lambda: 1280
     model.embDim = 1280
+    print(f"Using EfficientNetB0 pretrained={pretrained}, finetune={fine_tune}")
+    print(
+        "EfficientNetB0_PyTorch: Training {}% of {} trainable parameters".format(
+            int(sum(p.numel() for p in model.parameters() if p.requires_grad) * 100 / sum(
+                p.numel() for p in model.parameters())),
+            sum(p.numel() for p in model.parameters())
+        )
+    )
     return model
 
 

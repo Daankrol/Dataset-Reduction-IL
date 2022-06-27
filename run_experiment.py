@@ -78,8 +78,7 @@ parser.add_argument(
 parser.add_argument("--epochs", type=int, help="number of epochs to train")
 parser.add_argument(
     "--disable_scheduler",
-    type=bool,
-    default=False,
+    action='store_true',
     help="Whether to disable Cosine Annealing",
 )
 parser.add_argument(
@@ -87,8 +86,29 @@ parser.add_argument(
 )
 parser.add_argument(
     "--early_stopping",
-    type=bool,
+    action='store_true',
     help="Enable early stopping. NOTE: has to be used with --disable_scheduler",
+)
+parser.add_argument(
+    "--lr",
+    type=float,
+    help="learning rate"
+)
+parser.add_argument(
+    "--model",
+    type=str,
+    choices=["ResNet18", "EfficientNet"],
+    default="Resnet18",
+)
+parser.add_argument(
+    "--pretrained",
+    action='store_true',
+    help="use pretrained model"
+)
+parser.add_argument(
+    "--finetune",
+    action='store_true',
+    help="do finetuning of all layers."
 )
 
 args = parser.parse_args()
@@ -97,8 +117,21 @@ if args.config is None:
     exit(1)
 
 cfg = load_config_data(args.config)
+
+
 if args.dataset is not None:
     cfg.dataset.name = args.dataset
+if args.lr is not None:
+    cfg.optimizer.lr = args.lr
+
+cfg.model.architecture = args.model
+
+if args.pretrained:
+    cfg.model.type = 'pre-trained'
+else:
+    cfg.model.type = 'pre-defined'
+cfg.model.fine_tune = args.finetune
+
 if args.fraction is not None:
     cfg.dss_args.fraction = args.fraction
 if args.select_every is not None:
