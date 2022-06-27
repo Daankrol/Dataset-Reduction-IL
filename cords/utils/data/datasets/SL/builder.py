@@ -216,6 +216,9 @@ class CUB200(torch.utils.data.Dataset):
             )
             print(
                 "Download CUB200 from https://drive.google.com/uc?id=1U655cnOmqRZHEindgJgIQ49Cm-Kgro8d"
+                + " and put it in "
+                + self._root
+                + "/raw/CUB_200_2011/"
             )
             exit()
             self._download(url)
@@ -1795,31 +1798,32 @@ def gen_dataset(datadir, dset_name, feature, isnumpy=False, **kwargs):
         torch.cuda.manual_seed(42)
         torch.manual_seed(42)
 
-        # read dataset
-        cubs_transform = transforms.Compose(
+        if "pre-trained" in kwargs and kwargs["pre-trained"]:
+            # Normalization based on imageNet
+            normalize = transforms.Normalize(
+                (0.485, 0.456, 0.406), (0.229, 0.224, 0.225)
+            )
+        else:
+            # # Note: Normalization is calculated by using 32x32 images of the whole train set
+            normalize = transforms.Normalize(
+                (0.4857, 0.4996, 0.4325), (0.2067, 0.2019, 0.2422)
+            )
+
+        cub200_transform = transforms.Compose(
             [
-                # transforms.Resize((600, 600), Image.BILINEAR),
-                # transforms.CenterCrop((448, 448)),
-                transforms.Resize((32, 32)),
-                transforms.RandomHorizontalFlip(),  # solo se train
+                transforms.Resize(256),
+                transforms.CenterCrop(224),
+                transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
-                # Note: Normalization is calculated by using 32x32 images of the whole train set
-                transforms.Normalize(
-                    (0.4857, 0.4996, 0.4325), (0.2067, 0.2019, 0.2422)
-                ),
+                normalize(),
             ]
         )
-
-        cubs_tst_transform = transforms.Compose(
+        cub200_tst_transform = transforms.Compose(
             [
-                # transforms.Resize((600, 600), Image.BILINEAR),
-                # transforms.CenterCrop((448, 448)),
-                transforms.Resize((32, 32)),
-                # transforms.RandomHorizontalFlip(), # solo se train
+                transforms.Resize(256),
+                transforms.CenterCrop(224),
                 transforms.ToTensor(),
-                transforms.Normalize(
-                    (0.4857, 0.4996, 0.4325), (0.2067, 0.2019, 0.2422)
-                ),
+                normalize(),
             ]
         )
 

@@ -9,6 +9,7 @@ from .dla_simple import SimpleDLA
 from .dpn import DPN26
 from .dpn import DPN92
 from .efficientnet import EfficientNetB0
+from .efficientnet import EfficientNetB0_PyTorch
 from .googlenet import GoogLeNet
 from .googlenet import Inception
 from .lenet import LeNet

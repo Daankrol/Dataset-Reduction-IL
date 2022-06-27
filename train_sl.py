@@ -65,7 +65,7 @@ class TrainClassifier:
             datefmt="%m/%d %H:%M:%S",
         )
         log_level = logging.INFO
-        if self.cfg.logging == 'DEBUG':
+        if self.cfg.logging == "DEBUG":
             log_level = logging.DEBUG
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(log_level)
@@ -114,6 +114,7 @@ class TrainClassifier:
                     "setting": self.cfg.setting,
                     "model": self.cfg.model.architecture,
                     "model_type": self.cfg.model.type,
+                    "fine_tune": self.cfg.model.fine_tune,
                     "epochs": self.cfg.train_args.num_epochs,
                     "batch_size": self.cfg.dataloader.batch_size,
                     "lr": self.cfg.optimizer.lr,
@@ -121,7 +122,7 @@ class TrainClassifier:
                     "scheduler": self.cfg.scheduler.type,
                     "measure_energy": self.cfg.measure_energy,
                     "optimizer": self.cfg.optimizer,
-                    "dss_args" : self.cfg.dss_args,
+                    "dss_args": self.cfg.dss_args,
                 },
             )
 
@@ -153,6 +154,22 @@ class TrainClassifier:
     """
 
     def create_model(self):
+        if self.cfg.model.architecture == "EfficientNet":
+            if self.cfg.model.type == "pre-trained":
+                fine_tune = False
+                if self.cfg.model.fine_tune:
+                    fine_tune = True
+
+                model = EfficientNetB0_PyTorch(
+                    num_classes=self.cfg.dataset.num_classes,
+                    pretrained=True,
+                    fine_tune=fine_tune,
+                )
+            else:
+                model = EfficientNetB0_PyTorch(
+                    num_classes=self.cfg.dataset.num_classes, pretrained=False
+                )
+
         if self.cfg.model.architecture == "RegressionNet":
             model = RegressionNet(self.cfg.model.input_dim)
         elif self.cfg.model.architecture == "ResNet18":
@@ -424,7 +441,7 @@ class TrainClassifier:
         # Early stopping
         if self.cfg.early_stopping and scheduler is not None:
             print(self.cfg.early_stopping, scheduler)
-            raise Exception('Do not use early stopping AND a lr scheduler')
+            raise Exception("Do not use early stopping AND a lr scheduler")
         if self.cfg.early_stopping:
             early_stopping = EarlyStopping(patience=5, min_delta=0, logger=logger)
 
@@ -810,7 +827,6 @@ class TrainClassifier:
                             if early_stopping.early_stop:
                                 logger.info("Stopped because of EarlyStopping")
                                 break
-
 
                     if "val_acc" in print_args:
                         val_acc.append(val_correct / val_total)
