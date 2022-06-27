@@ -161,7 +161,7 @@ class TrainClassifier:
                     fine_tune = True
 
                 model = EfficientNetB0_PyTorch(
-                    num_classes=self.cfg.dataset.num_classes,
+                    num_classes=self.cfg.model.numclasses,
                     pretrained=True,
                     fine_tune=fine_tune,
                 )
