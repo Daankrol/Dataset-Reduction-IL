@@ -59,8 +59,7 @@ parser.add_argument(
 parser.add_argument(
     "--dataset",
     type=str,
-    choices=["cifar10", "cifar100", "cub200"],
-    default="cifar10"
+    choices=["cifar10", "cifar100", "cub200"]
 )
 
 parser.add_argument(
@@ -106,8 +105,8 @@ if args.config is None:
     exit(1)
 
 cfg = load_config_data(args.config)
-
-cfg.dataset.name = args.dataset
+if args.dataset is not None:
+    cfg.dataset.name = args.dataset
 if args.fraction is not None:
     cfg.dss_args.fraction = args.fraction
 if args.select_every is not None:
@@ -123,7 +122,6 @@ if args.kappa is not None:
     cfg.dss_args.kappa = args.kappa
 if args.lam is not None:
     cfg.dss_args.lam = args.lam
-
 
 clf = TrainClassifier(cfg)
 clf.train()

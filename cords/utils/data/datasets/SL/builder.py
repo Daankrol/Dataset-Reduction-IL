@@ -1798,7 +1798,7 @@ def gen_dataset(datadir, dset_name, feature, isnumpy=False, **kwargs):
         torch.cuda.manual_seed(42)
         torch.manual_seed(42)
 
-        if "pre-trained" in kwargs and kwargs["pre-trained"]:
+        if "pre_trained" in kwargs and kwargs["pre_trained"]:
             # Normalization based on imageNet
             normalize = transforms.Normalize(
                 (0.485, 0.456, 0.406), (0.229, 0.224, 0.225)
@@ -1815,7 +1815,7 @@ def gen_dataset(datadir, dset_name, feature, isnumpy=False, **kwargs):
                 transforms.CenterCrop(224),
                 transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
-                normalize(),
+                normalize,
             ]
         )
         cub200_tst_transform = transforms.Compose(
@@ -1823,13 +1823,13 @@ def gen_dataset(datadir, dset_name, feature, isnumpy=False, **kwargs):
                 transforms.Resize(256),
                 transforms.CenterCrop(224),
                 transforms.ToTensor(),
-                normalize(),
+                normalize,
             ]
         )
 
         num_cls = 200
-        fullset = CUB200(root=datadir, train=True, transform=cubs_transform)
-        testset = CUB200(root=datadir, train=False, transform=cubs_tst_transform)
+        fullset = CUB200(root=datadir, train=True, transform=cub200_transform)
+        testset = CUB200(root=datadir, train=False, transform=cub200_tst_transform)
 
         if feature == "classimb":
             samples_per_class = torch.zeros(num_cls)

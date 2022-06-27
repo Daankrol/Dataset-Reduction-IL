@@ -154,6 +154,7 @@ class TrainClassifier:
     """
 
     def create_model(self):
+        print(f"using model: {self.cfg.model.architecture} with {self.cfg.model}")
         if self.cfg.model.architecture == "EfficientNet":
             if self.cfg.model.type == "pre-trained":
                 fine_tune = False
@@ -167,10 +168,10 @@ class TrainClassifier:
                 )
             else:
                 model = EfficientNetB0_PyTorch(
-                    num_classes=self.cfg.dataset.num_classes, pretrained=False
+                    num_classes=self.cfg.model.numclasses, pretrained=False
                 )
 
-        if self.cfg.model.architecture == "RegressionNet":
+        elif self.cfg.model.architecture == "RegressionNet":
             model = RegressionNet(self.cfg.model.input_dim)
         elif self.cfg.model.architecture == "ResNet18":
             model = ResNet18(self.cfg.model.numclasses)
@@ -327,6 +328,10 @@ class TrainClassifier:
         # Start energy measurement
         self.start_energy_measurement(tag="data_loading")
 
+        use_pre_trained_normalization = False
+        if self.cfg.model.type == 'pre-trained':
+            use_pre_trained_normalization = True
+
         if self.cfg.dataset.feature == "classimb":
             trainset, validset, testset, num_cls = gen_dataset(
                 self.cfg.dataset.datadir,
@@ -334,6 +339,7 @@ class TrainClassifier:
                 self.cfg.dataset.feature,
                 classimb_ratio=self.cfg.dataset.classimb_ratio,
                 dataset=self.cfg.dataset,
+                pre_trained=use_pre_trained_normalization
             )
         else:
             trainset, validset, testset, num_cls = gen_dataset(
@@ -341,7 +347,10 @@ class TrainClassifier:
                 self.cfg.dataset.name,
                 self.cfg.dataset.feature,
                 dataset=self.cfg.dataset,
+                pre_trained=use_pre_trained_normalization
             )
+        print(self.cfg)
+        print(f"{self.cfg.dataset} num cls = {num_cls}")
 
         trn_batch_size = self.cfg.dataloader.batch_size
         val_batch_size = self.cfg.dataloader.batch_size
@@ -361,7 +370,7 @@ class TrainClassifier:
         batch_sampler = lambda _, __: None
         drop_last = False
 
-        if "collate_fn" not in self.cfg.dataloader.keys():
+        if "collate_fn"in self.cfg.dataloader.keys():
             collate_fn = None
         else:
             collate_fn = self.cfg.dataloader.collate_fn
