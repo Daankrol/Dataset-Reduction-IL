@@ -12,7 +12,7 @@ from pyJoules.device.device_factory import DeviceFactory
 
 
 def getCPUIDs():
-    """Get the IDs of the GPU and CPUs that are assigned to this job. 
+    """Get the IDs of the GPU and CPUs that are assigned to this job.
     SLURM IDs are mapped to the psysical IDs.
     """
     # CPU IDs can be found by using the bash command "cat /proc/self/status | grep Cpus_allowed_list"
@@ -25,7 +25,12 @@ def getCPUIDs():
     cpu_id_list = []
     for cpu_id_string in cpu_id_string.split(","):
         if "-" in cpu_id_string:
-            cpu_id_list.extend(range(int(cpu_id_string.split("-")[0]), int(cpu_id_string.split("-")[1]) + 1))
+            cpu_id_list.extend(
+                range(
+                    int(cpu_id_string.split("-")[0]),
+                    int(cpu_id_string.split("-")[1]) + 1,
+                )
+            )
         else:
             cpu_id_list.append(int(cpu_id_string))
 
@@ -38,7 +43,9 @@ def getCPUIDs():
     mapping = {}
     for line in mapping_str:
         if "PU L#" in line:
-            mapping[line.split(" ")[1].split("#")[1]] = line.split(" ")[2].split("#")[1].split(')')[0]
+            mapping[line.split(" ")[1].split("#")[1]] = (
+                line.split(" ")[2].split("#")[1].split(")")[0]
+            )
 
     for cpu_id in cpu_id_list:
         if cpu_id in mapping:
@@ -48,7 +55,8 @@ def getCPUIDs():
 
 
 parser = argparse.ArgumentParser(
-    description="Run experiments with config file\n ./configs/SL/config_gradmatch_cifar10.py")
+    description="Run experiments with config file\n ./configs/SL/config_gradmatch_cifar10.py"
+)
 
 parser.add_argument(
     "--config",
@@ -56,47 +64,31 @@ parser.add_argument(
     required=True,
     help="Path of the experiment config file",
 )
-parser.add_argument(
-    "--dataset",
-    type=str,
-    choices=["cifar10", "cifar100", "cub200"]
-)
+parser.add_argument("--dataset", type=str, choices=["cifar10", "cifar100", "cub200"])
 
 parser.add_argument(
-    "--fraction",
-    type=float,
-    help="Fraction of data to select with DSS"
+    "--fraction", type=float, help="Fraction of data to select with DSS"
 )
 parser.add_argument(
-    "--kappa",
-    type=float,
-    help="Fraction of epochs to use for warm up."
+    "--kappa", type=float, help="Fraction of epochs to use for warm up."
 )
 parser.add_argument(
-    "--select_every",
-    type=int,
-    help="Select a new subset every X epochs."
+    "--select_every", type=int, help="Select a new subset every X epochs."
 )
-parser.add_argument(
-    "--epochs",
-    type=int,
-    help="number of epochs to train"
-)
+parser.add_argument("--epochs", type=int, help="number of epochs to train")
 parser.add_argument(
     "--disable_scheduler",
     type=bool,
     default=False,
-    help="Whether to disable Cosine Annealing"
+    help="Whether to disable Cosine Annealing",
 )
 parser.add_argument(
-    "--lam",
-    type=float,
-    help="regularization constant for OMP solver (GradMatch)"
+    "--lam", type=float, help="regularization constant for OMP solver (GradMatch)"
 )
 parser.add_argument(
     "--early_stopping",
     type=bool,
-    help="Enable early stopping. NOTE: has to be used with --disable_scheduler"
+    help="Enable early stopping. NOTE: has to be used with --disable_scheduler",
 )
 
 args = parser.parse_args()

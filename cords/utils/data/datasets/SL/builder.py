@@ -186,7 +186,7 @@ class CUB200(torch.utils.data.Dataset):
     """
 
     def __init__(
-        self, root, train=True, transform=None, target_transform=None, download=False
+        self, root, train=True, transform=None, target_transform=None, download=True
     ):
         """Load the dataset.
         Args
@@ -210,18 +210,18 @@ class CUB200(torch.utils.data.Dataset):
         if self._checkIntegrity():
             print("Files already downloaded and verified.")
         elif download:
-            url = (
-                "http://www.vision.caltech.edu/visipedia-data/CUB-200-2011/"
-                "CUB_200_2011.tgz"
-            )
+            # url = (
+            #     "http://www.vision.caltech.edu/visipedia-data/CUB-200-2011/"
+            #     "CUB_200_2011.tgz"
+            # )
             print(
                 "Download CUB200 from https://drive.google.com/uc?id=1U655cnOmqRZHEindgJgIQ49Cm-Kgro8d"
                 + " and put it in "
                 + self._root
                 + "/raw/CUB_200_2011/"
             )
-            exit()
-            self._download(url)
+            # exit()
+            # self._download(url)
             self._extract()
         else:
             raise RuntimeError(
@@ -318,6 +318,7 @@ class CUB200(torch.utils.data.Dataset):
     def _extract(self):
         """Prepare the data for train/test split and save onto disk."""
         image_path = os.path.join(self._root, "raw/CUB_200_2011/images/")
+        print("Extracting images from " + image_path)
         # Format of images.txt: <image_id> <image_name>
         id2name = np.genfromtxt(
             os.path.join(self._root, "raw/CUB_200_2011/images.txt"), dtype=str

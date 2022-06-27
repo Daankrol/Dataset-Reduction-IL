@@ -329,7 +329,7 @@ class TrainClassifier:
         self.start_energy_measurement(tag="data_loading")
 
         use_pre_trained_normalization = False
-        if self.cfg.model.type == 'pre-trained':
+        if self.cfg.model.type == "pre-trained":
             use_pre_trained_normalization = True
 
         if self.cfg.dataset.feature == "classimb":
@@ -339,7 +339,7 @@ class TrainClassifier:
                 self.cfg.dataset.feature,
                 classimb_ratio=self.cfg.dataset.classimb_ratio,
                 dataset=self.cfg.dataset,
-                pre_trained=use_pre_trained_normalization
+                pre_trained=use_pre_trained_normalization,
             )
         else:
             trainset, validset, testset, num_cls = gen_dataset(
@@ -347,7 +347,7 @@ class TrainClassifier:
                 self.cfg.dataset.name,
                 self.cfg.dataset.feature,
                 dataset=self.cfg.dataset,
-                pre_trained=use_pre_trained_normalization
+                pre_trained=use_pre_trained_normalization,
             )
         print(self.cfg)
         print(f"{self.cfg.dataset} num cls = {num_cls}")
@@ -370,10 +370,10 @@ class TrainClassifier:
         batch_sampler = lambda _, __: None
         drop_last = False
 
-        if "collate_fn"in self.cfg.dataloader.keys():
-            collate_fn = None
-        else:
+        if "collate_fn" in self.cfg.dataloader.keys():
             collate_fn = self.cfg.dataloader.collate_fn
+        else:
+            collate_fn = None
 
         # Creating the Data Loaders
         trainloader = torch.utils.data.DataLoader(
@@ -770,6 +770,9 @@ class TrainClassifier:
                 if ("trn_loss" in print_args) or ("trn_acc" in print_args):
                     samples = 0
                     with torch.no_grad():
+                        print(trainloader)
+                        print(len(trainloader))
+                        print(trainloader.dataset)
                         for _, data in enumerate(trainloader):
                             if is_selcon:
                                 inputs, targets, _ = data
