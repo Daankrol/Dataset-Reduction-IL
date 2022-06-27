@@ -15,7 +15,7 @@ config = dict(
     ),
     scheduler=dict(type="cosine_annealing", T_max=300),
     dss_args=dict(
-        type="CRAIG-Warm",
+        type="CRAIGPB-Warm",
         fraction=0.1,
         select_every=5,
         kappa=0.05,

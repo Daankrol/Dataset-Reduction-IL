@@ -7,6 +7,7 @@ import torch
 import numpy as np
 import torch.nn as nn
 import torch.optim as optim
+from dotmap import DotMap
 from ray import tune
 from torch.utils.data import Subset
 from cords.utils.config_utils import load_config_data
@@ -85,9 +86,9 @@ class TrainClassifier:
 
         if self.cfg.wandb:
             name = self.cfg.dss_args.type + "_" + self.cfg.dataset.name
-            if self.cfg.dss_args.fraction is not None:
+            if self.cfg.dss_args.fraction != DotMap():
                 name += f"_{str(self.cfg.dss_args.fraction)}"
-            if self.cfg.dss_args.select_every is not None:
+            if self.cfg.dss_args.select_every != DotMap():
                 name += f"_{str(self.cfg.dss_args.select_every)}"
             if self.cfg.model.type == "pre-trained":
                 name += "_PT"
@@ -95,11 +96,10 @@ class TrainClassifier:
                 name += "_ES"
             if self.cfg.scheduler.type is None and not self.cfg.early_stopping:
                 name += "_NoSched"
-            if self.cfg.dss_args.kappa is not None:
+            if self.cfg.dss_args != DotMap():
                 name += f"_k-{str(self.cfg.dss_args.kappa)}"
-            if self.cfg.dss_args.lam is not None:
+            if self.cfg.dss_args.lam != DotMap():
                 name += f"_lam-{str(self.cfg.dss_args.lam)}"
-
             wandb.init(
                 project="Dataset Reduction for IL",
                 entity="daankrol",
@@ -422,7 +422,8 @@ class TrainClassifier:
         optimizer, scheduler = self.optimizer_with_scheduler(model)
 
         # Early stopping
-        if self.cfg.early_stopping is not None and scheduler is not None:
+        if self.cfg.early_stopping and scheduler is not None:
+            print(self.cfg.early_stopping, scheduler)
             raise Exception('Do not use early stopping AND a lr scheduler')
         if self.cfg.early_stopping:
             early_stopping = EarlyStopping(patience=5, min_delta=0, logger=logger)
