@@ -23,12 +23,12 @@
 # python3 run_experiment.py --config ./exp_configs/config_craig-warm_cifar10.py # ok
 # python3 run_experiment.py --config ./exp_configs/config_craig-warm_cifar10.py --kappa 0.2 # ok
 # python3 run_experiment.py --config ./exp_configs/config_craig_cifar10.py # ok
-python3 run_experiment.py --config ./exp_configs/config_craig-warm_cifar10.py
-python3 run_experiment.py --config ./exp_configs/config_craig-warmpb_cifar10.py
-python3 run_experiment.py --config ./exp_configs/config_gradmatchpb-warm_cifar10.py
-python3 run_experiment.py --config ./exp_configs/config_gradmatchpb_cifar10.py --dataset cub200
-python3 run_experiment.py --config ./exp_configs/config_gradmatchpb_cifar10.py --dataset cub200 --lam 0.5
-python3 run_experiment.py --config ./exp_configs/config_gradmatch_cifar10.py --dataset cub200
-python3 run_experiment.py --config ./exp_configs/config_full_cifar10.py --dataset cub200
-python3 run_experiment.py --config ./exp_configs/config_full_cifar10.py --dataset cub200 --early_stopping True
-python3 run_experiment.py --config ./exp_configs/config_full_cifar10.py --early_stopping True
+# python3 run_experiment.py --config ./exp_configs/config_craig-warm_cifar10.py # ok
+# python3 run_experiment.py --config ./exp_configs/config_craig-warmpb_cifar10.py # ok
+# python3 run_experiment.py --config ./exp_configs/config_gradmatchpb-warm_cifar10.py # ok
+# python3 run_experiment.py --config ./exp_configs/config_gradmatchpb_cifar10.py --dataset cub200 # ok
+# python3 run_experiment.py --config ./exp_configs/config_gradmatchpb_cifar10.py --dataset cub200 --lam 0.5 # ok
+# python3 run_experiment.py --config ./exp_configs/config_gradmatch_cifar10.py --dataset cub200 # ok
+# python3 run_experiment.py --config ./exp_configs/config_full_cifar10.py --dataset cub200 # ok
+# python3 run_experiment.py --config ./exp_configs/config_full_cifar10.py --dataset cub200 --early_stopping True # ok
+# python3 run_experiment.py --config ./exp_configs/config_full_cifar10.py --early_stopping True # ok

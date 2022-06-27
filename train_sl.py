@@ -96,7 +96,7 @@ class TrainClassifier:
                 name += "_ES"
             if self.cfg.scheduler.type is None and not self.cfg.early_stopping:
                 name += "_NoSched"
-            if self.cfg.dss_args != DotMap():
+            if self.cfg.dss_args.kappa != DotMap():
                 name += f"_k-{str(self.cfg.dss_args.kappa)}"
             if self.cfg.dss_args.lam != DotMap():
                 name += f"_lam-{str(self.cfg.dss_args.lam)}"
