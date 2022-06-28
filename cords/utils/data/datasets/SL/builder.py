@@ -1884,26 +1884,40 @@ def gen_dataset(datadir, dset_name, feature, isnumpy=False, **kwargs):
     elif dset_name == "cifar10":
         torch.cuda.manual_seed(42)
         torch.manual_seed(42)
-        cifar_transform = transforms.Compose(
-            [
-                transforms.RandomCrop(32, padding=4),
-                transforms.RandomHorizontalFlip(),
-                transforms.ToTensor(),
-                transforms.Normalize(
-                    (0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)
-                ),
-            ]
-        )
+        # img_size is an optional param in kwargs
+        t = []
+        if (
+            "img_size" in kwargs
+            and kwargs["img_size"] != DotMap()
+            and kwargs["img_size"] != None
+        ):
+            img_size = kwargs["img_size"]
+        else:
+            img_size = 32
 
-        cifar_tst_transform = transforms.Compose(
-            [
-                transforms.ToTensor(),
-                transforms.Normalize(
-                    (0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)
-                ),
-            ]
-        )
+        if img_size == 32:
+            t += [transforms.RandomCrop(size=32)]
+        else:
+            t += [transforms.Resize(img_size + 32)]
+            t += [transforms.RandomCrop(img_size)]
+        t += [
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+        ]
+        if "pre_trained" in kwargs and kwargs["pre_trained"]:
+            # Normalization based on imageNet
+            normalize = transforms.Normalize(
+                (0.485, 0.456, 0.406), (0.229, 0.224, 0.225)
+            )
+        else:
+            # # Note: Normalization is calculated by using 32x32 images of the whole train set
+            normalize = transforms.Normalize(
+                (0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)
+            )
 
+        t += [normalize]
+        cifar_transform = transforms.Compose(t)
+        cifar_test_transform = transforms.Compose([transforms.ToTensor(), normalize])
         num_cls = 10
 
         fullset = torchvision.datasets.CIFAR10(

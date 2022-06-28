@@ -340,6 +340,7 @@ class TrainClassifier:
                 classimb_ratio=self.cfg.dataset.classimb_ratio,
                 dataset=self.cfg.dataset,
                 pre_trained=use_pre_trained_normalization,
+                img_size=self.cfg.dataset.img_size,
             )
         else:
             trainset, validset, testset, num_cls = gen_dataset(
@@ -348,6 +349,7 @@ class TrainClassifier:
                 self.cfg.dataset.feature,
                 dataset=self.cfg.dataset,
                 pre_trained=use_pre_trained_normalization,
+                img_size=self.cfg.dataset.img_size,
             )
         print(self.cfg)
         print(f"{self.cfg.dataset} num cls = {num_cls}")

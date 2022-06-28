@@ -1,9 +1,9 @@
 # Learning setting
 config = dict(
     setting="SL",
-    is_reg=False,
+    measure_energy=False,
     wandb=True,
-    measure_energy=True,
+    is_reg=False,
     dataset=dict(name="cifar10", datadir="../data", feature="dss", type="image"),
     dataloader=dict(shuffle=True, batch_size=20, pin_memory=True),
     model=dict(architecture="ResNet18", type="pre-defined"),
@@ -13,10 +13,10 @@ config = dict(
         type="sgd", momentum=0.9, lr=0.01, weight_decay=5e-4, nesterov=False
     ),
     scheduler=dict(type="cosine_annealing", T_max=300),
-    dss_args=dict(type="Random", fraction=0.1, select_every=10, kappa=0),
+    dss_args=dict(type="Random", fraction=0.1, select_every=1, kappa=0),
     train_args=dict(
-        num_epochs=300,
-        device="cuda",
+        num_epochs=1,
+        device="cpu",
         print_every=1,
         results_dir="../results/",
         print_args=[
