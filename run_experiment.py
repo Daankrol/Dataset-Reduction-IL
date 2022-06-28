@@ -98,7 +98,6 @@ parser.add_argument(
     "--model",
     type=str,
     choices=["ResNet18", "EfficientNet"],
-    default="Resnet18",
 )
 parser.add_argument(
     "--pretrained",
@@ -123,8 +122,8 @@ if args.dataset is not None:
     cfg.dataset.name = args.dataset
 if args.lr is not None:
     cfg.optimizer.lr = args.lr
-
-cfg.model.architecture = args.model
+if args.model is not None:
+    cfg.model.architecture = args.model
 
 if args.pretrained:
     cfg.model.type = 'pre-trained'
