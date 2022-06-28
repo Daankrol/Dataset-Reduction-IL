@@ -46,4 +46,6 @@
 # python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --pretrained --finetune # ok
 # python3 run_experiment.py --config ./exp_configs/cub200/config_full.py --pretrained --finetune # ok
 python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --pretrained --finetune --lr 0.001 
-python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --pretrained --finetune --lr 0.001 --select_every 10
+python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --pretrained --finetune --lr 0.0001
+python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --pretrained --finetune --lr 0.001 --select_every 10 
+python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --pretrained --finetune --lr 0.0001 --select_every 10
