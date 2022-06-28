@@ -96,9 +96,9 @@ class TrainClassifier:
                 name += "_ES"
             if self.cfg.scheduler.type is None and not self.cfg.early_stopping:
                 name += "_NoSched"
-            if self.cfg.dss_args.kappa != DotMap():
+            if self.cfg.dss_args.kappa != DotMap() and self.cfg.dss_args.kappa > 0:
                 name += f"_k-{str(self.cfg.dss_args.kappa)}"
-            if self.cfg.dss_args.lam != DotMap():
+            if self.cfg.dss_args.lam != DotMap() and self.cfg.dss_args.lam > 0:
                 name += f"_lam-{str(self.cfg.dss_args.lam)}"
             wandb.init(
                 project="Dataset Reduction for IL",
@@ -452,7 +452,7 @@ class TrainClassifier:
             print(self.cfg.early_stopping, scheduler)
             raise Exception("Do not use early stopping AND a lr scheduler")
         if self.cfg.early_stopping:
-            early_stopping = EarlyStopping(patience=5, min_delta=0, logger=logger)
+            early_stopping = EarlyStopping(patience=15, min_delta=0, logger=logger)
 
         """
         ############################## Custom Dataloader Creation ##############################

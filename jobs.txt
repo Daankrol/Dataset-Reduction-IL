@@ -43,3 +43,4 @@
 # python3 run_experiment.py --config ./exp_configs/config_gradmatchpb_cifar10.py --dataset cub200 --lr 0.005 --model EfficientNet --select_every 10 --pretrained --finetune # ok
 # python3 run_experiment.py --config ./exp_configs/config_gradmatch_cifar10.py --dataset cub200 --lr 0.005 --model EfficientNet --pretrained --finetune --select_every 10 # ok
 # python3 run_experiment.py --config ./exp_configs/config_full_cifar10.py --early_stopping # ok
+python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --pretrained --finetune
