@@ -656,6 +656,13 @@ class TrainClassifier:
                 pin_memory=self.cfg.dataloader.pin_memory,
             )
 
+        elif self.cfg.dss_args.type in ["Uncertainty"]:
+            """
+            ############################## Uncertainty Dataloader Additional Arguments ##############################
+            """
+            self.cfg.dss_args.model = model
+            dataloader = UncertaintyDataLoader(trainset, self.cfg.dss_args, logger)
+
         else:
             raise NotImplementedError
 
