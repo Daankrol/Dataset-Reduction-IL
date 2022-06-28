@@ -49,3 +49,7 @@ python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --
 python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --pretrained --finetune --lr 0.0001
 python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --pretrained --finetune --lr 0.001 --select_every 10 
 python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --pretrained --finetune --lr 0.0001 --select_every 10
+python3 run_experiment.py --config ./exp_configs/cub200/cofnig_full.py --pretrained --finetune --lr 0.0001
+python3 run_experiment.py --config ./exp_configs/cub200/cofnig_full.py --pretrained --finetune --lr 0.0001 --early_stopping
+python3 run_experiment.py --config ./exp_configs/cub200/cofnig_full.py --pretrained --finetune --lr 0.005
+python3 run_experiment.py --config ./exp_configs/cub200/cofnig_full.py --pretrained --finetune --lr 0.005 --early_stopping
