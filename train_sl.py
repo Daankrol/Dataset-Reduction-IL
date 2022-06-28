@@ -351,8 +351,6 @@ class TrainClassifier:
                 pre_trained=use_pre_trained_normalization,
                 img_size=self.cfg.dataset.img_size,
             )
-        print(self.cfg)
-        print(f"{self.cfg.dataset} num cls = {num_cls}")
 
         trn_batch_size = self.cfg.dataloader.batch_size
         val_batch_size = self.cfg.dataloader.batch_size
@@ -772,9 +770,6 @@ class TrainClassifier:
                 if ("trn_loss" in print_args) or ("trn_acc" in print_args):
                     samples = 0
                     with torch.no_grad():
-                        print(trainloader)
-                        print(len(trainloader))
-                        print(trainloader.dataset)
                         for _, data in enumerate(trainloader):
                             if is_selcon:
                                 inputs, targets, _ = data

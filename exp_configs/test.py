@@ -4,9 +4,9 @@ config = dict(
     measure_energy=False,
     wandb=True,
     is_reg=False,
-    dataset=dict(name="cifar10", datadir="../data", feature="dss", type="image"),
+    dataset=dict(name="cub200", datadir="../data", feature="dss", type="image"),
     dataloader=dict(shuffle=True, batch_size=20, pin_memory=True),
-    model=dict(architecture="ResNet18", type="pre-defined", fine_tune=False),
+    model=dict(architecture="EfficientNet", type="pre-trained", fine_tune=False),
     ckpt=dict(is_load=False, is_save=False, dir="results/", save_every=20),
     loss=dict(type="CrossEntropyLoss", use_sigmoid=False),
     optimizer=dict(
@@ -17,7 +17,7 @@ config = dict(
     dss_args=dict(type="Random", fraction=0.001, select_every=1, kappa=0),
     train_args=dict(
         num_epochs=4,
-        device="cpu",
+        device="cuda",
         print_every=1,
         results_dir="../results/",
         print_args=[
