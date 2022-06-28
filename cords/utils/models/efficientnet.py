@@ -184,21 +184,90 @@ def EfficientNetB0(num_classes=10):
     return EfficientNet(cfg, num_classes)
 
 
-def EfficientNetB0_PyTorch(num_classes=10, pretrained=True, fine_tune=True):
-    # load pretrained weights from the torchvision model
-    model = models.efficientnet_b0(pretrained=pretrained)
-    if fine_tune:
-        for param in model.parameters():
-            param.requires_grad = True
-    elif not fine_tune:
-        for param in model.parameters():
-            param.requires_grad = False
-    # replace the last layer with a new one based on the number of classes
-    model.classifier[1] = nn.Linear(in_features=1280, out_features=num_classes)
-    # make a function on the model that returns the embedding dim
-    model.get_embedding_dim = lambda: 1280
-    model.embDim = 1280
-    return model
+# def EfficientNetB0_PyTorch(num_classes=10, pretrained=True, fine_tune=True):
+#     # load pretrained weights from the torchvision model
+#     model = models.efficientnet_b0(pretrained=pretrained)
+#     if fine_tune:
+#         for param in model.parameters():
+#             param.requires_grad = True
+#     elif not fine_tune:
+#         for param in model.parameters():
+#             param.requires_grad = False
+#     # replace the last layer with a new one based on the number of classes
+#     model.classifier[1] = nn.Linear(in_features=1280, out_features=num_classes)
+#     # make a function on the model that returns the embedding dim
+#     model.get_embedding_dim = lambda: 1280
+#     model.embDim = 1280
+
+#     # print percentage of trainable parameters depending on the fine_tune flag
+#     print(
+#         "EfficientNetB0_PyTorch: {}% of {} trainable parameters".format(
+#             int(
+#                 sum(p.numel() for p in model.parameters() if p.requires_grad)
+#                 * 100
+#                 / sum(p.numel() for p in model.parameters())
+#             ),
+#             sum(p.numel() for p in model.parameters()),
+#         )
+#     )
+
+#     # Redefine the forward() method to def forward(self, x, last=False, freeze=False):
+#     model.forward = types.MethodType(forward, model)
+
+#     return model
+
+
+class EfficientNetB0_PyTorch(nn.Module):
+    def __init__(self, num_classes=10, pretrained=True, fine_tune=True):
+        super(EfficientNetB0_PyTorch, self).__init__()
+        # load pretrained weights from the torchvision model
+        self.model = models.efficientnet_b0(pretrained=pretrained)
+        if fine_tune:
+            for param in self.model.parameters():
+                param.requires_grad = True
+        elif not fine_tune:
+            for param in self.model.parameters():
+                param.requires_grad = False
+        # replace the last layer with a new one based on the number of classes
+        self.model.classifier[1] = nn.Linear(in_features=1280, out_features=num_classes)
+        self.embDim = 1280
+
+        # print percentage of trainable parameters depending on the fine_tune flag
+        print(
+            "EfficientNetB0_PyTorch: {}% of {} trainable parameters".format(
+                int(
+                    sum(p.numel() for p in self.model.parameters() if p.requires_grad)
+                    * 100
+                    / sum(p.numel() for p in self.model.parameters())
+                ),
+                sum(p.numel() for p in self.model.parameters()),
+            )
+        )
+
+    def get_embedding_dim(self):
+        return self.embDim
+
+    def forward(self, x, last=False, freeze=False):
+        if freeze:
+            with torch.no_grad():
+                out = self.model.features(x)
+                out = F.adaptive_avg_pool2d(out, 1)
+                e = out.view(out.size(0), -1)
+                dropout_rate = self.model.classifier[0].p
+                if self.training and dropout_rate > 0:
+                    e = F.dropout(e, p=dropout_rate)
+        else:
+            out = self.model.features(x)
+            out = F.adaptive_avg_pool2d(out, 1)
+            e = out.view(out.size(0), -1)
+            dropout_rate = self.model.classifier[0].p
+            if self.training and dropout_rate > 0:
+                e = F.dropout(e, p=dropout_rate)
+        out = self.model.classifier(e)
+        if last:
+            return out, e
+        else:
+            return out
 
 
 def test():
