@@ -225,7 +225,7 @@ class EfficientNetB0_PyTorch(nn.Module):
         if fine_tune:
             for param in self.model.parameters():
                 param.requires_grad = True
-        elif not fine_tune:
+        else:
             for param in self.model.parameters():
                 param.requires_grad = False
         # replace the last layer with a new one based on the number of classes

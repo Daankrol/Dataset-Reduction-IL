@@ -55,3 +55,7 @@
 # python3 run_experiment.py --config ./exp_configs/cub200/config_full.py --pretrained --finetune --lr 0.005 --early_stopping # ok
 # python3 run_experiment.py --config ./exp_configs/cub200/config_random.py --pretrained --finetune --lr 0.001 # ok
 # python3 run_experiment.py --config ./exp_configs/cub200/config_random.py --pretrained --finetune --lr 0.0001 # ok
+python3 run_experiment.py --config ./exp_configs/cub200/config_uncertainty.py --pretrained --finetune --fraction 0.1 --select_every 20
+python3 run_experiment.py --config ./exp_configs/cub200/config_uncertainty.py --pretrained --finetune --fraction 0.2 --select_every 20
+python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --pretrained --finetune --fraction 0.2 --select_every 10
+python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --pretrained --finetune --fraction 0.2 --select_every 20

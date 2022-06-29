@@ -94,7 +94,7 @@ class TrainClassifier:
                 name += f"_{str(self.cfg.dss_args.select_every)}"
             if self.cfg.model.type == "pre-trained":
                 name += "_PT"
-            if self.cfg.finetune:
+            if self.cfg.model.fine_tune != DotMap() and self.cfg.model.fine_tune:
                 name += "_FT"
             if self.cfg.early_stopping:
                 name += "_ES"
@@ -162,7 +162,7 @@ class TrainClassifier:
         if self.cfg.model.architecture == "EfficientNet":
             if self.cfg.model.type == "pre-trained":
                 fine_tune = False
-                if self.cfg.model.fine_tune:
+                if self.cfg.model.fine_tune != DotMap() and self.cfg.model.fine_tune:
                     fine_tune = True
 
                 model = EfficientNetB0_PyTorch(
