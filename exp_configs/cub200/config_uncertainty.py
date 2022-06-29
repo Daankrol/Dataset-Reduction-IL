@@ -17,6 +17,7 @@ config = dict(
         type="Uncertainty",
         fraction=0.1,
         select_every=10,
+        selection_type='LeastConfidence',
         kappa=0
     ),
     train_args=dict(

@@ -59,4 +59,4 @@
 # python3 run_experiment.py --config ./exp_configs/cub200/config_uncertainty.py --pretrained --finetune --fraction 0.2 --select_every 20 # ok
 # python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --pretrained --finetune --fraction 0.2 --select_every 10 # ok
 # python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --pretrained --finetune --fraction 0.2 --select_every 20 # ok
-python3 run_experiment.py --config ./exp_configs/config_gradmatchpb-warm.py --pretrained --finetune --select_every 10 --fraction 0.2 --kappa 0.05
+# python3 run_experiment.py --config ./exp_configs/config_gradmatchpb-warm.py --pretrained --finetune --select_every 10 --fraction 0.2 --kappa 0.05 # ok

@@ -14,7 +14,8 @@ class UncertaintyStrategy(DataSelectionStrategy):
         linear_layer,
         loss,
         device,
-        logger,
+        selection_type,
+        logger
     ):
         super().__init__(
             trainloader,
@@ -30,12 +31,31 @@ class UncertaintyStrategy(DataSelectionStrategy):
         self.valloader = valloader
         self.model = model
         self.N_trn = len(trainloader.sampler.data_source)
+        self.selection_type = selection_type
 
     def select(self, budget, model_params):
         start_time = time.time()
         self.model.load_state_dict(model_params)
-        self.logger.info("Started uncertainty selection")
+        self.logger.info(f"Started {self.selection_type} uncertainty selection")
         self.logger.info("Budget: {0:d}".format(budget))
+        
+        if self.selection_type == 'LeastConfidence':
+            idx, gamma = self.leastConfidenceSelection(budget)
+        elif self.selection_type == 'MarginOfConfidence':
+            idx, gamma = self.marginOfConfidenceSelection(budget)
+        elif self.selection_type == 'Entropy':
+            idx, gamma = self.entropySelection(budget)
+        
+
+        end_time = time.time()
+        self.logger.info(
+            "Uncertainty algorithm Subset Selection time is: {0:.4f}".format(
+                end_time - start_time
+            )
+        )
+        return idx, gamma
+        
+    def leastConfidenceSelection(self, budget):
         idxs = []
         uncertainties = []
         with torch.no_grad():
@@ -69,10 +89,10 @@ class UncertaintyStrategy(DataSelectionStrategy):
 
         idxs = idxs[:budget]
         gammas = torch.ones(len(idxs))
-        end_time = time.time()
-        self.logger.info(
-            "Uncertainty algorithm Subset Selection time is: {0:.4f}".format(
-                end_time - start_time
-            )
-        )
         return idxs, gammas
+
+    def marginOfConfidenceSelection(self, budget):
+        pass
+
+    def entropySelection(self, budget):
+        pass

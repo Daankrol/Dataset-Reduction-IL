@@ -26,14 +26,15 @@ class UncertaintyDataLoader(AdaptiveDSSDataLoader):
         assert (
             "model" in dss_args.keys()
         ), "'model' is a compulsory argument for UncertaintySampling. Please provide the model to be used for uncertainty sampling."
-
+        assert "selection_type" in dss_args.keys(), "'selection_type' is a compulsory argument for Uncertainty. Include it as a key in dss_args"
+        assert dss_args.selection_type in ['LeastConfidence', 'MarginOfConfidence', 'Entropy']
         super(UncertaintyDataLoader, self).__init__(
             train_loader, val_loader, dss_args, logger, *args, **kwargs
         )
         self.train_model = dss_args.model
         self.strategy = UncertaintyStrategy(
             train_loader, val_loader, copy.deepcopy(dss_args.model),
-            dss_args.num_classes, dss_args.linear_layer, dss_args.loss, dss_args.device, logger)
+            dss_args.num_classes, dss_args.linear_layer, dss_args.loss, dss_args.device, dss_args.selection_type, logger)
 
         self.logger.debug("Uncertainty dataloader initialized.")
 
