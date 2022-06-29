@@ -19,7 +19,7 @@ class UncertaintyDataLoader(AdaptiveDSSDataLoader):
         Logger for logging the information
     """
 
-    def __init__(self, train_loader, dss_args, logger, *args, **kwargs):
+    def __init__(self, train_loader, valloader, dss_args, logger, *args, **kwargs):
         """
         Constructor function
         """
@@ -44,11 +44,12 @@ class UncertaintyDataLoader(AdaptiveDSSDataLoader):
         self.logger.debug(
             "Epoch: {0:d}, requires subset selection. ".format(self.cur_epoch)
         )
-        self.logger.debug("Random budget: %d", self.budget)
-        subset_indices, subset_weights = self.strategy.select(self.budget)
+        self.logger.debug("Uncertainty budget: %d", self.budget)
+        clone_dict = copy.deepcopy(self.train_model.state_dict())
+        subset_indices, subset_weights = self.strategy.select(self.budget, clone_dict)
         end = time.time()
         self.logger.info(
-            "Epoch: {0:d}, Random subset selection finished, takes {1:.4f}. ".format(
+            "Epoch: {0:d}, Uncertainty subset selection finished, takes {1:.4f}. ".format(
                 self.cur_epoch, (end - start)
             )
         )

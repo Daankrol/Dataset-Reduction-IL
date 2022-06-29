@@ -68,7 +68,7 @@ class UncertaintyStrategy(DataSelectionStrategy):
         # return the indices of the selected samples
 
         idxs = idxs[:budget]
-        gammas = torch.ones(idxs)
+        gammas = torch.ones(len(idxs))
         end_time = time.time()
         self.logger.info(
             "Uncertainty algorithm Subset Selection time is: {0:.4f}".format(
