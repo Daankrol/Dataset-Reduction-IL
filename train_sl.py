@@ -20,7 +20,9 @@ from cords.utils.data.dataloader.SL.adaptive import (
     GradMatchDataLoader,
     RandomDataLoader,
     SELCONDataLoader,
+    UncertaintyDataLoader
 )
+
 from cords.utils.data.dataloader.SL.nonadaptive import FacLocDataLoader
 from cords.utils.data.datasets.SL import gen_dataset
 from cords.utils.models import *
@@ -661,7 +663,10 @@ class TrainClassifier:
             ############################## Uncertainty Dataloader Additional Arguments ##############################
             """
             self.cfg.dss_args.model = model
-            dataloader = UncertaintyDataLoader(trainset, self.cfg.dss_args, logger)
+            self.cfg.dss_args.device = self.cfg.train_args.device
+            dataloader = UncertaintyDataLoader(trainloader, valloader, self.cfg.dss_args, logger)
+
+
 
         else:
             raise NotImplementedError

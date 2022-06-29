@@ -1,3 +1,9 @@
+from .dataselectionstrategy import DataSelectionStrategy
+import time
+import torch
+import torch.nn.functional as F
+import numpy as np
+
 class UncertaintyStrategy(DataSelectionStrategy):
     def __init__(
         self,
@@ -28,7 +34,6 @@ class UncertaintyStrategy(DataSelectionStrategy):
         self.logger.info("Budget: {0:d}".format(budget))
         idxs = []
         uncertainties = []
-        gammas = []
         # Compute the uncertainty of the model on all training data
         with torch.no_grad():
             for i, (x, y) in enumerate(self.trainloader):
@@ -40,6 +45,8 @@ class UncertaintyStrategy(DataSelectionStrategy):
                 # difference between maximal confidence (1) and confidence of the actual label
                 # gamma is for the max class but we want it for the actual class so we need to take the index of the max
                 # and then use the index of the actual class
+
+                # need to take the
                 uncertainty = 1 - out[:, y].item()
                 idxs.append(i)
                 uncertainties.append(uncertainty)
@@ -60,4 +67,4 @@ class UncertaintyStrategy(DataSelectionStrategy):
                 end_time - start_time
             )
         )
-        return selected_idxs, gammas
+        return idxs, gammas

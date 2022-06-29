@@ -7,3 +7,4 @@ from .gradmatchstrategy import GradMatchStrategy
 from .fixedweightstrategy import FixedWeightStrategy
 from .selconstrategy import SELCONstrategy
 from .adapweightsstrategy import AdapWeightsStrategy
+from .uncertaintystrategy import UncertaintyStrategy

@@ -1,5 +1,7 @@
+import copy
+
 from .adaptivedataloader import AdaptiveDSSDataLoader
-from cords.selectionstrategies.SL import RandomStrategy
+from cords.selectionstrategies.SL import UncertaintyStrategy
 import time
 
 
@@ -25,13 +27,14 @@ class UncertaintyDataLoader(AdaptiveDSSDataLoader):
             "model" in dss_args.keys()
         ), "'model' is a compulsory argument for UncertaintySampling. Please provide the model to be used for uncertainty sampling."
 
-        super(RandomDataLoader, self).__init__(
+        super(UncertaintyDataLoader, self).__init__(
             train_loader, train_loader, dss_args, logger, *args, **kwargs
         )
-        self.strategy = UncertaintyStrategy(train_loader, online=False)
+        self.train_model = dss_args.model
+        self.strategy = UncertaintyStrategy(train_loader, train_loader, copy.deepcopy(dss_args.model), dss_args.num_classes, dss_args.linear_layer,
+                                            dss_args.loss, dss_args.device, logger)
 
-        UncertaintyStrategy(train_loader, online=False)
-        self.logger.debug("Random dataloader initialized.")
+        self.logger.debug("Uncertainty dataloader initialized.")
 
     def _resample_subset_indices(self):
         """

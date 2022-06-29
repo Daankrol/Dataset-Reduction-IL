@@ -127,9 +127,9 @@ if args.model is not None:
 
 if args.pretrained:
     cfg.model.type = 'pre-trained'
-else:
-    cfg.model.type = 'pre-defined'
-cfg.model.fine_tune = args.finetune
+
+if args.finetune:
+    cfg.model.fine_tune = args.finetune
 
 if args.fraction is not None:
     cfg.dss_args.fraction = args.fraction
