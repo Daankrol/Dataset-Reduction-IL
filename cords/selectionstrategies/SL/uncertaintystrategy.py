@@ -20,6 +20,10 @@ class UncertaintyStrategy(DataSelectionStrategy):
             device,
             logger,
         )
+        self.trainloader = trainloader
+        self.valloader = valloader
+        self.model = model
+        self.N_trn = len(trainloader.sampler.data_source)
 
     def select(self, budget, model_params):
         start_time = time.time()
@@ -29,29 +33,39 @@ class UncertaintyStrategy(DataSelectionStrategy):
         idxs = []
         uncertainties = []
         gammas = []
-        # Compute the uncertainty of the model on all training data
+        # Compute the uncertainty of the model on all training data samples. The data is batched so we have to unbatch it
+        # rank all data decreasingly by uncertainty
+        # select the first budget data
+        # return the selected data indices
         with torch.no_grad():
-            for i, (x, y) in enumerate(self.trainloader):
-                x = x.to(self.device)
-                y = y.to(self.device)
-                out = self.model(x)
+            for i, (inputs, targets) in enumerate(self.trainloader):
+                inputs = inputs.to(self.device)
+                targets = targets.to(self.device)
+                out = self.model(inputs)
                 # turn this into probability
                 out = F.softmax(out, dim=1)
-                # difference between maximal confidence (1) and confidence of the actual label
-                # gamma is for the max class but we want it for the actual class so we need to take the index of the max
-                # and then use the index of the actual class
-                uncertainty = 1 - out[:, y].item()
-                idxs.append(i)
-                uncertainties.append(uncertainty)
+                # out is of shape (batch_size, num_classes)
+                # get the probability for the target classess for each sample in the batch
+                # this is of shape (batch_size)
+                probs = out[range(out.shape[0]), targets]
+                # compute the uncertainty of the model on each sample in the batch
+                # this is of shape (batch_size)
+                uncertainty = 1 - probs
+                # extend the uncertainty vector with the uncertainties of the batch
+                uncertainties.extend(uncertainty.cpu().numpy())
+
+                # add the idx of each sample with respect to the full dataset to the list of idxs
+                idxs.extend(i * np.arange(0, uncertainty.shape[0]))
 
         # sort the idxs by descending uncertainty
         idxs = np.array(idxs)
         uncertainties = np.array(uncertainties)
-        idxs = idxs[uncertainties.argsort()[::-1]]
-        uncertainties = uncertainties[uncertainties.argsort()[::-1]]
+        idxs = idxs[np.argsort(uncertainties)[::-1]]
+        uncertainties = uncertainties[np.argsort(uncertainties)[::-1]]
 
         # select the top k samples where k == budget
         # return the indices of the selected samples
+
         idxs = idxs[:budget]
         gammas = torch.ones(idxs)
         end_time = time.time()
@@ -60,4 +74,5 @@ class UncertaintyStrategy(DataSelectionStrategy):
                 end_time - start_time
             )
         )
-        return selected_idxs, gammas
+
+        return idxs, gammas
