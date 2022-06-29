@@ -664,6 +664,7 @@ class TrainClassifier:
             """
             self.cfg.dss_args.model = model
             self.cfg.dss_args.device = self.cfg.train_args.device
+            self.cfg.dss_args.num_epochs = self.cfg.train_args.num_epochs
             dataloader = UncertaintyDataLoader(trainloader, valloader, self.cfg.dss_args, logger)
 
 

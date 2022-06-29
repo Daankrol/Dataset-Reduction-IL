@@ -19,7 +19,7 @@ class UncertaintyDataLoader(AdaptiveDSSDataLoader):
         Logger for logging the information
     """
 
-    def __init__(self, train_loader, valloader, dss_args, logger, *args, **kwargs):
+    def __init__(self, train_loader, val_loader, dss_args, logger, *args, **kwargs):
         """
         Constructor function
         """
@@ -28,11 +28,12 @@ class UncertaintyDataLoader(AdaptiveDSSDataLoader):
         ), "'model' is a compulsory argument for UncertaintySampling. Please provide the model to be used for uncertainty sampling."
 
         super(UncertaintyDataLoader, self).__init__(
-            train_loader, train_loader, dss_args, logger, *args, **kwargs
+            train_loader, val_loader, dss_args, logger, *args, **kwargs
         )
         self.train_model = dss_args.model
-        self.strategy = UncertaintyStrategy(train_loader, train_loader, copy.deepcopy(dss_args.model), dss_args.num_classes, dss_args.linear_layer,
-                                            dss_args.loss, dss_args.device, logger)
+        self.strategy = UncertaintyStrategy(
+            train_loader, val_loader, copy.deepcopy(dss_args.model),
+            dss_args.num_classes, dss_args.linear_layer, dss_args.loss, dss_args.device, logger)
 
         self.logger.debug("Uncertainty dataloader initialized.")
 

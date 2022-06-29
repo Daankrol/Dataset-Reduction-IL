@@ -1,11 +1,11 @@
-from cgi import test
 import numpy as np
 import os
 
-# from cords.utils.data.datasets.SL.custom_dataset_selcon import (
-#     CustomDataset_WithId_SELCON,
-# )
-import torch
+from dotmap import DotMap
+
+from cords.utils.data.datasets.SL.custom_dataset_selcon import (
+    CustomDataset_WithId_SELCON,
+)
 import torchvision
 from sklearn import datasets
 from sklearn.model_selection import train_test_split
@@ -15,17 +15,12 @@ from torchvision import transforms
 import PIL.Image as Image
 import PIL
 from sklearn.datasets import load_boston
-
-# from cords.utils.data.data_utils import *
+from cords.utils.data.data_utils import *
 import re
 import pandas as pd
 import torch
-import torchtext.data
 import pickle
-
-# from cords.utils.data.data_utils import WeightedSubset
-
-from datasets import load_dataset
+from cords.utils.data.data_utils import WeightedSubset
 
 
 class standard_scaling:
@@ -1889,7 +1884,7 @@ def gen_dataset(datadir, dset_name, feature, isnumpy=False, **kwargs):
         if (
             "img_size" in kwargs
             and kwargs["img_size"] != DotMap()
-            and kwargs["img_size"] != None
+            and kwargs["img_size"] is not None
         ):
             img_size = kwargs["img_size"]
         else:
@@ -1924,8 +1919,11 @@ def gen_dataset(datadir, dset_name, feature, isnumpy=False, **kwargs):
             root=datadir, train=True, download=True, transform=cifar_transform
         )
         testset = torchvision.datasets.CIFAR10(
-            root=datadir, train=False, download=True, transform=cifar_tst_transform
+            root=datadir, train=False, download=True, transform=cifar_test_transform
         )
+
+        fullset = torch.utils.data.Subset(fullset, list(range(int(len(fullset) * 0.1))))
+        testset = torch.utils.data.Subset(testset, list(range(int(len(testset) * 0.1))))
 
         if feature == "classimb":
             samples_per_class = torch.zeros(num_cls)
@@ -1983,6 +1981,10 @@ def gen_dataset(datadir, dset_name, feature, isnumpy=False, **kwargs):
         num_val = int(num_fulltrn * validation_set_fraction)
         num_trn = num_fulltrn - num_val
         trainset, valset = random_split(fullset, [num_trn, num_val])
+
+        # for dset in [trainset, valset, testset]:
+        #     dset.data = dset.data[: int(len(dset.data) * 0.1)]
+        #     dset.targets = dset.targets[: int(len(dset.targets) * 0.1)]
 
         return trainset, valset, testset, num_cls
 
