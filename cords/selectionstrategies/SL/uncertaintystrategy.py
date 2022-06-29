@@ -66,7 +66,7 @@ class UncertaintyStrategy(DataSelectionStrategy):
                 out = F.softmax(out, dim=1)
                 #   least confidence: difference between the most confident and 100% confidence
                 max_prob = torch.max(out, dim=1)[0]
-                confidences.extend(uncertainty.cpu().numpy())
+                confidences.extend(max_prob.cpu().numpy())
                 idxs.extend(i * np.arange(0, max_prob.shape[0]))
 
         # sort the idxs by ascending confidence
