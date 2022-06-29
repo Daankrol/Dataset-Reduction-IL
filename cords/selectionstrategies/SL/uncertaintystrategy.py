@@ -4,6 +4,7 @@ import torch
 import torch.nn.functional as F
 import numpy as np
 
+
 class UncertaintyStrategy(DataSelectionStrategy):
     def __init__(
         self,
@@ -15,7 +16,7 @@ class UncertaintyStrategy(DataSelectionStrategy):
         loss,
         device,
         selection_type,
-        logger
+        logger,
     ):
         super().__init__(
             trainloader,
@@ -38,14 +39,13 @@ class UncertaintyStrategy(DataSelectionStrategy):
         self.model.load_state_dict(model_params)
         self.logger.info(f"Started {self.selection_type} uncertainty selection")
         self.logger.info("Budget: {0:d}".format(budget))
-        
-        if self.selection_type == 'LeastConfidence':
+
+        if self.selection_type == "LeastConfidence":
             idx, gamma = self.leastConfidenceSelection(budget)
-        elif self.selection_type == 'MarginOfConfidence':
+        elif self.selection_type == "MarginOfConfidence":
             idx, gamma = self.marginOfConfidenceSelection(budget)
-        elif self.selection_type == 'Entropy':
+        elif self.selection_type == "Entropy":
             idx, gamma = self.entropySelection(budget)
-        
 
         end_time = time.time()
         self.logger.info(
@@ -54,45 +54,77 @@ class UncertaintyStrategy(DataSelectionStrategy):
             )
         )
         return idx, gamma
-        
+
     def leastConfidenceSelection(self, budget):
         idxs = []
-        uncertainties = []
+        confidences = []
         with torch.no_grad():
             for i, (inputs, targets) in enumerate(self.trainloader):
                 inputs = inputs.to(self.device)
                 targets = targets.to(self.device)
                 out = self.model(inputs)
-                # turn this into probability
                 out = F.softmax(out, dim=1)
+                #   least confidence: difference between the most confident and 100% confidence
+                max_prob = torch.max(out, dim=1)[0]
+                confidences.extend(uncertainty.cpu().numpy())
+                idxs.extend(i * np.arange(0, max_prob.shape[0]))
 
-                # out is of shape (batch_size, num_classes)
-                # get the probability for the target classess for each sample in the batch
-                # this is of shape (batch_size)
-                probs = out[range(out.shape[0]), targets]
-                # compute the uncertainty of the model on each sample in the batch
-                # this is of shape (batch_size)
-                uncertainty = 1 - probs
-                # extend the uncertainty vector with the uncertainties of the batch
-                uncertainties.extend(uncertainty.cpu().numpy())
-                # add the idx of each sample with respect to the full dataset to the list of idxs
-                idxs.extend(i * np.arange(0, uncertainty.shape[0]))
-
-        # sort the idxs by descending uncertainty
+        # sort the idxs by ascending confidence
         idxs = np.array(idxs)
-        uncertainties = np.array(uncertainties)
-        idxs = idxs[np.argsort(uncertainties)[::-1]]
-        uncertainties = uncertainties[np.argsort(uncertainties)[::-1]]
-
-        # select the top k samples where k == budget
-        # return the indices of the selected samples
+        confidences = np.array(confidences)
+        idxs = idxs[np.argsort(confidences)]
+        confidences = confidences[np.argsort(confidences)]
 
         idxs = idxs[:budget]
         gammas = torch.ones(len(idxs))
         return idxs, gammas
 
     def marginOfConfidenceSelection(self, budget):
-        pass
+        # Margin of confidence is defined by the difference between the top two confidence values
+        idxs = []
+        margins = []
+        with torch.no_grad():
+            for i, (inputs, targets) in enumerate(self.trainloader):
+                inputs = inputs.to(self.device)
+                targets = targets.to(self.device)
+                out = self.model(inputs)
+                out = F.softmax(out, dim=1)
+                # margin: difference between the top 2 most confident
+                top2 = torch.topk(out, 2, dim=1)[0]
+                margin = top2[:, 1] - top2[:, 0]
+                margins.extend(margin.cpu().numpy())
+                idxs.extend(i * np.arange(0, margin.shape[0]))
+
+        # sort the idxs by ascending margin
+        idxs = np.array(idxs)
+        margins = np.array(margins)
+        idxs = idxs[np.argsort(margins)]
+        margins = margins[np.argsort(margins)]
+
+        idxs = idxs[:budget]
+        gammas = torch.ones(len(idxs))
+        return idxs, gammas
 
     def entropySelection(self, budget):
-        pass
+        idxs = []
+        entropies = []
+        with torch.no_grad():
+            for i, (inputs, targets) in enumerate(self.trainloader):
+                inputs = inputs.to(self.device)
+                targets = targets.to(self.device)
+                out = self.model(inputs)
+                out = F.softmax(out, dim=1)
+                # entropy:
+                entropy = -torch.sum(out * torch.log(out), dim=1)
+                entropies.extend(entropy.cpu().numpy())
+                idxs.extend(i * np.arange(0, entropy.shape[0]))
+
+        # sort the idxs by ascending entropy
+        idxs = np.array(idxs)
+        entropies = np.array(entropies)
+        idxs = idxs[np.argsort(entropies)]
+        entropies = entropies[np.argsort(entropies)]
+
+        idxs = idxs[:budget]
+        gammas = torch.ones(len(idxs))
+        return idxs, gammas

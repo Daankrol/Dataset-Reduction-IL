@@ -1922,8 +1922,8 @@ def gen_dataset(datadir, dset_name, feature, isnumpy=False, **kwargs):
             root=datadir, train=False, download=True, transform=cifar_test_transform
         )
 
-        fullset = torch.utils.data.Subset(fullset, list(range(int(len(fullset) * 0.1))))
-        testset = torch.utils.data.Subset(testset, list(range(int(len(testset) * 0.1))))
+        # fullset = torch.utils.data.Subset(fullset, list(range(int(len(fullset) * 0.1))))
+        # testset = torch.utils.data.Subset(testset, list(range(int(len(testset) * 0.1))))
 
         if feature == "classimb":
             samples_per_class = torch.zeros(num_cls)
