@@ -112,7 +112,7 @@ class TrainClassifier:
                     "dataset": self.cfg.dataset.name,
                     "dss_type": self.cfg.dss_args.type,
                     "fraction": self.cfg.dss_args.fraction,
-                    # "selection_type": self.cfg.dss_args.selection_type,
+                    "selection_type": self.cfg.dss_args.selection_type,
                     "class_imbalance_training": self.cfg.dss_args.valid,
                     "select_every": self.cfg.dss_args.select_every,
                     "setting": self.cfg.setting,

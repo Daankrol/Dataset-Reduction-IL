@@ -109,6 +109,11 @@ parser.add_argument(
     action='store_true',
     help="do finetuning of all layers."
 )
+parser.add_argument(
+    "--selection_type",
+    type=str,
+    help="Selection type for DSS strategy"
+)
 
 args = parser.parse_args()
 if args.config is None:
@@ -124,7 +129,8 @@ if args.lr is not None:
     cfg.optimizer.lr = args.lr
 if args.model is not None:
     cfg.model.architecture = args.model
-
+if args.selection_type is not None:
+    cfg.dss_args.selection_type = args.selection_type
 if args.pretrained:
     cfg.model.type = 'pre-trained'
 
