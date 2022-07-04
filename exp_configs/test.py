@@ -14,10 +14,8 @@ config = dict(
     ),
     scheduler=dict(type="cosine_annealing", T_max=300),
     # early_stopping=True,
-    dss_args=dict(type="Uncertainty", fraction=0.01, select_every=5, kappa=0,
-                  # selection_type='LeastConfidence',
-                  #   selection_type='MarginOfConfidence',
-                    selection_type='Entropy',
+    dss_args=dict(type="FacLoc", fraction=0.01, select_every=1, kappa=0,
+                  size_chunk=450
                   ),
     # results in: 2 warm up epochs, resample, 3-4-5-6-7, resample, 8-9-10
     train_args=dict(

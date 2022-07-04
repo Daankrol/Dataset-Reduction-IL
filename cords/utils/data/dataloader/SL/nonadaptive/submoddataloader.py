@@ -29,7 +29,7 @@ class SubmodDataLoader(NonAdaptiveDSSDataLoader):
         Constructor function
         """
         # Arguments assertion
-        assert "size_chunk" in dss_args.keys(), "'size_chunk' is a compulsory agument for submodular dataloader"
+        # assert "size_chunk" in dss_args.keys(), "'size_chunk' is a compulsory agument for submodular dataloader"
         self.size_chunk = dss_args.size_chunk
         self.dss_args = dss_args
         super(SubmodDataLoader, self).__init__(train_loader, val_loader, dss_args,
@@ -62,16 +62,23 @@ class SubmodDataLoader(NonAdaptiveDSSDataLoader):
                     X_b = X_b.reshape(X_b.shape[0], -1)
                 X = torch.cat((X, X_b), dim=0)
         m = X.shape[0]
+        # print(m)
+        # exit()
         X = X.to(device='cpu').numpy()
         # Chunking dataset to calculate pairwise distance with limited memory
         sample_indices = []
         size_chunk, budget = self.size_chunk, self.budget
         n_chunks = math.ceil(m / self.size_chunk)
         budget_chunk = math.ceil(budget / n_chunks)
+
+        print(m, size_chunk, budget, n_chunks, budget_chunk)
         for i_chunk in range(n_chunks):
             l_idx = i_chunk * size_chunk
             r_idx = min(m, (i_chunk + 1) * size_chunk)
             n_samples = min(budget_chunk, budget - len(sample_indices))
+            print(i_chunk, ": ", n_samples)
+            if n_samples == 0:
+                break
             chunk = X[l_idx: r_idx, :]
             _sample_indices = self._chunk_select(chunk, n_samples)
             _sample_indices = [_sample_indice + l_idx for _sample_indice in _sample_indices]

@@ -582,9 +582,6 @@ class TrainClassifier:
             """
             ############################## Facility Location Dataloader Additional Arguments ##############################
             """
-            wt_trainset = WeightedSubset(
-                trainset, list(range(len(trainset))), [1] * len(trainset)
-            )
             self.cfg.dss_args.device = self.cfg.train_args.device
             self.cfg.dss_args.model = model
             self.cfg.dss_args.data_type = self.cfg.dataset.type

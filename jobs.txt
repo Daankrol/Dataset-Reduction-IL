@@ -60,5 +60,10 @@
 # python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --pretrained --finetune --fraction 0.2 --select_every 10 # ok
 # python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --pretrained --finetune --fraction 0.2 --select_every 20 # ok
 # python3 run_experiment.py --config ./exp_configs/config_gradmatchpb-warm.py --pretrained --finetune --select_every 10 --fraction 0.2 --kappa 0.05 # ok
-python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb-warm.py --pretrained --finetune --select_every 10 --fraction 0.2 --kappa 0.05
-python3 run_experiment.py --config ./exp_configs/cub200/config_uncertainty.py --pretrained --finetune --select_every 10 --fraction 0.2
+# python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb-warm.py --pretrained --finetune --select_every 10 --fraction 0.2 --kappa 0.05 # ok
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_uncertainty.py --pretrained --finetune --select_every 10 --fraction 0.2 --selection_type LeastConfidence # ok
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_uncertainty.py --pretrained --finetune --select_every 10 --fraction 0.2 --selection_type MarginOfConfidence # ok
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_uncertainty.py --pretrained --finetune --select_every 10 --fraction 0.2 --selection_type Entropy # ok
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_craig-warmpb.py --select_every 10 --fraction 0.1  --kappa 0.05 # ok
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatchpb-warm.py --select_every 10 --fraction 0.1  --kappa 0.05 # ok
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatch.py --select_every 10 --fraction 0.1  --kappa 0.05 # ok
