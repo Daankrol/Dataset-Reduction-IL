@@ -25,3 +25,4 @@ pyJoules
 wandb
 pynvml
 torchmetrics
+seaborn

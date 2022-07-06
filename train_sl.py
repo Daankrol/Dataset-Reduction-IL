@@ -34,8 +34,8 @@ from pyJoules.device.nvidia_device import NvidiaGPUDomain
 from pyJoules.handler.print_handler import PrintHandler
 from pyJoules.device.device_factory import DeviceFactory
 import torchmetrics
-
 from cords.utils.utils import EarlyStopping
+from cords.utils.tSNE_plotter import TSNEPlotter
 
 
 class TrainClassifier:
@@ -680,8 +680,17 @@ class TrainClassifier:
         else:
             is_selcon = False
 
-        self.report_energy()
-
+        """
+        ############################## tSNE embeddings ##############################
+        """
+        # create embeddings for the train set
+        self.tsne_plotter = TSNEPlotter(
+            trainloader,
+            valloader,
+            testloader,
+            None,
+            self.cfg.train_args.device,
+        )
         """
         ################################################# Checkpoint Loading #################################################
         """
@@ -719,6 +728,8 @@ class TrainClassifier:
         ################################################# Training Loop #################################################
         """
 
+        self.report_energy()
+
         for epoch in range(start_epoch, self.cfg.train_args.num_epochs):
             self.start_energy_measurement(tag="training")
             subtrn_loss = 0
@@ -727,6 +738,13 @@ class TrainClassifier:
             model.train()
             start_time = time.time()
             cum_weights = 0
+
+            # construct t-SNE plots if data has been resampled
+            if dataloader.resampled:
+                self.tsne_plotter.plot_tsne(
+                    epoch, select_indices=dataloader.subset_indices
+                )
+
             for _, data in enumerate(dataloader):
                 if is_selcon:
                     (
@@ -840,7 +858,7 @@ class TrainClassifier:
                             "trn_confusion_matrix": wandb.plot.confusion_matrix(
                                 probs=outputs.cpu().numpy(),
                                 y_true=targets.cpu().numpy(),
-                                title="trn_conf_mat"
+                                title="trn_conf_mat",
                             )
                         },
                         step=epoch,
@@ -907,7 +925,7 @@ class TrainClassifier:
                             "val_confusion_matrix": wandb.plot.confusion_matrix(
                                 probs=outputs.cpu().numpy(),
                                 y_true=targets.cpu().numpy(),
-                                title="val_conf_mat"
+                                title="val_conf_mat",
                             )
                         },
                         step=epoch,
@@ -967,7 +985,7 @@ class TrainClassifier:
                             "tst_confusion_matrix": wandb.plot.confusion_matrix(
                                 probs=outputs.cpu().numpy(),
                                 y_true=targets.cpu().numpy(),
-                                title="tst_conf_mat"
+                                title="tst_conf_mat",
                             )
                         },
                         step=epoch,
