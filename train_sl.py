@@ -838,8 +838,9 @@ class TrainClassifier:
                     wandb.log(
                         {
                             "trn_confusion_matrix": wandb.plot.confusion_matrix(
-                                probs=outputs,
+                                probs=outputs.cpu().numpy(),
                                 y_true=targets.cpu().numpy(),
+                                title="trn_conf_mat"
                             )
                         },
                         step=epoch,
@@ -904,8 +905,9 @@ class TrainClassifier:
                     wandb.log(
                         {
                             "val_confusion_matrix": wandb.plot.confusion_matrix(
-                                probs=outputs,
+                                probs=outputs.cpu().numpy(),
                                 y_true=targets.cpu().numpy(),
+                                title="val_conf_mat"
                             )
                         },
                         step=epoch,
@@ -963,8 +965,9 @@ class TrainClassifier:
                     wandb.log(
                         {
                             "tst_confusion_matrix": wandb.plot.confusion_matrix(
-                                preds=predicted.cpu().numpy(),
+                                probs=outputs.cpu().numpy(),
                                 y_true=targets.cpu().numpy(),
+                                title="tst_conf_mat"
                             )
                         },
                         step=epoch,
