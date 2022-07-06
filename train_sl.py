@@ -841,7 +841,8 @@ class TrainClassifier:
                                 probs=outputs,
                                 y_true=targets.cpu().numpy(),
                             )
-                        }
+                        },
+                        step=epoch,
                     )
 
                 if ("val_loss" in print_args) or ("val_acc" in print_args):
@@ -906,7 +907,8 @@ class TrainClassifier:
                                 probs=outputs,
                                 y_true=targets.cpu().numpy(),
                             )
-                        }
+                        },
+                        step=epoch,
                     )
 
                 if ("tst_loss" in print_args) or ("tst_acc" in print_args):
@@ -964,7 +966,8 @@ class TrainClassifier:
                                 preds=predicted.cpu().numpy(),
                                 y_true=targets.cpu().numpy(),
                             )
-                        }
+                        },
+                        step=epoch,
                     )
 
                 if "subtrn_acc" in print_args:
