@@ -828,7 +828,7 @@ class TrainClassifier:
                     ).to(self.cfg.train_args.device)
                     trn_precision = precision(outputs, targets).item()
                     trn_precisions.append(trn_precision)
-                    f1 = torchmetrics.F1(
+                    f1 = torchmetrics.F1Score(
                         average="macro", num_classes=self.cfg.model.numclasses
                     ).to(self.cfg.train_args.device)
                     trn_f1 = f1(outputs, targets).item()
@@ -883,7 +883,7 @@ class TrainClassifier:
                     ).to(self.cfg.train_args.device)
                     val_precision = precision(outputs, targets).item()
                     val_precisions.append(val_precision)
-                    f1 = torchmetrics.F1(
+                    f1 = torchmetrics.F1Score(
                         average="macro", num_classes=self.cfg.model.numclasses
                     ).to(self.cfg.train_args.device)
                     val_f1 = f1(outputs, targets).item()
@@ -931,7 +931,7 @@ class TrainClassifier:
                     ).to(self.cfg.train_args.device)
                     tst_precision = precision(outputs, targets).item()
                     tst_precisions.append(tst_precision)
-                    f1 = torchmetrics.F1(
+                    f1 = torchmetrics.F1Score(
                         average="macro", num_classes=self.cfg.model.numclasses
                     ).to(self.cfg.train_args.device)
                     tst_f1 = f1(outputs, targets).item()
