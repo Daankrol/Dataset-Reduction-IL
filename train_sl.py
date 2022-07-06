@@ -20,7 +20,7 @@ from cords.utils.data.dataloader.SL.adaptive import (
     GradMatchDataLoader,
     RandomDataLoader,
     SELCONDataLoader,
-    UncertaintyDataLoader
+    UncertaintyDataLoader,
 )
 
 from cords.utils.data.dataloader.SL.nonadaptive import FacLocDataLoader
@@ -424,6 +424,12 @@ class TrainClassifier:
         trn_recalls = list()
         val_recalls = list()
         tst_recalls = list()
+        trn_precisions = list()
+        val_precisions = list()
+        tst_precisions = list()
+        trn_f1s = list()
+        val_f1s = list()
+        tst_f1s = list()
 
         # Checkpoint file
         checkpoint_dir = osp.abspath(osp.expanduser(self.cfg.ckpt.dir))
@@ -662,9 +668,9 @@ class TrainClassifier:
             self.cfg.dss_args.model = model
             self.cfg.dss_args.device = self.cfg.train_args.device
             self.cfg.dss_args.num_epochs = self.cfg.train_args.num_epochs
-            dataloader = UncertaintyDataLoader(trainloader, valloader, self.cfg.dss_args, logger)
-
-
+            dataloader = UncertaintyDataLoader(
+                trainloader, valloader, self.cfg.dss_args, logger
+            )
 
         else:
             raise NotImplementedError
@@ -816,6 +822,18 @@ class TrainClassifier:
                         trn_recall = recall(outputs, targets).item()
                         trn_recalls.append(trn_recall)
 
+                    # calculate precision and f1
+                    precision = torchmetrics.Precision(
+                        average="macro", num_classes=self.cfg.model.numclasses
+                    ).to(self.cfg.train_args.device)
+                    trn_precision = precision(outputs, targets).item()
+                    trn_precisions.append(trn_precision)
+                    f1 = torchmetrics.F1(
+                        average="macro", num_classes=self.cfg.model.numclasses
+                    ).to(self.cfg.train_args.device)
+                    trn_f1 = f1(outputs, targets).item()
+                    trn_f1s.append(trn_f1)
+
                 if ("val_loss" in print_args) or ("val_acc" in print_args):
                     samples = 0
                     with torch.no_grad():
@@ -859,6 +877,18 @@ class TrainClassifier:
                         val_recall = recall(outputs, targets).item()
                         val_recalls.append(val_recall)
 
+                    # calculate precision and f1
+                    precision = torchmetrics.Precision(
+                        average="macro", num_classes=self.cfg.model.numclasses
+                    ).to(self.cfg.train_args.device)
+                    val_precision = precision(outputs, targets).item()
+                    val_precisions.append(val_precision)
+                    f1 = torchmetrics.F1(
+                        average="macro", num_classes=self.cfg.model.numclasses
+                    ).to(self.cfg.train_args.device)
+                    val_f1 = f1(outputs, targets).item()
+                    val_f1s.append(val_f1)
+
                 if ("tst_loss" in print_args) or ("tst_acc" in print_args):
                     samples = 0
                     with torch.no_grad():
@@ -895,6 +925,18 @@ class TrainClassifier:
                         tst_recall = recall(outputs, targets).item()
                         tst_recalls.append(tst_recall)
 
+                    # calculate precision and f1
+                    precision = torchmetrics.Precision(
+                        average="macro", num_classes=self.cfg.model.numclasses
+                    ).to(self.cfg.train_args.device)
+                    tst_precision = precision(outputs, targets).item()
+                    tst_precisions.append(tst_precision)
+                    f1 = torchmetrics.F1(
+                        average="macro", num_classes=self.cfg.model.numclasses
+                    ).to(self.cfg.train_args.device)
+                    tst_f1 = f1(outputs, targets).item()
+                    tst_f1s.append(tst_f1)
+
                 if "subtrn_acc" in print_args:
                     subtrn_acc.append(subtrn_correct / subtrn_total)
 
@@ -920,6 +962,7 @@ class TrainClassifier:
                             " , " + "Validation Recall: " + str(val_recalls[-1])
                         )
                         metrics["val_recall"] = val_recalls[-1]
+
                     if arg == "tst_loss":
                         print_str += " , " + "Test Loss: " + str(tst_losses[-1])
                         metrics["tst_loss"] = tst_losses[-1]
@@ -929,6 +972,9 @@ class TrainClassifier:
                     if arg == "tst_recall":
                         print_str += " , " + "Test Recall: " + str(tst_recalls[-1])
                         metrics["tst_recall"] = tst_recalls[-1]
+
+                    # precision and f1
+                    print_str
                     if arg == "trn_loss":
                         print_str += " , " + "Training Loss: " + str(trn_losses[-1])
                         metrics["trn_loss"] = trn_losses[-1]
@@ -948,6 +994,20 @@ class TrainClassifier:
                         print_str += " , " + "Timing: " + str(timing[-1])
                         metrics["time"] = timing[-1]
                         metrics["cumulative_time"] = total_timing
+
+                # precision and f1
+                print_str += " , " + "Training Precision: " + str(trn_precisions[-1])
+                metrics["trn_precision"] = trn_precisions[-1]
+                print_str += " , " + "Validation Precision: " + str(val_precisions[-1])
+                metrics["val_precision"] = val_precisions[-1]
+                print_str += " , " + "Test Precision: " + str(tst_precisions[-1])
+                metrics["tst_precision"] = tst_precisions[-1]
+                print_str += " , " + "Training F1: " + str(trn_f1s[-1])
+                metrics["trn_f1"] = trn_f1s[-1]
+                print_str += " , " + "Validation F1: " + str(val_f1s[-1])
+                metrics["val_f1"] = val_f1s[-1]
+                print_str += " , " + "Test F1: " + str(tst_f1s[-1])
+                metrics["tst_f1"] = tst_f1s[-1]
 
                 # report metric to ray for hyperparameter optimization
                 if (
@@ -1065,4 +1125,7 @@ class TrainClassifier:
         )
         wandb.run.summary["total_time_taken"] = omp_cum_timing[-1]
         wandb.run.summary["best_test_accuracy"] = max(tst_acc)
+        wandb.run.summary["best_test_f1"] = max(tst_f1s)
+        wandb.run.summary["best_test_precision"] = max(tst_precisions)
+        wandb.run.summary["best_test_recall"] = max(tst_recalls)
         wandb.finish()

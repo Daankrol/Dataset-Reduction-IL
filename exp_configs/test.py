@@ -4,7 +4,9 @@ config = dict(
     measure_energy=False,
     wandb=True,
     is_reg=False,
-    dataset=dict(name="cifar10", datadir="../data", feature="dss", type="image", img_size=32),
+    dataset=dict(
+        name="cifar10", datadir="../data", feature="dss", type="image", img_size=32
+    ),
     dataloader=dict(shuffle=True, batch_size=20, pin_memory=True),
     model=dict(architecture="ResNet18", type="pre-defined"),
     ckpt=dict(is_load=False, is_save=False, dir="results/", save_every=20),
@@ -14,12 +16,14 @@ config = dict(
     ),
     scheduler=dict(type="cosine_annealing", T_max=300),
     # early_stopping=True,
-    dss_args=dict(type="FacLoc", fraction=0.01, select_every=1, kappa=0,
-                  size_chunk=450
-                  ),
-    # results in: 2 warm up epochs, resample, 3-4-5-6-7, resample, 8-9-10
+    dss_args=dict(
+        type="Random",
+        fraction=0.01,
+        select_every=1,
+        kappa=0,
+    ),
     train_args=dict(
-        num_epochs=10,
+        num_epochs=3,
         device="cuda",
         print_every=1,
         results_dir="../results/",
