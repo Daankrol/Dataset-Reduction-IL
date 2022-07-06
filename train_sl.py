@@ -834,6 +834,16 @@ class TrainClassifier:
                     trn_f1 = f1(outputs, targets).item()
                     trn_f1s.append(trn_f1)
 
+                    # confusion matrix
+                    wandb.log(
+                        {
+                            "trn_confusion_matrix": wandb.plot.confusion_matrix(
+                                probs=outputs,
+                                y_true=targets.cpu().numpy(),
+                            )
+                        }
+                    )
+
                 if ("val_loss" in print_args) or ("val_acc" in print_args):
                     samples = 0
                     with torch.no_grad():
@@ -889,6 +899,16 @@ class TrainClassifier:
                     val_f1 = f1(outputs, targets).item()
                     val_f1s.append(val_f1)
 
+                    # confusion matrix
+                    wandb.log(
+                        {
+                            "val_confusion_matrix": wandb.plot.confusion_matrix(
+                                probs=outputs,
+                                y_true=targets.cpu().numpy(),
+                            )
+                        }
+                    )
+
                 if ("tst_loss" in print_args) or ("tst_acc" in print_args):
                     samples = 0
                     with torch.no_grad():
@@ -936,6 +956,16 @@ class TrainClassifier:
                     ).to(self.cfg.train_args.device)
                     tst_f1 = f1(outputs, targets).item()
                     tst_f1s.append(tst_f1)
+
+                    # confusion matrix
+                    wandb.log(
+                        {
+                            "tst_confusion_matrix": wandb.plot.confusion_matrix(
+                                preds=predicted.cpu().numpy(),
+                                y_true=targets.cpu().numpy(),
+                            )
+                        }
+                    )
 
                 if "subtrn_acc" in print_args:
                     subtrn_acc.append(subtrn_correct / subtrn_total)
