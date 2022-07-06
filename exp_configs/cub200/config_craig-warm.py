@@ -2,10 +2,12 @@
 config = dict(
     setting="SL",
     measure_energy=True,
-    logging='DEBUG',
+    logging="DEBUG",
     wandb=True,
     is_reg=False,
-    dataset=dict(name="cub200", datadir="../data", feature="dss", type="image", img_size=224),
+    dataset=dict(
+        name="cub200", datadir="../data", feature="dss", type="image", img_size=224
+    ),
     dataloader=dict(shuffle=True, batch_size=20, pin_memory=True),
     model=dict(architecture="EfficientNet", type="pre-defined"),
     ckpt=dict(is_load=False, is_save=False, dir="results/", save_every=20),
@@ -16,7 +18,7 @@ config = dict(
     scheduler=dict(type="cosine_annealing", T_max=300),
     dss_args=dict(
         type="CRAIG-Warm",
-        fraction=0.1,
+        fraction=0.2,
         select_every=10,
         kappa=0.05,
         linear_layer=False,

@@ -15,7 +15,7 @@ config = dict(
     scheduler=dict(type="cosine_annealing", T_max=300),
     dss_args=dict(
         type="CRAIG",
-        fraction=0.1,
+        fraction=0.2,
         select_every=10,
         kappa=0,
         linear_layer=False,
