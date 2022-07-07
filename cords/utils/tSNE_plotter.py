@@ -36,6 +36,9 @@ class TSNEPlotter:
         self.val_embeddings = None
         self.test_embeddings = None
         self.df = None
+        self.tsne = TSNE(
+            n_components=2, perplexity=30, init="pca", learning_rate="auto"
+        )
 
         # remove the classification head from the model as we only use it for embedding
         self.model.classifier = nn.Sequential()
@@ -47,13 +50,11 @@ class TSNEPlotter:
             self.full_trainloader
         )
         cols = [f"out_{i}" for i in range(self.train_embeddings.shape[1])]
-        self.train_labels = [f"{y.numpy()}" for x, y in self.full_trainloader.dataset]
+        self.train_labels = [y for x, y in self.full_trainloader.dataset]
 
         # create tSNE plot with pca embeddings
         time_start = time.time()
-        self.tsne = TSNE(
-            n_components=2, perplexity=30, init="pca", learning_rate="auto"
-        )
+
         self.tsne_embeddings = self.tsne.fit_transform(self.train_embeddings)
         self.df = pd.DataFrame(self.tsne_embeddings, columns=["tsne-2d-x", "tsne-2d-y"])
         self.df["LABEL"] = self.train_labels

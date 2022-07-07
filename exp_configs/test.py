@@ -19,7 +19,7 @@ config = dict(
     dss_args=dict(
         type="Random",
         fraction=0.01,
-        select_every=1,
+        select_every=2,
         kappa=0,
     ),
     train_args=dict(

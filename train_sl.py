@@ -739,11 +739,6 @@ class TrainClassifier:
             start_time = time.time()
             cum_weights = 0
 
-            # construct t-SNE plots if data has been resampled
-            if dataloader.resampled:
-                self.tsne_plotter.plot_tsne(
-                    epoch, select_indices=dataloader.subset_indices
-                )
 
             for _, data in enumerate(dataloader):
                 if is_selcon:
@@ -755,6 +750,7 @@ class TrainClassifier:
                     ) = data  # dataloader also returns id in case of selcon algorithm
                 else:
                     inputs, targets, weights = data
+
                 inputs = inputs.to(self.cfg.train_args.device)
                 targets = targets.to(self.cfg.train_args.device, non_blocking=True)
                 weights = weights.to(self.cfg.train_args.device)
@@ -784,6 +780,14 @@ class TrainClassifier:
             timing.append(epoch_time)
             total_timing += epoch_time
             print_args = self.cfg.train_args.print_args
+
+            # construct t-SNE plots if data has been resampled
+            if dataloader.resampled:
+                print('TNSE PLOTTING - dataloader is resampled. Epoch: ', epoch)
+                print('Indices:', dataloader.subset_indices[:20])
+                self.tsne_plotter.make_tsne_plot(
+                    epoch, selected_indices=dataloader.subset_indices
+                )
 
             """
             ################################################# Evaluation Loop #################################################
@@ -852,17 +856,18 @@ class TrainClassifier:
                     trn_f1 = f1(outputs, targets).item()
                     trn_f1s.append(trn_f1)
 
-                    # confusion matrix
-                    wandb.log(
-                        {
-                            "trn_confusion_matrix": wandb.plot.confusion_matrix(
-                                probs=outputs.cpu().numpy(),
-                                y_true=targets.cpu().numpy(),
-                                title="trn_conf_mat",
-                            )
-                        },
-                        step=epoch,
-                    )
+                    if epoch % 10 == 0 or epoch == self.cfg.train_args.num_epochs - 1:
+                        # confusion matrix
+                        wandb.log(
+                            {
+                                "trn_confusion_matrix": wandb.plot.confusion_matrix(
+                                    probs=outputs.cpu().numpy(),
+                                    y_true=targets.cpu().numpy(),
+                                    title="trn_conf_mat",
+                                )
+                            },
+                            step=epoch,
+                        )
 
                 if ("val_loss" in print_args) or ("val_acc" in print_args):
                     samples = 0
@@ -920,16 +925,17 @@ class TrainClassifier:
                     val_f1s.append(val_f1)
 
                     # confusion matrix
-                    wandb.log(
-                        {
-                            "val_confusion_matrix": wandb.plot.confusion_matrix(
-                                probs=outputs.cpu().numpy(),
-                                y_true=targets.cpu().numpy(),
-                                title="val_conf_mat",
-                            )
-                        },
-                        step=epoch,
-                    )
+                    if epoch % 10 == 0 or epoch == self.cfg.train_args.num_epochs - 1:
+                        wandb.log(
+                            {
+                                "val_confusion_matrix": wandb.plot.confusion_matrix(
+                                    probs=outputs.cpu().numpy(),
+                                    y_true=targets.cpu().numpy(),
+                                    title="val_conf_mat",
+                                )
+                            },
+                            step=epoch,
+                        )
 
                 if ("tst_loss" in print_args) or ("tst_acc" in print_args):
                     samples = 0
@@ -980,16 +986,17 @@ class TrainClassifier:
                     tst_f1s.append(tst_f1)
 
                     # confusion matrix
-                    wandb.log(
-                        {
-                            "tst_confusion_matrix": wandb.plot.confusion_matrix(
-                                probs=outputs.cpu().numpy(),
-                                y_true=targets.cpu().numpy(),
-                                title="tst_conf_mat",
-                            )
-                        },
-                        step=epoch,
-                    )
+                    if epoch % 10 == 0 or epoch == self.cfg.train_args.num_epochs - 1:
+                        wandb.log(
+                            {
+                                "tst_confusion_matrix": wandb.plot.confusion_matrix(
+                                    probs=outputs.cpu().numpy(),
+                                    y_true=targets.cpu().numpy(),
+                                    title="tst_conf_mat",
+                                )
+                            },
+                            step=epoch,
+                        )
 
                 if "subtrn_acc" in print_args:
                     subtrn_acc.append(subtrn_correct / subtrn_total)

@@ -62,6 +62,7 @@ class AdaptiveDSSDataLoader(DSSDataLoader):
             # self.select_after = 0
             self.warmup_epochs = 0
         self.initialized = False
+        self.resampled = False
 
     def __iter__(self):
         """
