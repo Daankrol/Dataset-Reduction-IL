@@ -35,6 +35,7 @@ class TSNEPlotter:
         self.train_embeddings = None
         self.val_embeddings = None
         self.test_embeddings = None
+        self.df = None
 
         # remove the classification head from the model as we only use it for embedding
         self.model.classifier = nn.Sequential()
@@ -48,23 +49,24 @@ class TSNEPlotter:
         cols = [f"out_{i}" for i in range(self.train_embeddings.shape[1])]
         self.train_labels = [f"{y.numpy()}" for x, y in self.full_trainloader.dataset]
 
-        # table = wandb.Table(columns=df.columns.tolist(), data=df.values)
-        # wandb.log({"random": table})
-
         # create tSNE plot with pca embeddings
         time_start = time.time()
         self.tsne = TSNE(
             n_components=2, perplexity=30, init="pca", learning_rate="auto"
         )
         self.tsne_embeddings = self.tsne.fit_transform(self.train_embeddings)
+        self.df = pd.DataFrame(self.tsne_embeddings, columns=["tsne-2d-x", "tsne-2d-y"])
+        self.df["LABEL"] = self.train_labels
+        self.df["tsne-2d-x"] = self.tsne_embeddings[:, 0]
+        self.df["tsne-2d-y"] = self.tsne_embeddings[:, 1]
+
         print("t-SNE done! Time elapsed: {} seconds".format(time.time() - time_start))
 
     def make_tsne_plot(self, epoch, selected_indices=None):
-        df = pd.DataFrame(self.tsne_embeddings, columns=["tsne-2d-x", "tsne-2d-y"])
-        df["LABEL"] = self.train_labels
-        df["tsne-2d-x"] = self.tsne_embeddings[:, 0]
-        df["tsne-2d-y"] = self.tsne_embeddings[:, 1]
-        table = wandb.Table(columns=df.columns.tolist(), data=df.values)
+
+        self.df["selected_indices"] = selected_indices
+        table = wandb.Table(columns=self.df.columns.tolist(), data=self.df.values)
+        wandb.log({"tSNE_data": table}, step=epoch)
 
         # plot the tSNE plot
         plt.figure(figsize=(16, 10))
@@ -72,21 +74,19 @@ class TSNEPlotter:
             x="tsne-2d-x",
             y="tsne-2d-y",
             hue="LABEL",
-            palette=sns.color_palette("hls", len(df["LABEL"].unique())),
-            data=df,
+            palette=sns.color_palette("hls", len(self.df["LABEL"].unique())),
+            data=self.df,
             legend="full",
             alpha=0.7,
         )
 
-        # every points idx that is in the list of subset_indices has a different marker
-        # the marker is a red star
-        # add the red star in the legend with the label "subset"
+        # visualize every selected point
         if selected_indices is not None:
             plt.scatter(
-                df["tsne-2d-x"][selected_indices],
-                df["tsne-2d-y"][selected_indices],
+                self.df["tsne-2d-x"][selected_indices],
+                self.df["tsne-2d-y"][selected_indices],
                 marker="*",
-                color="red",
+                color="black",
                 s=80,
             )
         plt.title("t-SNE plot")
