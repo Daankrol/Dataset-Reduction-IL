@@ -56,8 +56,6 @@ class UncertaintyStrategy(DataSelectionStrategy):
         return idx, gamma
 
     def leastConfidenceSelection(self, budget):
-        idxs = []
-        confidences = []
         probs = torch.zeros([self.N_trn, self.num_classes]).to(self.device)
         indices = torch.arange(self.N_trn).to(self.device)
         evaluated_samples = 0
@@ -74,23 +72,12 @@ class UncertaintyStrategy(DataSelectionStrategy):
                 probs[start_slice:end_slice] = out
                 evaluated_samples = end_slice
 
-                # max_prob = torch.max(out, dim=1)[0]
-                # confidences.extend(max_prob.cpu().numpy())
-                # idxs.extend(i * np.arange(0, max_prob.shape[0]))
-
+        probs = probs.max(1)[0]
         # sort the indices by ascending confidence using torch.sort
         indices = indices[torch.argsort(probs, dim=0)]
+        print('indices: ', indices[:10])
         return indices[:budget], torch.ones(budget)
 
-        # # sort the idxs by ascending confidence
-        # idxs = np.array(idxs)
-        # confidences = np.array(confidences)
-        # idxs = idxs[np.argsort(confidences)]
-        # confidences = confidences[np.argsort(confidences)]
-
-        # idxs = idxs[:budget]
-        # gammas = torch.ones(len(idxs))
-        # return idxs, gammas
 
     def marginOfConfidenceSelection(self, budget):
         # Margin of confidence is defined by the difference between the top two confidence values

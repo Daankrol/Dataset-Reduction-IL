@@ -17,11 +17,18 @@ config = dict(
     scheduler=dict(type="cosine_annealing", T_max=300),
     # early_stopping=True,
     dss_args=dict(
-        type="Random",
+        type="GradMatch",
+        # selection_type="LeastConfidence",
+        selection_type="PerClassPerGradient",
+        v1=True,
+        lam=0.5,
+        valid=False,
+        linear_layer=True,
         fraction=0.01,
-        select_every=2,
+        select_every=1,
         kappa=0,
-        online=True
+        eps=1e-100,
+        # online=True
     ),
     train_args=dict(
         num_epochs=3,

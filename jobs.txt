@@ -75,3 +75,4 @@
 # python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatch.py --select_every 10 --fraction 0.2 # ok
 # python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatchpb.py --select_every 10 --fraction 0.3 # ok
 # python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatch.py --select_every 10 --fraction 0.3 # ok
+python3 run_experiment.py --config ./exp_configs/cifar10/config_uncertainty.py --select_every 10 --fraction 0.2 --selection_type LeastConfidence
