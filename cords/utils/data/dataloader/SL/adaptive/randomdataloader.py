@@ -1,3 +1,5 @@
+from dotmap import DotMap
+
 from .adaptivedataloader import AdaptiveDSSDataLoader
 from cords.selectionstrategies.SL import RandomStrategy
 import time
@@ -22,7 +24,13 @@ class RandomDataLoader(AdaptiveDSSDataLoader):
         """
         super(RandomDataLoader, self).__init__(train_loader, train_loader, dss_args, 
                                                     logger, *args, **kwargs)
-        self.strategy = RandomStrategy(train_loader, online=True)
+        if dss_args.online is not None and dss_args.online != DotMap():
+            self.online = dss_args.online
+        else:
+            self.online = False
+
+        self.logger.info(f'Running random in online mode: {self.online}')
+        self.strategy = RandomStrategy(train_loader, online=self.online)
         self.logger.debug('Random dataloader initialized.')
 
     def _resample_subset_indices(self):

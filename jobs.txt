@@ -67,3 +67,11 @@
 # python3 run_experiment.py --config ./exp_configs/cifar10/config_craig-warmpb.py --select_every 10 --fraction 0.1  --kappa 0.05 # ok
 # python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatchpb-warm.py --select_every 10 --fraction 0.1  --kappa 0.05 # ok
 # python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatch.py --select_every 10 --fraction 0.1  --kappa 0.05 # ok
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_random.py --select_every 10 --fraction 0.1  --kappa 0.0 --nonadaptive # ok
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_random.py --select_every 10 --fraction 0.1  --kappa 0.0 # ok
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_random.py --select_every 10 --fraction 0.3  --kappa 0.0 --nonadaptive # ok
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_random.py --select_every 10 --fraction 0.3  --kappa 0.0 # ok
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatchpb.py --select_every 10 --fraction 0.2 # ok
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatch.py --select_every 10 --fraction 0.2 # ok
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatchpb.py --select_every 10 --fraction 0.3 # ok
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatch.py --select_every 10 --fraction 0.3 # ok

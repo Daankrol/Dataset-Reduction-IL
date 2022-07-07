@@ -114,6 +114,11 @@ parser.add_argument(
     type=str,
     help="Selection type for DSS strategy"
 )
+parser.add_argument(
+    "--nonadaptive",
+    action='store_true',
+    help='Whether to run the DSS nonadaptively. (only once at the start)'
+)
 
 args = parser.parse_args()
 if args.config is None:
@@ -152,6 +157,11 @@ if args.kappa is not None:
     cfg.dss_args.kappa = args.kappa
 if args.lam is not None:
     cfg.dss_args.lam = args.lam
+
+if args.nonadaptive:
+    cfg.dss_args.online = False
+else:
+    cfg.dss_args.online = True
 
 clf = TrainClassifier(cfg)
 clf.train()

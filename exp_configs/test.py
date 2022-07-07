@@ -21,6 +21,7 @@ config = dict(
         fraction=0.01,
         select_every=2,
         kappa=0,
+        online=True
     ),
     train_args=dict(
         num_epochs=3,

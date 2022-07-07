@@ -783,8 +783,7 @@ class TrainClassifier:
 
             # construct t-SNE plots if data has been resampled
             if dataloader.resampled:
-                print('TNSE PLOTTING - dataloader is resampled. Epoch: ', epoch)
-                print('Indices:', dataloader.subset_indices[:20])
+                self.logger.info(f'TNSE PLOTTING - dataloader is resampled. Epoch: {epoch}')
                 self.tsne_plotter.make_tsne_plot(
                     epoch, selected_indices=dataloader.subset_indices
                 )

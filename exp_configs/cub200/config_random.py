@@ -15,7 +15,7 @@ config = dict(
         type="sgd", momentum=0.9, lr=0.005, weight_decay=5e-4, nesterov=False
     ),
     scheduler=dict(type="cosine_annealing", T_max=300),
-    dss_args=dict(type="Random", fraction=0.1, select_every=20, kappa=0),
+    dss_args=dict(type="Random", fraction=0.1, select_every=20, kappa=0, online=True),
     train_args=dict(
         num_epochs=300,
         device="cuda",
