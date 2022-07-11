@@ -64,8 +64,12 @@ class TSNEPlotter:
         print("t-SNE done! Time elapsed: {} seconds".format(time.time() - time_start))
 
     def make_tsne_plot(self, epoch, selected_indices=None):
+        # reset all the selected indices to False
+        # if a row is selected, mark it as selected in the dataframe
+        if selected_indices is not None:
+            self.df["selected_indices"] = False
+            self.df.loc[selected_indices, "selected_indices"] = True
 
-        self.df["selected_indices"] = selected_indices
         table = wandb.Table(columns=self.df.columns.tolist(), data=self.df.values)
         wandb.log({"tSNE_data": table}, step=epoch)
 
