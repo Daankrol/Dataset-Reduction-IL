@@ -3,24 +3,26 @@ import os
 
 from dotmap import DotMap
 
-from cords.utils.data.datasets.SL.custom_dataset_selcon import (
-    CustomDataset_WithId_SELCON,
-)
+# from cords.utils.data.datasets.SL.custom_dataset_selcon import (
+#     CustomDataset_WithId_SELCON,
+# )
 import torchvision
 from sklearn import datasets
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from torch.utils.data import Dataset, random_split, TensorDataset
+from torch.utils.data import Dataset, random_split, TensorDataset, Subset
 from torchvision import transforms
 import PIL.Image as Image
 import PIL
 from sklearn.datasets import load_boston
-from cords.utils.data.data_utils import *
+# from cords.utils.data.data_utils import *
 import re
 import pandas as pd
 import torch
 import pickle
-from cords.utils.data.data_utils import WeightedSubset
+# from cords.utils.data.data_utils import WeightedSubset
+from sklearn.model_selection import StratifiedShuffleSplit
+from papilion import PapilionDataset
 
 
 class standard_scaling:
@@ -229,11 +231,15 @@ class CUB200(torch.utils.data.Dataset):
                 open(os.path.join(self._root, "processed/train.pkl"), "rb")
             )
             assert len(self._train_data) == 5994 and len(self._train_labels) == 5994
+            self.data = self._train_data
+            self.targets = self._train_labels
         else:
             self._test_data, self._test_labels = pickle.load(
                 open(os.path.join(self._root, "processed/test.pkl"), "rb")
             )
             assert len(self._test_data) == 5794 and len(self._test_labels) == 5794
+            self.data = self._test_data
+            self.targets = self._test_labels
 
     def __getitem__(self, index):
         """
@@ -248,7 +254,7 @@ class CUB200(torch.utils.data.Dataset):
         else:
             image, target = self._test_data[index], self._test_labels[index]
         # Doing this so that it is consistent with all other datasets.
-        image = PIL.Image.fromarray(image)
+        # image = PIL.Image.fromarray(image)
 
         if self._transform is not None:
             image = self._transform(image)
@@ -1824,55 +1830,62 @@ def gen_dataset(datadir, dset_name, feature, isnumpy=False, **kwargs):
         )
 
         num_cls = 200
-        fullset = CUB200(root=datadir, train=True, transform=cub200_transform)
+        trainset = CUB200(root=datadir, train=True, transform=cub200_transform)
         testset = CUB200(root=datadir, train=False, transform=cub200_tst_transform)
 
-        if feature == "classimb":
-            samples_per_class = torch.zeros(num_cls)
-            for i in range(num_cls):
-                samples_per_class[i] = len(torch.where(fullset.targets == i)[0])
-            min_samples = int(torch.min(samples_per_class) * 0.1)
-            selected_classes = np.random.choice(
-                np.arange(num_cls),
-                size=int(kwargs["classimb_ratio"] * num_cls),
-                replace=False,
-            )
-            for i in range(num_cls):
-                if i == 0:
-                    if i in selected_classes:
-                        subset_idxs = list(
-                            np.random.choice(
-                                torch.where(fullset.targets == i)[0].cpu().numpy(),
-                                size=min_samples,
-                                replace=False,
-                            )
-                        )
-                    else:
-                        subset_idxs = list(
-                            torch.where(fullset.targets == i)[0].cpu().numpy()
-                        )
-                else:
-                    if i in selected_classes:
-                        batch_subset_idxs = list(
-                            np.random.choice(
-                                torch.where(fullset.targets == i)[0].cpu().numpy(),
-                                size=min_samples,
-                                replace=False,
-                            )
-                        )
-                    else:
-                        batch_subset_idxs = list(
-                            torch.where(fullset.targets == i)[0].cpu().numpy()
-                        )
-                    subset_idxs.extend(batch_subset_idxs)
-            fullset = torch.utils.data.Subset(fullset, subset_idxs)
-
-        # validation dataset is (0.1 * train dataset)
         validation_set_fraction = 0.1
-        num_fulltrn = len(fullset)
-        num_val = int(num_fulltrn * validation_set_fraction)
-        num_trn = num_fulltrn - num_val
-        trainset, valset = random_split(fullset, [num_trn, num_val])
+        # do stratisfied sampling to get the validation set
+        sss = StratifiedShuffleSplit(n_splits=1, test_size=validation_set_fraction)
+        for train_index, val_index in sss.split(trainset.data, trainset.targets):
+            trainset, valset = Subset(trainset, train_index), Subset(trainset, val_index)
+            break
+            
+        return trainset, valset, testset, num_cls
+
+
+    elif dset_name == "papilion":
+        torch.cuda.manual_seed(42)
+        torch.manual_seed(42)
+
+        if "pre_trained" in kwargs and kwargs["pre_trained"]:
+            # Normalization based on imageNet
+            normalize = transforms.Normalize(
+                (0.485, 0.456, 0.406), (0.229, 0.224, 0.225)
+            )
+        else:
+            # # Note: Normalization is calculated by using 224x224 images of the whole train set
+            normalize = transforms.Normalize(
+                (0.6209, 0.6052, 0.5562), (0.2183, 0.2803, 0.3155)
+            )
+
+        pap_transform = transforms.Compose(
+            [
+                transforms.Resize(224),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                normalize,
+            ]
+        )
+        pap_tst_transform = transforms.Compose(
+            [
+                transforms.Resize(224),
+                transforms.ToTensor(),
+                normalize,
+            ]
+        )
+
+        num_cls = 112
+        trainset = PapilionDataset(root=datadir, train=True, transform=pap_transform)
+        testset = PapilionDataset(root=datadir, train=False, transform=pap_tst_transform)
+
+        # create a validation set with 10% of the training set.
+        # Use stratisfied shuffle sampling to make sure that the validation set is balanced
+        # with respect to the classes.
+        validation_set_fraction = 0.1
+        sss = StratifiedShuffleSplit(n_splits=1, test_size=validation_set_fraction)
+        for train_index, val_index in sss.split(trainset.data, trainset.targets):
+            trainset, valset = Subset(trainset, train_index), Subset(trainset, val_index)
+            break
 
         return trainset, valset, testset, num_cls
 
@@ -1977,14 +1990,15 @@ def gen_dataset(datadir, dset_name, feature, isnumpy=False, **kwargs):
 
         # validation dataset is (0.1 * train dataset)
         validation_set_fraction = 0.1
-        num_fulltrn = len(fullset)
-        num_val = int(num_fulltrn * validation_set_fraction)
-        num_trn = num_fulltrn - num_val
-        trainset, valset = random_split(fullset, [num_trn, num_val])
+        sss = StratifiedShuffleSplit(n_splits=1, test_size=validation_set_fraction)
+        for train_index, val_index in sss.split(fullset.data, fullset.targets):
+            trainset, valset = Subset(fullset, train_index), Subset(fullset, val_index)
+            break
 
-        # for dset in [trainset, valset, testset]:
-        #     dset.data = dset.data[: int(len(dset.data) * 0.1)]
-        #     dset.targets = dset.targets[: int(len(dset.targets) * 0.1)]
+        # num_fulltrn = len(fullset)
+        # num_val = int(num_fulltrn * validation_set_fraction)
+        # num_trn = num_fulltrn - num_val
+        # trainset, valset = random_split(fullset, [num_trn, num_val])
 
         return trainset, valset, testset, num_cls
 
@@ -2648,3 +2662,9 @@ def mean_std(loader):
     # shape of images = [b,c,w,h]
     mean, std = images.mean([0, 2, 3]), images.std([0, 2, 3])
     return mean, std
+
+
+# main 
+if __name__ == "__main__":
+    train, val, test, num_cls = gen_dataset('~/Develop/Thesis/data', 'cub200', 'dss')
+    print(len(train), len(val), len(test))

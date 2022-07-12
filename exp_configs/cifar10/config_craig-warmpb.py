@@ -7,7 +7,7 @@ config = dict(
     is_reg=False,
     dataset=dict(name="cifar10", datadir="../data", feature="dss", type="image", img_size=32),
     dataloader=dict(shuffle=True, batch_size=20, pin_memory=True),
-    model=dict(architecture="ResNet18", type="pre-defined"),
+    model=dict(architecture="EfficientNet", type="pre-defined"),
     ckpt=dict(is_load=False, is_save=False, dir="results/", save_every=20),
     loss=dict(type="CrossEntropyLoss", use_sigmoid=False),
     optimizer=dict(

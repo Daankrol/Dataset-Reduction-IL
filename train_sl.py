@@ -1034,8 +1034,6 @@ class TrainClassifier:
                         print_str += " , " + "Test Recall: " + str(tst_recalls[-1])
                         metrics["tst_recall"] = tst_recalls[-1]
 
-                    # precision and f1
-                    print_str
                     if arg == "trn_loss":
                         print_str += " , " + "Training Loss: " + str(trn_losses[-1])
                         metrics["trn_loss"] = trn_losses[-1]

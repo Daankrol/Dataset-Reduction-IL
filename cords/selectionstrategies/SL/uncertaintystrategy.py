@@ -76,7 +76,8 @@ class UncertaintyStrategy(DataSelectionStrategy):
         # sort the indices by ascending confidence using torch.sort
         indices = indices[torch.argsort(probs, dim=0)]
         print('indices: ', indices[:10])
-        return indices[:budget], torch.ones(budget)
+
+        return indices[:budget].cpu().numpy(), torch.ones(budget)
 
 
     def marginOfConfidenceSelection(self, budget):
