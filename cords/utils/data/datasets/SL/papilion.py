@@ -154,15 +154,10 @@ class PapilionDataset(Dataset):
                 all_labels.append(label)
             else:
                 missing += 1
-        print("missing: " + str(missing), "set size: ", len(all_data))
+        # print("missing: " + str(missing), "set size: ", len(all_data))
 
         # the dataset is very imbalanced so we need to do stratified sampling
         # to balance the classes
-        # we use the sklearn.model_selection.StratifiedShuffleSplit function
-        # to do this
-
-        # we use the sklearn.model_selection.StratifiedShuffleSplit function
-        # to do this
         sss = StratifiedShuffleSplit(
             n_splits=1, test_size=self._fraction, random_state=42
         )
@@ -171,12 +166,6 @@ class PapilionDataset(Dataset):
         all_labels = np.array(all_labels)
 
         for train_index, test_index in sss.split(all_data, all_labels):
-            print(
-                "train size: ",
-                train_index,
-                " shape: ",
-                np.array(train_index).shape,
-            )
             self._train_data = all_data[train_index]
             self._train_labels = all_labels[train_index]
             self._test_data = all_data[test_index]
