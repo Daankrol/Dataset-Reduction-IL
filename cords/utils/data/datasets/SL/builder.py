@@ -3,9 +3,9 @@ import os
 
 from dotmap import DotMap
 
-# from cords.utils.data.datasets.SL.custom_dataset_selcon import (
-#     CustomDataset_WithId_SELCON,
-# )
+from cords.utils.data.datasets.SL.custom_dataset_selcon import (
+    CustomDataset_WithId_SELCON,
+)
 import torchvision
 from sklearn import datasets
 from sklearn.model_selection import train_test_split
@@ -15,14 +15,14 @@ from torchvision import transforms
 import PIL.Image as Image
 import PIL
 from sklearn.datasets import load_boston
-# from cords.utils.data.data_utils import *
+from cords.utils.data.data_utils import *
 import re
 import pandas as pd
 import torch
 import pickle
-# from cords.utils.data.data_utils import WeightedSubset
+from cords.utils.data.data_utils import WeightedSubset
 from sklearn.model_selection import StratifiedShuffleSplit
-from papilion import PapilionDataset
+from cords.utils.data.datasets.SL.papilion import PapilionDataset
 
 
 class standard_scaling:
