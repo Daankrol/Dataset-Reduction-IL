@@ -1860,7 +1860,7 @@ def gen_dataset(datadir, dset_name, feature, isnumpy=False, **kwargs):
 
         pap_transform = transforms.Compose(
             [
-                transforms.Resize(224),
+                transforms.Resize((224,224)),
                 transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
                 normalize,
@@ -1868,7 +1868,7 @@ def gen_dataset(datadir, dset_name, feature, isnumpy=False, **kwargs):
         )
         pap_tst_transform = transforms.Compose(
             [
-                transforms.Resize(224),
+                transforms.Resize((224,224)),
                 transforms.ToTensor(),
                 normalize,
             ]
