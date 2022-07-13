@@ -37,7 +37,7 @@ class TSNEPlotter:
         self.test_embeddings = None
         self.df = None
         self.tsne = TSNE(
-            n_components=2, perplexity=30, init="pca", learning_rate="auto"
+            n_components=2, perplexity=30, init="pca", learning_rate="auto", n_jobs=-1
         )
 
         # remove the classification head from the model as we only use it for embedding
