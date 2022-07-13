@@ -95,12 +95,15 @@ class TSNEPlotter:
                 s=80,
             )
         plt.title("t-SNE plot")
-        plt.savefig("tSNE_plot.png")
-        wandb.log({"tSNE_plot": wandb.Image("tSNE_plot.png")}, step=epoch)
-        # if file is already there, delete it
-        if os.path.exists("tSNE_plot.png"):
-            os.remove("tSNE_plot.png")
+
+        # random file name to save the plot
+        file_name = f"tSNE_plot_{time.time()}.png"
+        plt.savefig(file_name)
+        wandb.log({"tSNE_plot": wandb.Image(file_name)}, step=epoch)
         plt.close()
+        # if file is already there, delete it
+        if os.path.exists(file_name):
+            os.remove(file_name)
 
     def _make_embedding_for_dataloader(self, dataloader):
         # Create embeddings for the given batched dataloader
