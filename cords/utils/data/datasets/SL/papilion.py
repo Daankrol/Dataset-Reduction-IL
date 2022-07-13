@@ -47,15 +47,15 @@ class PapilionDataset(Dataset):
                 self._train_data, self._train_labels = pickle.load(f)
                 self.data = self._train_data
                 self.targets = self._train_labels
+            
         else:
             with open(os.path.join(self._root + "/test.pkl"), "rb") as f:
                 self._test_data, self._test_labels = pickle.load(f)
                 self.data = self._test_data
                 self.targets = self._test_labels
 
-        # targets should be a tensor
-        self.targets = torch.tensor(self.targets)
-
+        with open(os.path.join(self._root + '/class_names.pkl'), 'rb') as f:
+            self.class_names = pickle.load(f)
 
     def __getitem__(self, index):
         """
@@ -95,7 +95,9 @@ class PapilionDataset(Dataset):
         """
         return os.path.isfile(
             os.path.join(self._root + "/train.pkl")
-        ) and os.path.isfile(os.path.join(self._root + "/test.pkl"))
+        ) and os.path.isfile(os.path.join(self._root + "/test.pkl")) and os.path.isfile(
+            os.path.join(self._root + "/class_names.pkl")
+        )
 
     def _download(self):
         """Download the dataset."""
@@ -143,11 +145,15 @@ class PapilionDataset(Dataset):
         label_column_index = column_names.index(label_column)
         image_id_column_index = column_names.index(image_id_column)
 
+        # get all possible class names from the label_column
+        self.class_names = df[label_column].unique().tolist()
+
         missing = 0
         # iterate over the rows of the csv file
         for index, row in df.iterrows():
             image_id = row[image_id_column_index]
-            label = row[label_column_index]
+            class_name = row[label_column_index]
+            label = self.class_names.index(class_name)
             image_path = os.path.join(images_path, image_id + ".jpg")
             if os.path.isfile(image_path):
                 image = PIL.Image.open(image_path)
@@ -183,6 +189,9 @@ class PapilionDataset(Dataset):
         pickle.dump(
             (self._test_data, self._test_labels),
             open(os.path.join(self._root, "test.pkl"), "wb"),
+        )
+        pickle.dump(
+            self.class_names, open(os.path.join(self._root, "class_names.pkl"), "wb")
         )
 
     def _visualize(self):
