@@ -97,7 +97,9 @@ class TSNEPlotter:
         plt.title("t-SNE plot")
         plt.savefig("tSNE_plot.png")
         wandb.log({"tSNE_plot": wandb.Image("tSNE_plot.png")}, step=epoch)
-        os.remove("tSNE_plot.png")
+        # if file is already there, delete it
+        if os.path.exists("tSNE_plot.png"):
+            os.remove("tSNE_plot.png")
         plt.close()
 
     def _make_embedding_for_dataloader(self, dataloader):
