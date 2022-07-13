@@ -1838,13 +1838,17 @@ def gen_dataset(datadir, dset_name, feature, isnumpy=False, **kwargs):
         sss = StratifiedShuffleSplit(n_splits=1, test_size=validation_set_fraction)
         for train_index, val_index in sss.split(trainset.data, trainset.targets):
             trainset, valset = Subset(trainset, train_index), Subset(trainset, val_index)
+            # create TensorDatasets from the splits
+            # trainset = TensorDataset(
+            #     torch.tensor(trainset.data[train_index]),
+            #     torch.tensor(trainset.targets[train_index]),
+            # )
+            # valset = TensorDataset(
+            #     torch.tensor(trainset.data[val_index]),
+            #     torch.tensor(trainset.targets[val_index]),
+            # )
             break
-            
-        # all datasets need to be TensorDataset
-        trainset = TensorDataset(trainset.data, trainset.targets)
-        valset = TensorDataset(valset.data, valset.targets)
-        testset = TensorDataset(testset.data, testset.targets)
-        
+
         return trainset, valset, testset, num_cls
 
 
@@ -1892,10 +1896,10 @@ def gen_dataset(datadir, dset_name, feature, isnumpy=False, **kwargs):
             trainset, valset = Subset(trainset, train_index), Subset(trainset, val_index)
             break
 
-        # all datasets need to be TensorDataset
-        trainset = TensorDataset(trainset.data, trainset.targets)
-        valset = TensorDataset(valset.data, valset.targets)
-        testset = TensorDataset(testset.data, testset.targets)
+        # # all datasets need to be TensorDataset
+        # trainset = TensorDataset(trainset.data, trainset.targets)
+        # valset = TensorDataset(valset.data, valset.targets)
+        # testset = TensorDataset(testset.data, testset.targets)
 
         return trainset, valset, testset, num_cls
 
