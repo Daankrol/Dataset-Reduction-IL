@@ -783,7 +783,7 @@ class TrainClassifier:
             print_args = self.cfg.train_args.print_args
 
             # construct t-SNE plots if data has been resampled
-            if dataloader.resampled:
+            if self.cfg.dss_args.type != "Full" and dataloader.resampled:
                 self.logger.info(f'TNSE PLOTTING - dataloader is resampled. Epoch: {epoch}')
                 self.tsne_plotter.make_tsne_plot(
                     epoch, selected_indices=dataloader.subset_indices
