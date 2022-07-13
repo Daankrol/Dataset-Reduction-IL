@@ -53,6 +53,9 @@ class PapilionDataset(Dataset):
                 self.data = self._test_data
                 self.targets = self._test_labels
 
+        # targets should be a tensor
+        self.targets = torch.tensor(self.targets)
+
 
     def __getitem__(self, index):
         """
