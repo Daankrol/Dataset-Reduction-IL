@@ -127,8 +127,8 @@ class PapilionDataset(Dataset):
             os.path.join(self._root + "/raw/papilion.zip"), "r"
         ) as zip_ref:
             zip_ref.extractall(self._root + "/raw")
-        print("unzipping done")
-
+        print("unzipping done\nprocessing data...")
+        
         # metadata file
         # this csv file has the following columns: catalogNumber,basisOfRecord,class,collectionCode,continent,country,city,dateIdentified,latitudeDecimal,longitudeDecimal,family,genus,identifiedBy,individualCount,infraspecificEpithet,island,kingdom,lifeStage,locality,occurrenceID,order,phylum,preparations,recordedBy,scientificName,authorshipVerbatim,sex,specificEpithet,provinceState,subgenus,taxonRank,remarks,typeStatus,depth,altitudeUnifOfMeasurement,taxonRank.1,associatedMedia,verbatimCoordinates,verbatimEventDate,higherClassification,informationWithheld,verbatimCoordinates.1,eventDate,nomenclaturalCode,geodeticDatum,uid,crop_exists,class_infra_species,class_species,class_genus
         metadata_file = os.path.join(self._root, "raw/images.csv")
@@ -145,15 +145,13 @@ class PapilionDataset(Dataset):
         label_column_index = column_names.index(label_column)
         image_id_column_index = column_names.index(image_id_column)
 
-        # get all possible class names from the label_column
-        self.class_names = df[label_column].unique().tolist()
-
         missing = 0
         # iterate over the rows of the csv file
         for index, row in df.iterrows():
             image_id = row[image_id_column_index]
-            class_name = row[label_column_index]
-            label = self.class_names.index(class_name)
+            # class_name = row[label_column_index]
+            # label = self.class_names.index(class_name)
+            label = row[label_column_index]
             image_path = os.path.join(images_path, image_id + ".jpg")
             if os.path.isfile(image_path):
                 image = PIL.Image.open(image_path)
@@ -164,6 +162,12 @@ class PapilionDataset(Dataset):
             else:
                 missing += 1
         # print("missing: " + str(missing), "set size: ", len(all_data))
+
+        # get all unique class names from the labels
+        self.class_names = list(set(all_labels))
+        # transform each label to an integer
+        all_labels = [self.class_names.index(x) for x in all_labels]
+        
 
         # the dataset is very imbalanced so we need to do stratified sampling
         # to balance the classes
