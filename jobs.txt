@@ -15,7 +15,7 @@
 #python3 run_experiment.py --config ./exp_configs/config_gradmatchpb_cifar10.py --select_every 20 --disable_scheduler True
 #python3 run_experiment.py --config ./exp_configs/config_gradmatch_cifar10.py --select_every 20 --disable_scheduler True
 #python3 run_experiment.py --config ./exp_configs/config_glister_cifar10.py --select_every 20 --disable_scheduler True
-#python3 run_experiment.py --config ./exp_configs/config_craig_cifar10.py --select_every 20  --disable_scheduler True
+#python3 run_experiment.py --config ./exp_configs/config_craig_cifar10.py --select_every 20  --disable_scheduler Tru
 # python3 run_experiment.py --config ./exp_configs/config_full_cifar10.py # ok
 # python3 run_experiment.py --config ./exp_configs/config_craig_cifar10.py --select_every 10 # ok
 # python3 run_experiment.py --config ./exp_configs/config_craig_cifar10.py # ok
@@ -75,4 +75,13 @@
 # python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatch.py --select_every 10 --fraction 0.2 # ok
 # python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatchpb.py --select_every 10 --fraction 0.3 # ok
 # python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatch.py --select_every 10 --fraction 0.3 # ok
-python3 run_experiment.py --config ./exp_configs/cifar10/config_uncertainty.py --select_every 10 --fraction 0.2 --selection_type LeastConfidence
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_uncertainty.py --select_every 10 --fraction 0.2 --selection_type LeastConfidence # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_full.py --pretrained --finetune --lr 0.005 # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_full.py --pretrained --finetune --lr 0.001 # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_full.py --pretrained --finetune --lr 0.0005 # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatch.py --pretrained --finetune # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatch.py --pretrained --finetune --kappa 0.015 # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --pretrained --finetune # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --pretrained --finetune --kappa 0.015 # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_random.py --pretrained --finetune --nonadaptive # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_random.py --pretrained --finetune # ok

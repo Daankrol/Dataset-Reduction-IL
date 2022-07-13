@@ -26,4 +26,5 @@ wandb
 pynvml
 torchmetrics
 seaborn
-googledrivedownloader
+gdown
+fasttsne
