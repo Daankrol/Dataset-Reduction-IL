@@ -254,7 +254,7 @@ class CUB200(torch.utils.data.Dataset):
         else:
             image, target = self._test_data[index], self._test_labels[index]
         # Doing this so that it is consistent with all other datasets.
-        # image = PIL.Image.fromarray(image)
+        image = PIL.Image.fromarray(image)
 
         if self._transform is not None:
             image = self._transform(image)
