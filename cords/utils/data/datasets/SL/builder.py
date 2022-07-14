@@ -1888,16 +1888,67 @@ def gen_dataset(datadir, dset_name, feature, isnumpy=False, **kwargs):
         trainset = PapilionDataset(root=datadir, train=True, transform=pap_transform)
         testset = PapilionDataset(root=datadir, train=False, transform=pap_tst_transform)
 
-        # create a validation set with 10% of the training set.
-        # Use stratisfied shuffle sampling to make sure that the validation set is balanced
-        # with respect to the classes.
-        validation_set_fraction = 0.25
-        sss = StratifiedShuffleSplit(n_splits=1, test_size=validation_set_fraction)
-        for train_index, val_index in sss.split(trainset.data, trainset.targets):
-            trainset, valset = Subset(trainset, train_index), Subset(trainset, val_index)
-            break
-        
-        print('size of each dataset: ', len(trainset), len(valset), len(testset))
+
+
+        # now make a stratisfied split for the validation set
+        # make sure that the validation set has 10% of each class in the train set, to make sure it has the same distribution as the train set
+        # if there are not enough samples for each class, just take one sample from that class
+        validation_set_fraction = 0.1
+    
+        # get the train set classes
+        train_classes = list(set(trainset.targets))
+        # get the number of samples for each class
+        train_class_samples = [
+            len(np.where(trainset.targets == i)[0]) for i in train_classes
+        ]
+        # get the number of samples for the validation set for each class
+        # make sure that this is a fraction of the number of samples in the train set for that class
+        val_class_samples = [
+            max(int(validation_set_fraction * train_class_samples[i]), 1)
+            for i in range(len(train_classes))
+        ]
+
+        # get the indices for the validation set
+        val_idxs = []
+        for i in range(len(train_classes)):
+            # get the indices for the class.
+            class_idxs = np.where(trainset.targets == train_classes[i])[0]
+            val_idxs.extend(
+               np.random.choice(class_idxs, val_class_samples[i], replace=False)
+            )
+
+        # get the indices for the train set
+        train_idxs = [
+            i for i in range(len(trainset.data)) if i not in val_idxs
+        ]
+        # create Datasets from the splits
+        valset = Subset(trainset, val_idxs)
+        trainset = Subset(trainset, train_idxs)
+       
+
+
+        # print('size of each dataset: ', len(trainset), len(valset), len(testset))
+        # # print the distribution of the classes in the train set
+        # # count the images per class for the validation set 
+        # val_cntr = [0] * num_cls
+        # for i, (img, target) in enumerate(valset):
+        #     val_cntr[target] += 1
+        # # print the distribution of the classes in the validation set
+        # print('distribution of classes in the validation set: ', val_cntr)
+        # # print the distribution of the classes in the train set
+
+        # train_cntr = [0] * num_cls 
+        # for i, (img, target) in enumerate(trainset):
+        #     train_cntr[target] += 1
+
+        # print('distribution of classes in the train set: ', train_cntr)
+        # # print the distribution of the classes in the test set
+        # test_cntr = [0] * num_cls
+        # for i, (img, target) in enumerate(testset):
+        #     test_cntr[target] += 1
+        # print('distribution of classes in the test set: ', test_cntr)
+
+        # exit()
         return trainset, valset, testset, num_cls
 
     elif dset_name == 'inaturalist':

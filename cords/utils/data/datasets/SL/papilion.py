@@ -198,6 +198,38 @@ class PapilionDataset(Dataset):
             self.class_names, open(os.path.join(self._root, "class_names.pkl"), "wb")
         )
 
+
+
+
+
+         # check if every class is represented in the validation set
+        # if not, move one sample of that class from the training set to the validation set
+        # this is done until every class is represented in the validation set
+        for i in range(num_cls):
+            if i not in valset.targets:
+                # get the indices of samples in the trainset that should be move to the validation set
+                # we do this by sampling from the classes that are not in the validation set
+                # and then taking the first sample from each class
+                train_index, val_index = [], []
+                for j in range(num_cls):
+                    if j not in valset.targets:
+                        train_index.extend(list(torch.where(trainset.targets == j)[0].cpu().numpy()))
+                # get the first sample from the train_index
+                batch_subset_idxs = train_index[0:1]
+                # add the sample to the validation set
+                val_index.extend(batch_subset_idxs)
+                # remove the sample from the train_index
+                train_index = train_index[1:]
+                # create TensorDatas from the splits
+                trainset = Subset(trainset, train_index)
+                valset = Subset(valset, val_index)
+                break
+
+
+
+
+            
+
     def _visualize(self):
         # visualize the class distribution
         import matplotlib.pyplot as plt
