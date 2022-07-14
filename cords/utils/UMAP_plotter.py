@@ -7,18 +7,19 @@ import pandas as pd
 import numpy as np
 import wandb
 import time
-from sklearn.manifold import TSNE
 from sklearn.decomposition import PCA
 import seaborn as sns
 import matplotlib.pyplot as plt
 import pickle
+import umap
+from sklearn.manifold import TSNE
 
 """
-This class is used to build image embedding that can be used for TSNE plots.
+This class is used to build image embedding that can be used for UMAP plots.
 """
 
 
-class TSNEPlotter:
+class UMAPPlotter:
     def __init__(
         self, full_trainloader, full_valloader, full_testloader, subset_indices, device, root, dataset_name
     ):
@@ -36,9 +37,7 @@ class TSNEPlotter:
         self.val_embeddings = None
         self.test_embeddings = None
         self.df = None
-        self.tsne = TSNE(
-            n_components=2, perplexity=30, init="pca", learning_rate="auto", n_jobs=-1
-        )
+        self.umap = umap.UMAP(n_neighbors=10, n_components=2)
 
         # remove the classification head from the model as we only use it for embedding
         self.model.classifier = nn.Sequential()
@@ -48,16 +47,16 @@ class TSNEPlotter:
 
         # check if embeddings already exist. Only do so for dataset iNaturalist as the others have varying train/val splits
         if self.ds_name == "inaturalist":
-            if os.path.exists(os.path.join(self.root, f"{self.ds_name}_train_embeddings.pkl")):
-                self.tsne_embeddings = pickle.load(
-                    open(os.path.join(self.root, f"{self.ds_name}_train_embeddings.pkl"), "rb")
+            if os.path.exists(os.path.join(self.root, f"{self.ds_name}_train_UMAP_embeddings.pkl")):
+                self.umap_embeddings = pickle.load(
+                    open(os.path.join(self.root, f"{self.ds_name}_train_UMAP_embeddings.pkl"), "rb")
                 )
-                self.df = pickle.load(open(os.path.join(self.root, f"{self.ds_name}_df.pkl"), "rb"))
+                self.df = pickle.load(open(os.path.join(self.root, f"{self.ds_name}_UMAP_df.pkl"), "rb"))
                 print("Embeddings already exist")
             else: 
                 self.construct_embeddings()
-                pickle.dump(self.tsne_embeddings, open(os.path.join(self.root, f"{self.ds_name}_train_embeddings.pkl"), "wb"))
-                pickle.dump(self.df, open(os.path.join(self.root, f"{self.ds_name}_df.pkl"), "wb"))
+                pickle.dump(self.umap_embeddings, open(os.path.join(self.root, f"{self.ds_name}_train_UMAP_embeddings.pkl"), "wb"))
+                pickle.dump(self.df, open(os.path.join(self.root, f"{self.ds_name}_UMAP_df.pkl"), "wb"))
         else:
             self.construct_embeddings()
 
@@ -70,16 +69,31 @@ class TSNEPlotter:
         cols = [f"out_{i}" for i in range(self.train_embeddings.shape[1])]
         self.train_labels = [y for x, y in self.full_trainloader.dataset]
 
-        # create tSNE plot with pca embeddings
+        # create UMAP plot
         time_start = time.time()
-        print('Starting t-SNE fit and transform.')
-        self.tsne_embeddings = self.tsne.fit_transform(self.train_embeddings)
-        self.df = pd.DataFrame(self.tsne_embeddings, columns=["tsne-2d-x", "tsne-2d-y"])
-        self.df["LABEL"] = self.train_labels
-        self.df["tsne-2d-x"] = self.tsne_embeddings[:, 0]
-        self.df["tsne-2d-y"] = self.tsne_embeddings[:, 1]
+        print('Starting PCA and UMAP fit and transform.')
+        # transform to 50 pca components
+        pca_50 = PCA(n_components=50)
+        self.train_embeddings = pca_50.fit_transform(self.train_embeddings)
+        print('PCA done in {} seconds.'.format(time.time() - time_start))
+        time_start = time.time()
 
-        print("t-SNE done! Time elapsed: {} seconds".format(time.time() - time_start))
+        self.umap_embeddings = self.umap.fit_transform(X=self.train_embeddings, y=self.train_labels)
+        print("UMAP done! Time elapsed: {} seconds".format(time.time() - time_start))
+
+        print('shape: ', self.umap_embeddings.shape)
+        print('type of embeddings: ', type(self.umap_embeddings))
+        print('type of labels: ', type(self.train_labels))
+        print('type of first label in labels: ', type(self.train_labels[0]))
+        print('type of first embedding: ', type(self.umap_embeddings[0]))
+        self.df = pd.DataFrame(self.umap_embeddings, columns=["umap-2d-x", "umap-2d-y"])
+
+        # train_labels is a list of tensors. Make it a list of ints
+        self.df["LABEL"] = [int(x) for x in self.train_labels]
+        self.df["umap-2d-x"] = self.umap_embeddings[:, 0]
+        self.df["umap-2d-y"] = self.umap_embeddings[:, 1]
+
+        
 
     def make_plot(self, epoch, selected_indices=None):
         # reset all the selected indices to False
@@ -88,14 +102,14 @@ class TSNEPlotter:
             self.df["selected_indices"] = False
             self.df.loc[selected_indices, "selected_indices"] = True
 
-        table = wandb.Table(columns=self.df.columns.tolist(), data=self.df.values)
-        wandb.log({"tSNE_data": table}, step=epoch)
+        # table = wandb.Table(columns=self.df.columns.tolist(), data=self.df.values)
+        # wandb.log({"umap_data": table}, step=epoch)
 
-        # plot the tSNE plot
+        # plot the umap plot
         plt.figure(figsize=(16, 10))
         sns.scatterplot(
-            x="tsne-2d-x",
-            y="tsne-2d-y",
+            x="umap-2d-x",
+            y="umap-2d-y",
             hue="LABEL",
             palette=sns.color_palette("hls", len(self.df["LABEL"].unique())),
             data=self.df,
@@ -106,18 +120,19 @@ class TSNEPlotter:
         # visualize every selected point
         if selected_indices is not None:
             plt.scatter(
-                self.df["tsne-2d-x"][selected_indices],
-                self.df["tsne-2d-y"][selected_indices],
+                self.df["umap-2d-x"][selected_indices],
+                self.df["umap-2d-y"][selected_indices],
                 marker="*",
                 color="black",
                 s=80,
             )
-        plt.title("t-SNE plot")
+        plt.title("UMAP plot")
 
         # random file name to save the plot
-        file_name = f"tSNE_plot_{time.time()}.png"
+        file_name = f"UMAP_{time.time()}.png"
         plt.savefig(file_name)
-        wandb.log({"tSNE_plot": wandb.Image(file_name)}, step=epoch)
+        # wandb.log({"UMAP_plot": wandb.Image(file_name)}, step=epoch)
+        plt.show()
         plt.close()
         # if file is already there, delete it
         if os.path.exists(file_name):
@@ -169,11 +184,9 @@ if __name__ == "__main__":
     # make a tensor with 50 random labels between 0 and 9
     labels = torch.randint(0, 10, (50,))
 
-    # make a tensor dataset and a dataloader
+    # make a dataset and a dataloader
     dataset = torch.utils.data.TensorDataset(images, labels)
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=2, shuffle=False)
 
-    tp = TSNEPlotter(dataloader, dataloader, dataloader, None, "cpu")
-    tp.make_tsne_plot(0, [1, 2, 3, 4, 5])
-    tp.make_tsne_plot(1, [6, 7, 8, 9, 10])
-    tp.make_tsne_plot(2, [1, 2, 3, 7, 8, 9])
+    tp = UMAPPlotter(dataloader, dataloader, dataloader, None, 'cpu', '../data', 'cifar')
+    tp.make_plot(0, [1, 2, 3, 4, 5])

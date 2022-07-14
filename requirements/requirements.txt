@@ -27,4 +27,4 @@ pynvml
 torchmetrics
 seaborn
 gdown
-fasttsne
+umap-learn

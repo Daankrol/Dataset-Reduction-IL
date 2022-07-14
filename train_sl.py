@@ -36,7 +36,7 @@ from pyJoules.device.device_factory import DeviceFactory
 import torchmetrics
 from cords.utils.utils import EarlyStopping
 from cords.utils.tSNE_plotter import TSNEPlotter
-
+from cords.utils.UMAP_plotter import UMAPPlotter
 
 class TrainClassifier:
     def __init__(self, config_file_data):
@@ -685,12 +685,23 @@ class TrainClassifier:
         ############################## tSNE embeddings ##############################
         """
         # create embeddings for the train set
-        self.tsne_plotter = TSNEPlotter(
+        # self.embedding_plotter = TSNEPlotter(
+        #     trainloader,
+        #     valloader,
+        #     testloader,
+        #     None,
+        #     self.cfg.train_args.device,
+        #     root=self.cfg.train_args.root,
+        #     dataset_name=self.cfg.dataset.name,
+        # )
+        self.embedding_plotter = UMAPPlotter(
             trainloader,
             valloader,
             testloader,
             None,
             self.cfg.train_args.device,
+            root=self.cfg.train_args.root,
+            dataset_name=self.cfg.dataset.name,
         )
         """
         ################################################# Checkpoint Loading #################################################
@@ -784,10 +795,8 @@ class TrainClassifier:
 
             # construct t-SNE plots if data has been resampled
             if self.cfg.dss_args.type != "Full" and dataloader.resampled:
-                self.logger.info(f'TNSE PLOTTING - dataloader is resampled. Epoch: {epoch}')
-                self.tsne_plotter.make_tsne_plot(
-                    epoch, selected_indices=dataloader.subset_indices
-                )
+                self.logger.info(f'EMBEDDING - dataloader is resampled. Epoch: {epoch}')
+                self.embedding_plotter.make_plot(epoch, selected_indices=dataloader.subset_indices)
 
             """
             ################################################# Evaluation Loop #################################################
