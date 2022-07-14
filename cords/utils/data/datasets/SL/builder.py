@@ -1891,12 +1891,13 @@ def gen_dataset(datadir, dset_name, feature, isnumpy=False, **kwargs):
         # create a validation set with 10% of the training set.
         # Use stratisfied shuffle sampling to make sure that the validation set is balanced
         # with respect to the classes.
-        validation_set_fraction = 0.1
+        validation_set_fraction = 0.25
         sss = StratifiedShuffleSplit(n_splits=1, test_size=validation_set_fraction)
         for train_index, val_index in sss.split(trainset.data, trainset.targets):
             trainset, valset = Subset(trainset, train_index), Subset(trainset, val_index)
             break
-
+        
+        print('size of each dataset: ', len(trainset), len(valset), len(testset))
         return trainset, valset, testset, num_cls
 
     elif dset_name == 'inaturalist':
