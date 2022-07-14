@@ -5,7 +5,7 @@ config = dict(
     wandb=True,
     is_reg=False,
     dataset=dict(
-        name="papilion", datadir="../data", feature="dss", type="image", img_size=224
+        name="inaturalist", datadir="../data", feature="dss", type="image", img_size=224
     ),
     dataloader=dict(shuffle=True, batch_size=20, pin_memory=True),
     model=dict(architecture="EfficientNet", type="pre-defined"),

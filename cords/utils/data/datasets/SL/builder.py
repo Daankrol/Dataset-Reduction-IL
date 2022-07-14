@@ -23,6 +23,7 @@ import pickle
 from cords.utils.data.data_utils import WeightedSubset
 from sklearn.model_selection import StratifiedShuffleSplit
 from cords.utils.data.datasets.SL.papilion import PapilionDataset
+from cords.utils.data.datasets.SL.iNaturalist import INAT
 
 
 class standard_scaling:
@@ -1902,6 +1903,24 @@ def gen_dataset(datadir, dset_name, feature, isnumpy=False, **kwargs):
         # testset = TensorDataset(testset.data, testset.targets)
 
         return trainset, valset, testset, num_cls
+
+    elif dset_name == 'inaturalist':
+        ## INat 2019 dataset 
+        # https://www.kaggle.com/code/feichin/inception3-last-years-baseline
+        torch.cuda.manual_seed(42)
+        torch.manual_seed(42)
+
+        # download 2019 dataset and put in the datadir + '/iNaturalist2019' directory.
+
+        # trainset = INAT(root=datadir, ann_file='train2019.json' ,partition='train')
+        # valset = INAT(root=datadir, ann_file='val2019.json', partition='val')
+        testset = INAT(root=datadir, partition='test')
+
+        num_cls = len(set(trainset.classes))
+        exit()
+
+        return trainset, valset, testset, num_cls
+
 
     elif dset_name == "cifar10":
         torch.cuda.manual_seed(42)
