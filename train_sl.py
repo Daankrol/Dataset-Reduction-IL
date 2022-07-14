@@ -855,12 +855,12 @@ class TrainClassifier:
 
                     # calculate precision and f1
                     precision = torchmetrics.Precision(
-                        average="weighted", num_classes=self.cfg.model.numclasses
+                        average="micro", num_classes=self.cfg.model.numclasses
                     ).to(self.cfg.train_args.device)
                     trn_precision = precision(outputs, targets).item()
                     trn_precisions.append(trn_precision)
                     f1 = torchmetrics.F1Score(
-                        average="weighted", num_classes=self.cfg.model.numclasses
+                        average="micro", num_classes=self.cfg.model.numclasses
                     ).to(self.cfg.train_args.device)
                     trn_f1 = f1(outputs, targets).item()
                     trn_f1s.append(trn_f1)
@@ -914,21 +914,21 @@ class TrainClassifier:
                     if "val_acc" in print_args:
                         val_acc.append(val_correct / val_total)
                     if "val_recall" in print_args:
-                        # Do weighted averaging recall over all classes
+                        # Do micro averaging recall over all classes
                         recall = torchmetrics.Recall(
-                            average="weighted", num_classes=self.cfg.model.numclasses
+                            average="micro", num_classes=self.cfg.model.numclasses
                         ).to(self.cfg.train_args.device)
                         val_recall = recall(outputs, targets).item()
                         val_recalls.append(val_recall)
 
                     # calculate precision and f1
                     precision = torchmetrics.Precision(
-                        average="weighted", num_classes=self.cfg.model.numclasses
+                        average="micro", num_classes=self.cfg.model.numclasses
                     ).to(self.cfg.train_args.device)
                     val_precision = precision(outputs, targets).item()
                     val_precisions.append(val_precision)
                     f1 = torchmetrics.F1Score(
-                        average="weighted", num_classes=self.cfg.model.numclasses
+                        average="micro", num_classes=self.cfg.model.numclasses
                     ).to(self.cfg.train_args.device)
                     val_f1 = f1(outputs, targets).item()
                     val_f1s.append(val_f1)
@@ -975,21 +975,21 @@ class TrainClassifier:
                     if "tst_acc" in print_args:
                         tst_acc.append(tst_correct / tst_total)
                     if "tst_recall" in print_args:
-                        # Do weighted averaging recall over all classes
+                        # Do micro averaging recall over all classes
                         recall = torchmetrics.Recall(
-                            average="weighted", num_classes=self.cfg.model.numclasses
+                            average="micro", num_classes=self.cfg.model.numclasses
                         ).to(self.cfg.train_args.device)
                         tst_recall = recall(outputs, targets).item()
                         tst_recalls.append(tst_recall)
 
                     # calculate precision and f1
                     precision = torchmetrics.Precision(
-                        average="weighted", num_classes=self.cfg.model.numclasses
+                        average="micro", num_classes=self.cfg.model.numclasses
                     ).to(self.cfg.train_args.device)
                     tst_precision = precision(outputs, targets).item()
                     tst_precisions.append(tst_precision)
                     f1 = torchmetrics.F1Score(
-                        average="weighted", num_classes=self.cfg.model.numclasses
+                        average="micro", num_classes=self.cfg.model.numclasses
                     ).to(self.cfg.train_args.device)
                     tst_f1 = f1(outputs, targets).item()
                     tst_f1s.append(tst_f1)
