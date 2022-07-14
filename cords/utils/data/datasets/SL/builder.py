@@ -1897,11 +1897,6 @@ def gen_dataset(datadir, dset_name, feature, isnumpy=False, **kwargs):
             trainset, valset = Subset(trainset, train_index), Subset(trainset, val_index)
             break
 
-        # # all datasets need to be TensorDataset
-        # trainset = TensorDataset(trainset.data, trainset.targets)
-        # valset = TensorDataset(valset.data, valset.targets)
-        # testset = TensorDataset(testset.data, testset.targets)
-
         return trainset, valset, testset, num_cls
 
     elif dset_name == 'inaturalist':
@@ -1912,12 +1907,13 @@ def gen_dataset(datadir, dset_name, feature, isnumpy=False, **kwargs):
 
         # download 2019 dataset and put in the datadir + '/iNaturalist2019' directory.
 
-        trainset = INAT(root=datadir,partition='train')
-        testset = INAT(root=datadir, partition='val')
-        valset = testset
+        trainset = INAT(root=datadir, partition='train')
+        valset = INAT(root=datadir, partition='val')
+        testset = INAT(root=datadir, partition='test')
 
-        num_cls = len(set(testset.classes))
-
+        print('num classes in each dataset: ', trainset.num_classes, valset.num_classes, testset.num_classes)')
+        print('size of each dataset: ', len(trainset), len(valset), len(testset))
+        exit()
         return trainset, valset, testset, num_cls
 
 

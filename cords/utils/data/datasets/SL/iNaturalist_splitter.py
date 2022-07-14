@@ -38,18 +38,9 @@ class iNatSplitter():
         ann_file = partition + '2019.json'
         self.is_train = (partition == 'train')
         root = os.path.abspath(root)
-        self.root = os.path.join(root, 'iNaturalist2019')
         ann_location = os.path.join(self.root, ann_file)
-
+        print('Starting to split the dataset...')
         print('root: {}  self.root: {} ann_location: {}'.format(root, self.root, ann_location))
-
-        if partition == 'test':
-            self.root = os.path.join(root, 'iNaturalist2019/')
-        else:
-            self.root = os.path.join(root, 'iNaturalist2019/')
-
-        print('self.root: {}'.format(self.root))
-
         print('Loading annotations from: ' + ann_location)
         with open(ann_location, 'r') as f:
             ann_data = json.load(f)
@@ -116,11 +107,18 @@ class iNatSplitter():
             current_count = already_marked[class_label]
             if current_count < should_be_marked_per_class[class_label]:
                 img['validation'] = True
+                # also update the annotations 
+                ann_data['annotations'][ii]['validation'] = True
                 already_marked[class_label] += 1
             else:
+                ann_data['annotations'][ii]['validation'] = False
                 img['validation'] = False
 
         # write the new json file with name "train_val_split.json"
         with open(os.path.join(self.root, 'train_val_split.json'), 'w') as f:
             json.dump(ann_data, f)
-            
+
+# main 
+if __name__ == '__main__':
+    # create a new instance of the iNatSplitter class
+    splitter = iNatSplitter('/home/daankrol/data/iNaturalist2019')
