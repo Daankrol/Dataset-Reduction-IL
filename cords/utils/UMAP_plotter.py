@@ -102,8 +102,8 @@ class UMAPPlotter:
             self.df["selected_indices"] = False
             self.df.loc[selected_indices, "selected_indices"] = True
 
-        # table = wandb.Table(columns=self.df.columns.tolist(), data=self.df.values)
-        # wandb.log({"umap_data": table}, step=epoch)
+        table = wandb.Table(columns=self.df.columns.tolist(), data=self.df.values)
+        wandb.log({"umap_data": table}, step=epoch)
 
         # plot the umap plot
         plt.figure(figsize=(16, 10))
@@ -131,7 +131,7 @@ class UMAPPlotter:
         # random file name to save the plot
         file_name = f"UMAP_{time.time()}.png"
         plt.savefig(file_name)
-        # wandb.log({"UMAP_plot": wandb.Image(file_name)}, step=epoch)
+        wandb.log({"UMAP_plot": wandb.Image(file_name)}, step=epoch)
         plt.show()
         plt.close()
         # if file is already there, delete it
