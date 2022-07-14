@@ -34,7 +34,7 @@ def load_taxonomy(ann_data, tax_levels, classes):
 # Constructing a stratisfied 10% validation split of the training dataset
 class iNatSplitter():
     def __init__(self, root):
-        partition = train
+        partition = 'train'
         ann_file = partition + '2019.json'
         self.is_train = (partition == 'train')
         root = os.path.abspath(root)
@@ -96,9 +96,7 @@ class iNatSplitter():
         print('class counts: {}'.format(self.class_counts))
         print('should be marked per class: {}'.format(should_be_marked_per_class))
 
-        already_marked = []
-        for cc in np.unique(self.classes):
-            already_marked[cc] = 0
+        already_marked = [0 for cc in np.unique(self.classes)]
 
         # Now iterate all images, and mark them as validation in the json (by adding the key 'validation' to the image) if 
         # for that class we have not yet marked the required number of images.

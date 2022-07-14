@@ -58,7 +58,7 @@ def run_jobs_slurm(jobs_path: str, partition: str = None, cluster: str = 'intel'
                 command += f"\n#SBATCH --partition={partition}"
             command += f"""
 #SBATCH --nodes=1
-#SBATCH --cores=6
+#SBATCH --cores=12
 #SBATCH --mem=100G
 """
             if cluster == 'intel':
