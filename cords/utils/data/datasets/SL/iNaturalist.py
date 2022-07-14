@@ -49,9 +49,6 @@ class INAT(data.Dataset):
         self.root = os.path.join(root, 'iNaturalist2019')
         ann_location = os.path.join(self.root, ann_file)
 
-        print('root: {}  self.root: {} ann_location: {}'.format(root, self.root, ann_location))
-
-        # if file train_val_split.json does not exist
         if not os.path.isfile(os.path.join(self.root, 'train_val_split.json')):
             print('validation split file not found. Making one now...')
             splitter = iNatSplitter(self.root)
@@ -61,18 +58,23 @@ class INAT(data.Dataset):
             ann_file = 'train_val_split.json'
             ann_location = os.path.join(self.root, ann_file)
 
-        print('Loading annotations from: ' + ann_location)
         with open(ann_location, 'r') as f:
             ann_data = json.load(f)
 
         # set up the filenames and annotations
-        self.imgs = [aa['file_name'] for aa in ann_data['images'] if aa['validation'] == (partition == 'val')]
-        self.ids = [aa['id'] for aa in ann_data['images'] if aa['validation'] == (partition == 'val')]
+        if partition == 'test':
+            self.imgs = [aa['file_name'] for aa in ann_data['images']]
+            self.ids = [aa['id'] for aa in ann_data['images']]
+        else:
+            self.imgs = [aa['file_name'] for aa in ann_data['images'] if aa['validation'] == (partition == 'val')]
+            self.ids = [aa['id'] for aa in ann_data['images'] if aa['validation'] == (partition == 'val')]
 
         # if we dont have class labels set them to '0'
-        # FIXME: shouldn't this be 'images' instead of 'annotations'??
         if 'annotations' in ann_data.keys():
-            self.classes = [aa['category_id'] for aa in ann_data['annotations'] if aa['validation'] == (partition == 'val')]
+            if partition == 'test':
+                self.classes = [aa['category_id'] for aa in ann_data['annotations']]
+            else:
+                self.classes = [aa['category_id'] for aa in ann_data['annotations'] if aa['validation'] == (partition == 'val')]
         else:
             self.classes = [0]*len(self.imgs)
 
@@ -108,7 +110,7 @@ class INAT(data.Dataset):
 
 
     def __getitem__(self, index):
-        path = self.root + self.imgs[index]
+        path = os.path.join(self.root, self.imgs[index])
         im_id = self.ids[index]
         img = self.loader(path)
         species_id = self.classes[index]

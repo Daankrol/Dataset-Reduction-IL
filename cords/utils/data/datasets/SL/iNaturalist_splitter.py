@@ -38,6 +38,7 @@ class iNatSplitter():
         ann_file = partition + '2019.json'
         self.is_train = (partition == 'train')
         root = os.path.abspath(root)
+        self.root = root
         ann_location = os.path.join(self.root, ann_file)
         print('Starting to split the dataset...')
         print('root: {}  self.root: {} ann_location: {}'.format(root, self.root, ann_location))
