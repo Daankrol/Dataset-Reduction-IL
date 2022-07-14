@@ -85,3 +85,4 @@
 # python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --pretrained --finetune --kappa 0.015 # ok
 # python3 run_experiment.py --config ./exp_configs/papilion/config_random.py --pretrained --finetune --nonadaptive # ok
 # python3 run_experiment.py --config ./exp_configs/papilion/config_random.py --pretrained --finetune # ok
+# python3 run_experiment.py --config ./exp_configs/test.py # ok

@@ -47,9 +47,9 @@ class INAT(data.Dataset):
         print('root: {}  self.root: {} ann_location: {}'.format(root, self.root, ann_location))
 
         if partition == 'test':
-            self.root = os.path.join(root, '/iNaturalist2019/test2019')
+            self.root = os.path.join(root, 'iNaturalist2019/')
         else:
-            self.root = os.path.join(root, '/iNaturalist2019/train_val2019')
+            self.root = os.path.join(root, 'iNaturalist2019/')
 
         print('self.root: {}'.format(self.root))
 
@@ -114,7 +114,7 @@ class INAT(data.Dataset):
         img = self.norm_aug(img)
 
         # return img, im_id, species_id, tax_ids
-        return img, im_id
+        return img, species_id
 
     def __len__(self):
         return len(self.imgs)

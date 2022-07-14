@@ -1912,12 +1912,11 @@ def gen_dataset(datadir, dset_name, feature, isnumpy=False, **kwargs):
 
         # download 2019 dataset and put in the datadir + '/iNaturalist2019' directory.
 
-        # trainset = INAT(root=datadir, ann_file='train2019.json' ,partition='train')
-        # valset = INAT(root=datadir, ann_file='val2019.json', partition='val')
-        testset = INAT(root=datadir, partition='test')
+        trainset = INAT(root=datadir,partition='train')
+        testset = INAT(root=datadir, partition='val')
+        valset = testset
 
-        num_cls = len(set(trainset.classes))
-        exit()
+        num_cls = len(set(testset.classes))
 
         return trainset, valset, testset, num_cls
 
