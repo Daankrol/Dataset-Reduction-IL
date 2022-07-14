@@ -54,7 +54,7 @@ class TSNEPlotter:
 
         # create tSNE plot with pca embeddings
         time_start = time.time()
-
+        print('Starting t-SNE fit and transform.')
         self.tsne_embeddings = self.tsne.fit_transform(self.train_embeddings)
         self.df = pd.DataFrame(self.tsne_embeddings, columns=["tsne-2d-x", "tsne-2d-y"])
         self.df["LABEL"] = self.train_labels
