@@ -700,7 +700,7 @@ class TrainClassifier:
             testloader,
             None,
             self.cfg.train_args.device,
-            root=self.cfg.train_args.root,
+            root=self.cfg.dataset.datadir,
             dataset_name=self.cfg.dataset.name,
         )
         """
