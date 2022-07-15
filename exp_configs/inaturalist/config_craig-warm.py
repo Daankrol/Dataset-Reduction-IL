@@ -8,12 +8,12 @@ config = dict(
     dataset=dict(
         name="inaturalist", datadir="../data", feature="dss", type="image", img_size=224
     ),
-    dataloader=dict(shuffle=True, batch_size=20, pin_memory=True),
+    dataloader=dict(shuffle=True, batch_size=32, pin_memory=True),
     model=dict(architecture="EfficientNet", type="pre-defined"),
     ckpt=dict(is_load=False, is_save=False, dir="results/", save_every=20),
     loss=dict(type="CrossEntropyLoss", use_sigmoid=False),
     optimizer=dict(
-        type="sgd", momentum=0.9, lr=0.005, weight_decay=5e-4, nesterov=False
+        type="adam", lr=0.005,
     ),
     scheduler=dict(type="cosine_annealing", T_max=300),
     dss_args=dict(

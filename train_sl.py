@@ -685,24 +685,27 @@ class TrainClassifier:
         ############################## tSNE embeddings ##############################
         """
         # create embeddings for the train set
-        # self.embedding_plotter = TSNEPlotter(
+        if self.cfg.dataset.name in ['cifar10', 'cifar100', 'cub200'] and self.cfg.dss_args.type not in ['Full']:
+            self.embedding_plotter = TSNEPlotter(
+                trainloader,
+                valloader,
+                testloader,
+                None,
+                self.cfg.train_args.device,
+                root=self.cfg.train_args.root,
+                dataset_name=self.cfg.dataset.name,
+            )
+        else: 
+            self.embedding_plotter = None
+        # self.embedding_plotter = UMAPPlotter(
         #     trainloader,
         #     valloader,
         #     testloader,
         #     None,
         #     self.cfg.train_args.device,
-        #     root=self.cfg.train_args.root,
+        #     root=self.cfg.dataset.datadir,
         #     dataset_name=self.cfg.dataset.name,
         # )
-        self.embedding_plotter = UMAPPlotter(
-            trainloader,
-            valloader,
-            testloader,
-            None,
-            self.cfg.train_args.device,
-            root=self.cfg.dataset.datadir,
-            dataset_name=self.cfg.dataset.name,
-        )
         """
         ################################################# Checkpoint Loading #################################################
         """
@@ -794,7 +797,7 @@ class TrainClassifier:
             print_args = self.cfg.train_args.print_args
 
             # construct t-SNE plots if data has been resampled
-            if self.cfg.dss_args.type != "Full" and dataloader.resampled:
+            if self.cfg.dss_args.type != "Full" and dataloader.resampled and self.embedding_plotter is not None:
                 self.logger.info(f'EMBEDDING - dataloader is resampled. Epoch: {epoch}')
                 self.embedding_plotter.make_plot(epoch, selected_indices=dataloader.subset_indices)
 
