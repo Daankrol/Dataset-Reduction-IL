@@ -8,7 +8,7 @@ config = dict(
     dataset=dict(
         name="papilion", datadir="../data", feature="dss", type="image", img_size=224
     ),
-    dataloader=dict(shuffle=True, batch_size=20, pin_memory=True),
+    dataloader=dict(shuffle=True, batch_size=32, pin_memory=True),
     model=dict(architecture="EfficientNet", type="pre-defined"),
     ckpt=dict(is_load=False, is_save=False, dir="results/", save_every=20),
     loss=dict(type="CrossEntropyLoss", use_sigmoid=False),
