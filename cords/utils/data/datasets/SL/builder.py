@@ -1839,15 +1839,6 @@ def gen_dataset(datadir, dset_name, feature, isnumpy=False, **kwargs):
         sss = StratifiedShuffleSplit(n_splits=1, test_size=validation_set_fraction)
         for train_index, val_index in sss.split(trainset.data, trainset.targets):
             trainset, valset = Subset(trainset, train_index), Subset(trainset, val_index)
-            # create TensorDatasets from the splits
-            # trainset = TensorDataset(
-            #     torch.tensor(trainset.data[train_index]),
-            #     torch.tensor(trainset.targets[train_index]),
-            # )
-            # valset = TensorDataset(
-            #     torch.tensor(trainset.data[val_index]),
-            #     torch.tensor(trainset.targets[val_index]),
-            # )
             break
 
         return trainset, valset, testset, num_cls
@@ -1888,8 +1879,6 @@ def gen_dataset(datadir, dset_name, feature, isnumpy=False, **kwargs):
         trainset = PapilionDataset(root=datadir, train=True, transform=pap_transform)
         testset = PapilionDataset(root=datadir, train=False, transform=pap_tst_transform)
 
-
-
         # now make a stratisfied split for the validation set
         # make sure that the validation set has 10% of each class in the train set, to make sure it has the same distribution as the train set
         # if there are not enough samples for each class, just take one sample from that class
@@ -1925,30 +1914,6 @@ def gen_dataset(datadir, dset_name, feature, isnumpy=False, **kwargs):
         valset = Subset(trainset, val_idxs)
         trainset = Subset(trainset, train_idxs)
        
-
-
-        # print('size of each dataset: ', len(trainset), len(valset), len(testset))
-        # # print the distribution of the classes in the train set
-        # # count the images per class for the validation set 
-        # val_cntr = [0] * num_cls
-        # for i, (img, target) in enumerate(valset):
-        #     val_cntr[target] += 1
-        # # print the distribution of the classes in the validation set
-        # print('distribution of classes in the validation set: ', val_cntr)
-        # # print the distribution of the classes in the train set
-
-        # train_cntr = [0] * num_cls 
-        # for i, (img, target) in enumerate(trainset):
-        #     train_cntr[target] += 1
-
-        # print('distribution of classes in the train set: ', train_cntr)
-        # # print the distribution of the classes in the test set
-        # test_cntr = [0] * num_cls
-        # for i, (img, target) in enumerate(testset):
-        #     test_cntr[target] += 1
-        # print('distribution of classes in the test set: ', test_cntr)
-
-        # exit()
         return trainset, valset, testset, num_cls
 
     elif dset_name == 'inaturalist':

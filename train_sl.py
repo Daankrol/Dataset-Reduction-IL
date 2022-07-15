@@ -685,14 +685,14 @@ class TrainClassifier:
         ############################## tSNE embeddings ##############################
         """
         # create embeddings for the train set
-        if self.cfg.dataset.name in ['cifar10', 'cifar100', 'cub200'] and self.cfg.dss_args.type not in ['Full']:
+        if self.cfg.dataset.name in ['cifar10', 'cifar100', 'papilion','cub200'] and self.cfg.dss_args.type not in ['Full']:
             self.embedding_plotter = TSNEPlotter(
                 trainloader,
                 valloader,
                 testloader,
                 None,
                 self.cfg.train_args.device,
-                root=self.cfg.train_args.root,
+                root=self.cfg.dataset.datadir,
                 dataset_name=self.cfg.dataset.name,
             )
         else: 

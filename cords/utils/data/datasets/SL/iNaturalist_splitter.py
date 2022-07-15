@@ -92,7 +92,7 @@ class iNatSplitter():
         
         should_be_marked_per_class = {}
         for cc in np.unique(self.classes):
-            should_be_marked_per_class[cc] = int(self.class_counts[cc] * 0.1)
+            should_be_marked_per_class[cc] = max(1,int(self.class_counts[cc] * 0.1))
 
         print('class counts: {}'.format(self.class_counts))
         print('should be marked per class: {}'.format(should_be_marked_per_class))
