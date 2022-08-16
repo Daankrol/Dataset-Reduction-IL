@@ -1,0 +1,19 @@
+#inaturalist: paper from iNaturalist gives lr of 0.0045 for inception,resnet,mobilenet pretrained on imagenet
+#- all methods, pretrained finetuning  (2 different learning rates.) Or exp with 3 learning rates
+#- Gradmatch and Craig, 20% every 10, 30% every 10, 10% every 5
+#- warm up v non warm up -> gradmatch
+python3 run_experiment.py --config ./exp_configs/inaturalist/config_gradmatch.py --select_every 10 --fraction 0.2 --lr 0.0045 --pretrained --finetune
+python3 run_experiment.py --config ./exp_configs/inaturalist/config_gradmatchpb.py --select_every 10 --fraction 0.2 --lr 0.0045 --pretrained --finetune
+python3 run_experiment.py --config ./exp_configs/inaturalist/config_glister.py --select_every 10 --fraction 0.2 --lr 0.0045 --pretrained --finetune
+python3 run_experiment.py --config ./exp_configs/inaturalist/config_craig.py --select_every 10 --fraction 0.2 --lr 0.0045 --pretrained --finetune
+python3 run_experiment.py --config ./exp_configs/inaturalist/config_craigpb.py --select_every 10 --fraction 0.2 --lr 0.0045 --pretrained --finetune
+python3 run_experiment.py --config ./exp_configs/inaturalist/config_random.py --select_every 10 --fraction 0.2 --lr 0.0045 --pretrained --finetune
+python3 run_experiment.py --config ./exp_configs/inaturalist/config_full.py --lr 0.0045 --pretrained --finetune
+## different fractions
+python3 run_experiment.py --config ./exp_configs/inaturalist/config_gradmatch.py --select_every 10 --fraction 0.3 --lr 0.0045 --pretrained --finetune
+python3 run_experiment.py --config ./exp_configs/inaturalist/config_craig.py --select_every 10 --fraction 0.3 --lr 0.0045 --pretrained --finetune
+python3 run_experiment.py --config ./exp_configs/inaturalist/config_gradmatch.py --select_every 5 --fraction 0.1 --lr 0.0045 --pretrained --finetune
+python3 run_experiment.py --config ./exp_configs/inaturalist/config_craig.py --select_every 5 --fraction 0.1 --lr 0.0045 --pretrained --finetune
+## warm up
+python3 run_experiment.py --config ./exp_configs/inaturalist/config_gradmatch-warm.py --select_every 10 --fraction 0.2 --lr 0.0045 --pretrained --finetune
+python3 run_experiment.py --config ./exp_configs/inaturalist/config_craig-warm.py --select_every 10 --fraction 0.2 --lr 0.0045 --pretrained --finetune

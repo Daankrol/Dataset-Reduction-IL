@@ -66,7 +66,7 @@ def run_jobs_slurm(jobs_path: str, partition: str = None, cluster: str = 'intel'
                 if partition == 'short':
                     command += "#SBATCH --time=23:00:00\n"
                 else:
-                    command += "#SBATCH --time=1-23:00:00\n"
+                    command += "#SBATCH --time=6-23:00:00\n"
                 command += f"""
 source ~/.bashrc
 source activate /home/daankrol/miniconda3/envs/DatasetReduction/
