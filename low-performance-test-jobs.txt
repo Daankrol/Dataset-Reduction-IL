@@ -1,1 +1,2 @@
-python3 run_experiment.py --config ./exp_configs/cub200/config_full_sgd.py --lr 0.005 --pretrained --finetune
+#python3 run_experiment.py --config ./exp_configs/cub200/config_full_sgd.py --lr 0.005 --pretrained --finetune
+python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb_sgd.py --lr 0.005 --pretrained --finetune
