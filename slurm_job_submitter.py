@@ -13,7 +13,7 @@ def run_jobs_slurm(jobs_path: str, partition: str = None, cluster: str = 'intel'
     """
     SLURM job runner
     Run in folder where you want to create jobs, e.g.
-    `python slurm_jobs_runner.py --jobs_path jobs.txt --conda_env ote-det`
+    `python slurm_jobs_runner.py --jobs_path old_jobs.txt --conda_env ote-det`
     Make sure your ~/.bashrc contains the following lines:
     export PATH="/home2/<user>/miniconda3/bin:$PATH"
     export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home2/<user>/miniconda3/lib
@@ -58,7 +58,7 @@ def run_jobs_slurm(jobs_path: str, partition: str = None, cluster: str = 'intel'
                 command += f"\n#SBATCH --partition={partition}"
             command += f"""
 #SBATCH --nodes=1
-#SBATCH --cores=12
+#SBATCH --cores=7
 #SBATCH --mem=100G
 """
             if cluster == 'intel':
