@@ -16,6 +16,7 @@ config = dict(
         type="CRAIGPB",
         fraction=0.2,
         select_every=10,
+        kappa=0,
         linear_layer=False,
         optimizer="lazy",
         selection_type="PerBatch",
