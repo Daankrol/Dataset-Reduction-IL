@@ -56,28 +56,15 @@ class UncertaintyStrategy(DataSelectionStrategy):
         return idx, gamma
 
     def leastConfidenceSelection(self, budget):
-        probs = torch.zeros([self.N_trn, self.num_classes]).to(self.device)
-        indices = torch.arange(self.N_trn).to(self.device)
-        evaluated_samples = 0
-
+        self.movel.eval()
         with torch.no_grad():
-            for i, (inputs, targets) in enumerate(self.trainloader):
-                inputs = inputs.to(self.device)
-                out = self.model(inputs, freeze=True)
-                out = F.softmax(out, dim=1)
+            scores = np.array([])
+            batch_num = len(trainloader)
+            for i, (inputs, _) in enumerate(self.trainloader):
+                scores = np.append(scores, self.model(inputs.to(self.device), freeze=True).max(axis=1).values.cpu().numpy())
 
-                #   least confidence: difference between the most confident and 100% confidence
-                start_slice = evaluated_samples
-                end_slice = evaluated_samples + out.shape[0]
-                probs[start_slice:end_slice] = out
-                evaluated_samples = end_slice
-
-        probs = probs.max(1)[0]
-        # sort the indices by ascending confidence using torch.sort
-        indices = indices[torch.argsort(probs, dim=0)]
-        print('indices: ', indices[:10])
-
-        return indices[:budget].cpu().numpy(), torch.ones(budget)
+        indices = np.argsort(scores)[::-1][:budget]
+        return indices, torch.ones(len(indices))
 
 
     def marginOfConfidenceSelection(self, budget):
