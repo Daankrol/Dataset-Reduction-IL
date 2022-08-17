@@ -33,7 +33,7 @@ def load_taxonomy(ann_data, tax_levels, classes):
 
 # Constructing a stratisfied 10% validation split of the training dataset
 class iNatSplitter():
-    def __init__(self, root):
+    def __init__(self, root, reduced_fraction=0.7):
         partition = 'train'
         ann_file = partition + '2019.json'
         self.is_train = (partition == 'train')
@@ -90,18 +90,49 @@ class iNatSplitter():
         for cc in np.unique(self.classes):
             self.class_counts[cc] = np.sum(self.classes == cc)
         
+
+        # First reduce the total dataset to 70% of the original size
         should_be_marked_per_class = {}
         for cc in np.unique(self.classes):
-            should_be_marked_per_class[cc] = max(1,int(self.class_counts[cc] * 0.1))
+            should_be_marked_per_class[cc] = max(2,int(self.class_counts[cc] * reduced_fraction))
 
         print('class counts: {}'.format(self.class_counts))
         print('should be marked per class: {}'.format(should_be_marked_per_class))
+        print('original dataset size: {}'.format(len(self.imgs)))
 
         already_marked = [0 for cc in np.unique(self.classes)]
+        # Now mark these images as belonging to the reduced dataset
+        for ii, img in enumerate(ann_data['images']):
+            class_label = self.classes[ii]
+            current_count = already_marked[class_label]
+            if current_count < should_be_marked_per_class[class_label]:
+                img['reduced_set'] = True
+                # also update the annotations 
+                ann_data['annotations'][ii]['reduced_set'] = True
+                already_marked[class_label] += 1
+            else:
+                ann_data['annotations'][ii]['reduced_set'] = False
+                img['reduced_set'] = False
+
+
+        print('new reduced dataset size: {}'.format(len([aa for aa in ann_data['images'] if aa['reduced_set']])))
+
+        # We then split the reduced dataset into a training and validation set
+        # recount the number of images per class
+
+        should_be_marked_per_class_for_validation = {}
+        fraction = 0.1
+        for cc in np.unique(self.classes):
+            should_be_marked_per_class_for_validation[cc] = max(1,int(already_marked[cc] * fraction))
+
+
 
         # Now iterate all images, and mark them as validation in the json (by adding the key 'validation' to the image) if 
         # for that class we have not yet marked the required number of images.
         for ii, img in enumerate(ann_data['images']):
+            # only use the reduced dataset
+            if not img['reduced_set']:
+                continue
             class_label = self.classes[ii]
             current_count = already_marked[class_label]
             if current_count < should_be_marked_per_class[class_label]:
@@ -113,11 +144,13 @@ class iNatSplitter():
                 ann_data['annotations'][ii]['validation'] = False
                 img['validation'] = False
 
+        print('validation images per class: {}'.format(already_marked))
+
         # write the new json file with name "train_val_split.json"
         with open(os.path.join(self.root, 'train_val_split.json'), 'w') as f:
             json.dump(ann_data, f)
 
-# main 
+        
 if __name__ == '__main__':
     # create a new instance of the iNatSplitter class
-    splitter = iNatSplitter('/home/daankrol/data/iNaturalist2019')
+    splitter = iNatSplitter('/home/daankrol/data/iNaturalist2019', 0.2)

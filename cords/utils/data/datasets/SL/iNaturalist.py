@@ -66,15 +66,15 @@ class INAT(data.Dataset):
             self.imgs = [aa['file_name'] for aa in ann_data['images']]
             self.ids = [aa['id'] for aa in ann_data['images']]
         else:
-            self.imgs = [aa['file_name'] for aa in ann_data['images'] if aa['validation'] == (partition == 'val')]
-            self.ids = [aa['id'] for aa in ann_data['images'] if aa['validation'] == (partition == 'val')]
+            self.imgs = [aa['file_name'] for aa in ann_data['images'] if (aa['reduced_set'] and aa['validation'] == (partition == 'val'))]
+            self.ids = [aa['id'] for aa in ann_data['images'] if (aa['reduced_set'] and aa['validation'] == (partition == 'val'))]
 
         # if we dont have class labels set them to '0'
         if 'annotations' in ann_data.keys():
             if partition == 'test':
                 self.classes = [aa['category_id'] for aa in ann_data['annotations']]
             else:
-                self.classes = [aa['category_id'] for aa in ann_data['annotations'] if aa['validation'] == (partition == 'val')]
+                self.classes = [aa['category_id'] for aa in ann_data['annotations'] if (aa['reduced_set'] and aa['validation'] == (partition == 'val'))]
         else:
             self.classes = [0]*len(self.imgs)
 
