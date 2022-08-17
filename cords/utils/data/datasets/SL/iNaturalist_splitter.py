@@ -97,6 +97,7 @@ class iNatSplitter():
             should_be_marked_per_class[cc] = max(2,int(self.class_counts[cc] * reduced_fraction))
 
         print('class counts: {}'.format(self.class_counts))
+        print('sorted class counts: {}'.format(sorted(self.class_counts.items(), key=lambda x: x[1])))
         print('should be marked per class: {}'.format(should_be_marked_per_class))
         print('original dataset size: {}'.format(len(self.imgs)))
 
@@ -144,7 +145,7 @@ class iNatSplitter():
                 ann_data['annotations'][ii]['validation'] = False
                 img['validation'] = False
 
-        print('validation images per class: {}'.format(already_marked))
+        print('validation images per class: {}'.format(np.sort(already_marked)))
 
         # write the new json file with name "train_val_split.json"
         with open(os.path.join(self.root, 'train_val_split.json'), 'w') as f:
@@ -153,4 +154,4 @@ class iNatSplitter():
         
 if __name__ == '__main__':
     # create a new instance of the iNatSplitter class
-    splitter = iNatSplitter('/home/daankrol/data/iNaturalist2019', 0.2)
+    splitter = iNatSplitter('/home/daankrol/data/iNaturalist2019', 0.5)
