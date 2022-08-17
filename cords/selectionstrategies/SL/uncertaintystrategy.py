@@ -53,19 +53,19 @@ class UncertaintyStrategy(DataSelectionStrategy):
                 end_time - start_time
             )
         )
+
         return idx, gamma
 
     def leastConfidenceSelection(self, budget):
-        self.movel.eval()
+        self.model.eval()
         with torch.no_grad():
             scores = np.array([])
-            batch_num = len(trainloader)
+            batch_num = len(self.trainloader)
             for i, (inputs, _) in enumerate(self.trainloader):
                 scores = np.append(scores, self.model(inputs.to(self.device), freeze=True).max(axis=1).values.cpu().numpy())
 
         indices = np.argsort(scores)[::-1][:budget]
         return indices, torch.ones(len(indices))
-
 
     def marginOfConfidenceSelection(self, budget):
         # Margin of confidence is defined by the difference between the top two confidence values
