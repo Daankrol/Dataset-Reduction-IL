@@ -33,6 +33,7 @@ class UncertaintyStrategy(DataSelectionStrategy):
         self.model = model
         self.N_trn = len(trainloader.sampler.data_source)
         self.selection_type = selection_type
+        assert(selection_type in ['LeastConfidence', 'MarginOfConfidence', 'Entropy'])
 
     def select(self, budget, model_params):
         start_time = time.time()
@@ -53,7 +54,6 @@ class UncertaintyStrategy(DataSelectionStrategy):
                 end_time - start_time
             )
         )
-
         return idx, gamma
 
     def leastConfidenceSelection(self, budget):
@@ -97,6 +97,30 @@ class UncertaintyStrategy(DataSelectionStrategy):
 
         indices = np.argsort(scores)[::-1][:budget]
         return indices, torch.ones(len(indices))
+
+    def leastConfidenceSelectionOld(self, budget):
+        idxs = []
+        confidences = []
+        with torch.no_grad():
+            for i, (inputs, targets) in enumerate(self.trainloader):
+                inputs = inputs.to(self.device)
+                targets = targets.to(self.device)
+                out = self.model(inputs)
+                out = F.softmax(out, dim=1)
+                #   least confidence: difference between the most confident and 100% confidence
+                max_prob = torch.max(out, dim=1)[0]
+                confidences.extend(max_prob.cpu().numpy())
+                idxs.extend(i * np.arange(0, max_prob.shape[0]))
+
+        # sort the idxs by ascending confidence
+        idxs = np.array(idxs)
+        confidences = np.array(confidences)
+        idxs = idxs[np.argsort(confidences)]
+        confidences = confidences[np.argsort(confidences)]
+
+        idxs = idxs[:budget]
+        gammas = torch.ones(len(idxs))
+        return idxs, gammas
 
     def marginOfConfidenceSelectionOld(self, budget):
         # Margin of confidence is defined by the difference between the top two confidence values
