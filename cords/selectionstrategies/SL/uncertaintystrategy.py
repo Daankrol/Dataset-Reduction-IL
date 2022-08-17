@@ -69,6 +69,37 @@ class UncertaintyStrategy(DataSelectionStrategy):
 
     def marginOfConfidenceSelection(self, budget):
         # Margin of confidence is defined by the difference between the top two confidence values
+        # source: https://github.com/PatrickZH/DeepCore/blob/main/deepcore/methods/uncertainty.py
+        self.model.eval()
+        with torch.no_grad():
+            scores = np.array([])
+            batch_num = len(self.trainloader)
+            for i, (input, _) in enumerate(self.trainloader):
+                preds = torch.nn.functional.softmax(self.model(input.to(self.device)), dim=1)
+                preds_argmax = torch.argmax(preds, dim=1)
+                max_preds = preds[torch.ones(preds.shape[0], dtype=bool), preds_argmax].clone()
+                preds[torch.ones(preds.shape[0], dtype=bool), preds_argmax] = -1.0
+                preds_sub_argmax = torch.argmax(preds, dim=1)
+                scores = np.append(scores, (max_preds - preds[
+                    torch.ones(preds.shape[0], dtype=bool), preds_sub_argmax]).cpu().numpy())
+
+        indices = np.argsort(scores)[::-1][:budget]
+        return indices, torch.ones(len(indices))
+
+    def entropySelection(self, budget):
+        self.model.eval()
+        with torch.no_grad():
+            scores = np.array([])
+            batch_num = len(self.trainloader)
+            for i, (input, _) in enumerate(self.trainloader):
+                preds = torch.nn.functional.softmax(self.model(input.to(self.device)), dim=1).cpu().numpy()
+                scores = np.append(scores, (np.log(preds + 1e-6) * preds).sum(axis=1))
+
+        indices = np.argsort(scores)[::-1][:budget]
+        return indices, torch.ones(len(indices))
+
+    def marginOfConfidenceSelectionOld(self, budget):
+        # Margin of confidence is defined by the difference between the top two confidence values
         idxs = []
         margins = []
         with torch.no_grad():
@@ -93,7 +124,7 @@ class UncertaintyStrategy(DataSelectionStrategy):
         gammas = torch.ones(len(idxs))
         return idxs, gammas
 
-    def entropySelection(self, budget):
+    def entropySelectionOld(self, budget):
         idxs = []
         entropies = []
         with torch.no_grad():
