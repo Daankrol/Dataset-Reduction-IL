@@ -50,10 +50,11 @@ class UncertaintyStrategy(DataSelectionStrategy):
     def select(self, budget, model_params):
         start_time = time.time()
         self.model.load_state_dict(model_params)
-        self.logger.info(f"Started {self.selection_type} uncertainty selection")
+        self.logger.info(f"Started {self.selection_type} uncertainty selection." + " With per class balancing" if self.balance else "")
         self.logger.info("Budget: {0:d}".format(budget))
         self.fraction = budget / self.N_trn
-        print('Uncertainty balancing with fraction: {0:.2f}'.format(self.fraction))
+        if self.balance:
+            self.logger.info('Uncertainty balancing with fraction: {0:.2f}'.format(self.fraction))
         
         if self.balance:
             # per-class sampling
@@ -64,7 +65,7 @@ class UncertaintyStrategy(DataSelectionStrategy):
             for c in range(self.num_classes):
                 class_index = np.arange(self.N_trn)[self.trn_lbls == c]
                 scores.append(self.rank_uncertainty(class_index))
-                indices = np.append(selection_result, class_index[np.argsort(scores[-1])[
+                indices = np.append(indices, class_index[np.argsort(scores[-1])[
                                                                :round(len(class_index) * self.fraction)]])
         else:
             scores = self.method(budget)
@@ -73,10 +74,11 @@ class UncertaintyStrategy(DataSelectionStrategy):
 
         end_time = time.time()
         self.logger.info(
-            "Uncertainty algorithm Subset Selection time is: {0:.4f}. Selected {} samples with a budget of {}".format(
-                end_time - start_time, len(indices), budget
+            "Uncertainty algorithm Subset Selection time is: {0:.4f}.".format(
+                end_time - start_time
             )
         )
+        self.logger.info("Selected {} samples with a budget of {}".format(len(indices), budget))
 
         return indices, torch.ones(len(indices))
 
@@ -105,7 +107,7 @@ class UncertaintyStrategy(DataSelectionStrategy):
                     scores = np.append(scores, (max_preds - preds[
                         torch.ones(preds.shape[0], dtype=bool), preds_sub_argmax]).cpu().numpy())
                 elif self.selection_type == "Entropy":
-                    preds = torch.nn.functional.softmax(self.model(input.to(self.device)), dim=1)
+                    preds = torch.nn.functional.softmax(self.model(input.to(self.device)), dim=1).cpu()
                     scores = np.append(scores, (np.log(preds + 1e-6) * preds).sum(axis=1))
         return scores
 

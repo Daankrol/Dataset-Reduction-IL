@@ -1,5 +1,7 @@
 import copy
 
+from dotmap import DotMap
+
 from .adaptivedataloader import AdaptiveDSSDataLoader
 from cords.selectionstrategies.SL import UncertaintyStrategy
 import time
@@ -34,7 +36,9 @@ class UncertaintyDataLoader(AdaptiveDSSDataLoader):
         self.train_model = dss_args.model
         self.strategy = UncertaintyStrategy(
             train_loader, val_loader, copy.deepcopy(dss_args.model),
-            dss_args.num_classes, dss_args.linear_layer, dss_args.loss, dss_args.device, dss_args.selection_type, logger)
+            dss_args.num_classes, dss_args.linear_layer, dss_args.loss,
+            dss_args.device, dss_args.selection_type, logger,
+            balance=(dss_args.balancing if not isinstance(dss_args.balancing, DotMap) else None) )
 
         self.logger.debug("Uncertainty dataloader initialized.")
 
