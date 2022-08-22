@@ -584,6 +584,28 @@ class TrainClassifier:
                 collate_fn=self.cfg.dss_args.collate_fn,
             )
 
+        elif self.cfg.dss_args.type == "Submodular":
+            """
+            ############################## Submodular Dataloader Additional Arguments ##############################
+            """
+            self.cfg.dss_args.model = model
+            self.cfg.dss_args.loss = criterion_nored
+            self.cfg.dss_args.num_classes = self.cfg.model.numclasses
+            self.cfg.dss_args.num_epochs = self.cfg.train_args.num_epochs
+            self.cfg.dss_args.device = self.cfg.train_args.device
+
+            dataloader = SubmodularDataLoader(
+                trainloader,
+                valloader,
+                self.cfg.dss_args,
+                logger,
+                batch_size=self.cfg.dataloader.batch_size,
+                shuffle=self.cfg.dataloader.shuffle,
+                pin_memory=self.cfg.dataloader.pin_memory,
+                collate_fn=self.cfg.dss_args.collate_fn,
+            )
+
+
         elif self.cfg.dss_args.type == "FacLoc":
             """
             ############################## Facility Location Dataloader Additional Arguments ##############################

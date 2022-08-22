@@ -22,14 +22,10 @@ class SubmodularDataloader(AdaptiveDSSDataLoader):
     """
 
     def __init__(self, train_loader, val_loader, dss_args, logger, *args, **kwargs):
-        """
-        Constructor function
-        """
         assert (
             "model" in dss_args.keys()
         ), "'model' is a compulsory argument for Submodular. Please provide the model to be used for uncertainty sampling."
-        assert "selection_type" in dss_args.keys(), "'selection_type' is a compulsory argument for Submodular. Include it as a key in dss_args"
-        assert dss_args.selection_type in ['PerClass', 'Supervised']
+        assert dss_args.selection_type in ['PerClass', 'Supervised', 'PerBatch']
         assert dss_args.submod_func_type in ['facility-location', 'graph-cut', 'sum-redundancy', 'saturated-coverage']
         super(SubmodularDataloader, self).__init__(
             train_loader, val_loader, dss_args, logger, *args, **kwargs
@@ -38,17 +34,24 @@ class SubmodularDataloader(AdaptiveDSSDataLoader):
         self.strategy = SubmodularSelectionStrategy(
             train_loader, val_loader, copy.deepcopy(dss_args.model), dss_args.loss,
             dss_args.device, dss_args.num_classes,
-            ifconvex,
-            selection_type,
-            submod_func_type,
-            optimizer,
+            dss_args.linear_layer,
+            dss_args.if_convex,
+            dss_args.selection_type,
+            dss_args.submod_func_type,
+            dss_args.optimizer, # two-stage is default.
+            # 'random' : randomly select elements (dummy optimizer)
+            # 'modular' : approximate the function using its modular upper bound
+            # 'naive' : the naive greedy algorithm
+            # 'lazy' : the lazy (or accelerated) greedy algorithm
+            # 'approximate-lazy' : the approximate lazy greedy algorithm
+            # 'two-stage' : starts with naive and switches to lazy
+            # 'stochastic' : the stochastic greedy algorithm
+            # 'sample' : randomly take a subset and perform selection on that
+            # 'greedi' : the GreeDi distributed algorithm
+            # 'bidirectional' : the bidirectional greedy algorithm
         )
 
-            dss_args.linear_layer, dss_args.loss,
-            dss_args.device, dss_args.selection_type, logger,
-            balance=(dss_args.balancing if not isinstance(dss_args.balancing, DotMap) else None) )
-
-        self.logger.debug("Uncertainty dataloader initialized.")
+        self.logger.debug("Submodular dataloader initialized.")
 
     def _resample_subset_indices(self):
         """
@@ -63,7 +66,7 @@ class SubmodularDataloader(AdaptiveDSSDataLoader):
         subset_indices, subset_weights = self.strategy.select(self.budget, clone_dict)
         end = time.time()
         self.logger.info(
-            "Epoch: {0:d}, Uncertainty subset selection finished, takes {1:.4f}. ".format(
+            "Epoch: {0:d}, Submodular subset selection finished, takes {1:.4f}. ".format(
                 self.cur_epoch, (end - start)
             )
         )
