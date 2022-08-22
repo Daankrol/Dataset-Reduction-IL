@@ -695,7 +695,7 @@ class TrainClassifier:
                 root=self.cfg.dataset.datadir,
                 dataset_name=self.cfg.dataset.name,
             )
-        else: 
+        else:
             self.embedding_plotter = None
         # self.embedding_plotter = UMAPPlotter(
         #     trainloader,
