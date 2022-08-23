@@ -7,7 +7,7 @@ from cords.selectionstrategies.SL import UncertaintyStrategy, SubmodularSelectio
 import time
 
 
-class SubmodularDataloader(AdaptiveDSSDataLoader):
+class SubmodularDataLoader(AdaptiveDSSDataLoader):
     """
     Implementation of the SubmodularDataloaders that serves as the dataloader for the adaptive Submodular subset selection strategy.
 
@@ -27,10 +27,11 @@ class SubmodularDataloader(AdaptiveDSSDataLoader):
         ), "'model' is a compulsory argument for Submodular. Please provide the model to be used for uncertainty sampling."
         assert dss_args.selection_type in ['PerClass', 'Supervised', 'PerBatch']
         assert dss_args.submod_func_type in ['facility-location', 'graph-cut', 'sum-redundancy', 'saturated-coverage']
-        super(SubmodularDataloader, self).__init__(
+        super(SubmodularDataLoader, self).__init__(
             train_loader, val_loader, dss_args, logger, *args, **kwargs
         )
         self.train_model = dss_args.model
+        self.dss_args = dss_args
         self.strategy = SubmodularSelectionStrategy(
             train_loader, val_loader, copy.deepcopy(dss_args.model), dss_args.loss,
             dss_args.device, dss_args.num_classes,
@@ -49,6 +50,7 @@ class SubmodularDataloader(AdaptiveDSSDataLoader):
             # 'sample' : randomly take a subset and perform selection on that
             # 'greedi' : the GreeDi distributed algorithm
             # 'bidirectional' : the bidirectional greedy algorithm
+            logger
         )
 
         self.logger.debug("Submodular dataloader initialized.")
@@ -61,13 +63,14 @@ class SubmodularDataloader(AdaptiveDSSDataLoader):
         self.logger.debug(
             "Epoch: {0:d}, requires subset selection. ".format(self.cur_epoch)
         )
-        self.logger.debug("Uncertainty budget: %d", self.budget)
+        self.logger.debug("Submodular budget: %d", self.budget)
         clone_dict = copy.deepcopy(self.train_model.state_dict())
         subset_indices, subset_weights = self.strategy.select(self.budget, clone_dict)
         end = time.time()
         self.logger.info(
-            "Epoch: {0:d}, Submodular subset selection finished, takes {1:.4f}. ".format(
-                self.cur_epoch, (end - start)
+            "Epoch: {0:d}, Submodular subset selection with {3} {2} finished, takes {1:.4f}. ".format(
+                self.cur_epoch, (end - start), self.dss_args.submod_func_type, self.dss_args.selection_type
             )
         )
+        self.logger.info(f"Selected {len(subset_indices)} samples with a budget of {self.budget}")
         return subset_indices, subset_weights

@@ -3,71 +3,71 @@
 #- warm up v non warm up -> gradmatch, craig
 #- gradmatch,craig: 30x10, 20x5, 
 ## cifar10 all methods
-python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatch.py --select_every 10 --fraction 0.2
-python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatchpb.py --select_every 10 --fraction 0.2
-python3 run_experiment.py --config ./exp_configs/cifar10/config_glister.py --select_every 10 --fraction 0.2
-python3 run_experiment.py --config ./exp_configs/cifar10/config_craig.py --select_every 10 --fraction 0.2
-python3 run_experiment.py --config ./exp_configs/cifar10/config_craigpb.py --select_every 10 --fraction 0.2
-python3 run_experiment.py --config ./exp_configs/cifar10/config_random.py --select_every 10 --fraction 0.2
-python3 run_experiment.py --config ./exp_configs/cifar10/config_full.py
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatch.py --select_every 10 --fraction 0.2 # ok
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatchpb.py --select_every 10 --fraction 0.2 # ok
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_glister.py --select_every 10 --fraction 0.2 # ok
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_craig.py --select_every 10 --fraction 0.2 # ok
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_craigpb.py --select_every 10 --fraction 0.2 # ok
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_random.py --select_every 10 --fraction 0.2 # ok
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_full.py # ok
 ## cifar 10 warm up vs non warm up
-python3 run_experiment.py --config ./exp_configs/cifar10/config_craig-warm.py --select_every 10 --fraction 0.2 --kappa 0.05
-python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatch-warm.py --select_every 10 --fraction 0.2 --kappa 0.05
-python3 run_experiment.py --config ./exp_configs/cifar10/config_craig-warm.py --select_every 10 --fraction 0.2 --kappa 0.015
-python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatch-warm.py --select_every 10 --fraction 0.2 --kappa 0.015
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_craig-warm.py --select_every 10 --fraction 0.2 --kappa 0.05 # ok
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatch-warm.py --select_every 10 --fraction 0.2 --kappa 0.05 # ok
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_craig-warm.py --select_every 10 --fraction 0.2 --kappa 0.015 # ok
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatch-warm.py --select_every 10 --fraction 0.2 --kappa 0.015 # ok
 
 #cub200. lr=0.005 for pretrained, lr=0.001 for non-pretrained. Internet says 0.0001 for pretrained. (te laag)  (https://notebooks.githubusercontent.com/view/ipynb?browser=chrome&color_mode=auto&commit=2022ec832137b512324d324129d083f63f6a2188&device=unknown&enc_url=68747470733a2f2f7261772e67697468756275736572636f6e74656e742e636f6d2f736c69706e6974736b6179612f63616c746563682d62697264732d616476616e6365642d636c617373696669636174696f6e2f323032326563383332313337623531323332346433323431323964303833663633663661323138382f6e6f7465626f6f6b2e6970796e62&logged_in=false&nwo=slipnitskaya%2Fcaltech-birds-advanced-classification&path=notebook.ipynb&platform=android&repository_id=306156391&repository_type=Repository&version=98)
 #- non pretrained all methods, 
 #- pretrained finetune all methods
 #- warm up v non warm up -> gradmatch (finetune and non-pretrained)
 #- gradmatch pretrain, non finetune 
-python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatch.py --select_every 10 --fraction 0.2 --lr 0.001
-python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatch.py --select_every 10 --fraction 0.2 --lr 0.005
-python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatch.py --select_every 10 --fraction 0.2 --lr 0.01
-python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --select_every 10 --fraction 0.2 --lr 0.001
-python3 run_experiment.py --config ./exp_configs/cub200/config_glister.py --select_every 10 --fraction 0.2 --lr 0.001
-python3 run_experiment.py --config ./exp_configs/cub200/config_craig.py --select_every 10 --fraction 0.2 --lr 0.001
-python3 run_experiment.py --config ./exp_configs/cub200/config_craigpb.py --select_every 10 --fraction 0.2 --lr 0.001
-python3 run_experiment.py --config ./exp_configs/cub200/config_random.py --select_every 10 --fraction 0.2 --lr 0.001
-python3 run_experiment.py --config ./exp_configs/cub200/config_full.py --lr 0.001
+# python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatch.py --select_every 10 --fraction 0.2 --lr 0.001 # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatch.py --select_every 10 --fraction 0.2 --lr 0.005 # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatch.py --select_every 10 --fraction 0.2 --lr 0.01 # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --select_every 10 --fraction 0.2 --lr 0.001 # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_glister.py --select_every 10 --fraction 0.2 --lr 0.001 # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_craig.py --select_every 10 --fraction 0.2 --lr 0.001 # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_craigpb.py --select_every 10 --fraction 0.2 --lr 0.001 # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_random.py --select_every 10 --fraction 0.2 --lr 0.001 # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_full.py --lr 0.001 # ok
 ## pretrained finetune
-python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatch.py --select_every 10 --fraction 0.2 --lr 0.005 --pretrained --finetune
-python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --select_every 10 --fraction 0.2 --lr 0.005 --pretrained --finetune
-python3 run_experiment.py --config ./exp_configs/cub200/config_glister.py --select_every 10 --fraction 0.2 --lr 0.005 --pretrained --finetune
-python3 run_experiment.py --config ./exp_configs/cub200/config_craig.py --select_every 10 --fraction 0.2 --lr 0.005 --pretrained --finetune
-python3 run_experiment.py --config ./exp_configs/cub200/config_craigpb.py --select_every 10 --fraction 0.2 --lr 0.005 --pretrained --finetune
-python3 run_experiment.py --config ./exp_configs/cub200/config_random.py --select_every 10 --fraction 0.2 --lr 0.005 --pretrained --finetune
-python3 run_experiment.py --config ./exp_configs/cub200/config_full.py --lr 0.005 --pretrained --finetune
+# python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatch.py --select_every 10 --fraction 0.2 --lr 0.005 --pretrained --finetune # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --select_every 10 --fraction 0.2 --lr 0.005 --pretrained --finetune # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_glister.py --select_every 10 --fraction 0.2 --lr 0.005 --pretrained --finetune # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_craig.py --select_every 10 --fraction 0.2 --lr 0.005 --pretrained --finetune # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_craigpb.py --select_every 10 --fraction 0.2 --lr 0.005 --pretrained --finetune # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_random.py --select_every 10 --fraction 0.2 --lr 0.005 --pretrained --finetune # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_full.py --lr 0.005 --pretrained --finetune # ok
 ## warmup 
-python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatch-warm.py --kappa 0.05 --select_every 10 --fraction 0.2 --lr 0.001
-python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatch-warm.py --kappa 0.05 --select_every 10 --fraction 0.2 --lr 0.01
-python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatch-warm.py --kappa 0.05 --select_every 10 --fraction 0.2 --lr 0.005 --pretrained --finetune
+# python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatch-warm.py --kappa 0.05 --select_every 10 --fraction 0.2 --lr 0.001 # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatch-warm.py --kappa 0.05 --select_every 10 --fraction 0.2 --lr 0.01 # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatch-warm.py --kappa 0.05 --select_every 10 --fraction 0.2 --lr 0.005 --pretrained --finetune # ok
 ## non fine tune
-python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatch.py --select_every 10 --fraction 0.2 --pretrained --lr 0.001
-python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatch.py --select_every 10 --fraction 0.2 --pretrained --lr 0.005
-python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatch.py --select_every 10 --fraction 0.2 --pretrained --lr 0.0005
+# python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatch.py --select_every 10 --fraction 0.2 --pretrained --lr 0.001 # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatch.py --select_every 10 --fraction 0.2 --pretrained --lr 0.005 # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatch.py --select_every 10 --fraction 0.2 --pretrained --lr 0.0005 # ok
 
 
 #papilion 
 ## pretrained finetune 
-python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatch.py --select_every 10 --fraction 0.2 --lr 0.005 --pretrained --finetune
-python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --select_every 10 --fraction 0.2 --lr 0.005 --pretrained --finetune
-python3 run_experiment.py --config ./exp_configs/papilion/config_glister.py --select_every 10 --fraction 0.2 --lr 0.005 --pretrained --finetune
-python3 run_experiment.py --config ./exp_configs/papilion/config_craig.py --select_every 10 --fraction 0.2 --lr 0.005 --pretrained --finetune
-python3 run_experiment.py --config ./exp_configs/papilion/config_craigpb.py --select_every 10 --fraction 0.2 --lr 0.005 --pretrained --finetune
-python3 run_experiment.py --config ./exp_configs/papilion/config_random.py --select_every 10 --fraction 0.2 --lr 0.005 --pretrained --finetune
-python3 run_experiment.py --config ./exp_configs/papilion/config_full.py --lr 0.005 --pretrained --finetune
+# python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatch.py --select_every 10 --fraction 0.2 --lr 0.005 --pretrained --finetune # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --select_every 10 --fraction 0.2 --lr 0.005 --pretrained --finetune # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_glister.py --select_every 10 --fraction 0.2 --lr 0.005 --pretrained --finetune # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_craig.py --select_every 10 --fraction 0.2 --lr 0.005 --pretrained --finetune # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_craigpb.py --select_every 10 --fraction 0.2 --lr 0.005 --pretrained --finetune # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_random.py --select_every 10 --fraction 0.2 --lr 0.005 --pretrained --finetune # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_full.py --lr 0.005 --pretrained --finetune # ok
 ## warmup 
-python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatch-warm.py --kappa 0.05 --select_every 10 --fraction 0.2 --lr 0.001
-python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatch-warm.py --kappa 0.05 --select_every 10 --fraction 0.2 --lr 0.01
-python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatch-warm.py --kappa 0.05 --select_every 10 --fraction 0.2 --lr 0.005 --pretrained --finetune
+# python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatch-warm.py --kappa 0.05 --select_every 10 --fraction 0.2 --lr 0.001 # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatch-warm.py --kappa 0.05 --select_every 10 --fraction 0.2 --lr 0.01 # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatch-warm.py --kappa 0.05 --select_every 10 --fraction 0.2 --lr 0.005 --pretrained --finetune # ok
 
 #inaturalist: paper from iNaturalist gives lr of 0.0045 for inception,resnet,mobilenet pretrained on imagenet
 #- all methods, pretrained finetuning  (2 different learning rates.) Or exp with 3 learning rates
 #- Gradmatch and Craig, 20% every 10, 30% every 10, 10% every 5
 #- warm up v non warm up -> gradmatch
 # python3 run_experiment.py --config ./exp_configs/inaturalist/config_gradmatch.py --select_every 10 --fraction 0.2 --lr 0.0045 --pretrained --finetune # ok
-# python3 run_experiment.py --confing ./exp_configs/inaturalist/config_gradmatchpb.py --select_every 10 --fraction 0.2 --lr 0.0045 --pretrained --finetune # ok
+# python3 run_experiment.py --config ./exp_configs/inaturalist/config_gradmatchpb.py --select_every 10 --fraction 0.2 --lr 0.0045 --pretrained --finetune # ok
 # python3 run_experiment.py --config ./exp_configs/inaturalist/config_glister.py --select_every 10 --fraction 0.2 --lr 0.0045 --pretrained --finetune # ok
 # python3 run_experiment.py --config ./exp_configs/inaturalist/config_craig.py --select_every 10 --fraction 0.2 --lr 0.0045 --pretrained --finetune # ok
 # python3 run_experiment.py --config ./exp_configs/inaturalist/config_craigpb.py --select_every 10 --fraction 0.2 --lr 0.0045 --pretrained --finetune # ok
@@ -81,3 +81,45 @@ python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatch-warm.
 ## warm up
 # python3 run_experiment.py --config ./exp_configs/inaturalist/config_gradmatch-warm.py --select_every 10 --fraction 0.2 --lr 0.0045 --pretrained --finetune # ok
 # python3 run_experiment.py --config ./exp_configs/inaturalist/config_craig-warm.py --select_every 10 --fraction 0.2 --lr 0.0045 --pretrained --finetune # ok
+
+
+
+# Experiments with larger subset size subset sizes.
+# efficientNet, cub, FT, PT,
+# 30% every 10. 30% every 5, 20% every 5, 40% every 10
+python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --select_every 10 --fraction 0.3 --lr 0.005 --pretrained --finetune
+python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --select_every 5 --fraction 0.3 --lr 0.005 --pretrained --finetune
+python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --select_every 5 --fraction 0.2 --lr 0.005 --pretrained --finetune
+python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --select_every 10 --fraction 0.4 --lr 0.005 --pretrained --finetune
+
+# Exps with more epochs, cub, gradmatch, PT, FT, change scheduler
+python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb_long.py --select_every 10 --fraction 0.2 --lr 0.005 --pretrained --finetune
+python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb_long.py --select_every 10 --fraction 0.4 --lr 0.005 --pretrained --finetune
+
+# experiments with Facility-location, graph-cut
+#cifar10 ResNet. no PT. no FT
+python3 run_experiment.py --config ./exp_configs/cifar10/config_submodular.py --select_every 10 --fraction 0.2 --submod_function facility-location
+python3 run_experiment.py --config ./exp_configs/cifar10/config_submodular.py --select_every 10 --fraction 0.2 --submod_function graph-cut
+python3 run_experiment.py --config ./exp_configs/cifar10/config_submodular.py --select_every 10 --fraction 0.2 --submod_function sum-redundancy
+python3 run_experiment.py --config ./exp_configs/cifar10/config_submodular.py --select_every 10 --fraction 0.2 --submod_function saturated-coverage
+#cubs efficientNet PT, FT
+python3 run_experiment.py --config ./exp_configs/cub200/config_submodular.py --select_every 10 --fraction 0.2 --submod_function facility-location --pretrained --finetune
+python3 run_experiment.py --config ./exp_configs/cub200/config_submodular.py --select_every 10 --fraction 0.2 --submod_function graph-cut --pretrained --finetune
+python3 run_experiment.py --config ./exp_configs/cub200/config_submodular.py --select_every 10 --fraction 0.2 --submod_function sum-redundancy --pretrained --finetune
+python3 run_experiment.py --config ./exp_configs/cub200/config_submodular.py --select_every 10 --fraction 0.2 --submod_function saturated-coverage --pretrained --finetune
+#pap
+python3 run_experiment.py --config ./exp_configs/cub200/config_submodular.py --select_every 10 --fraction 0.2 --submod_function facility-location --pretrained --finetune
+python3 run_experiment.py --config ./exp_configs/cub200/config_submodular.py --select_every 10 --fraction 0.2 --submod_function graph-cut --pretrained --finetune
+python3 run_experiment.py --config ./exp_configs/cub200/config_submodular.py --select_every 10 --fraction 0.2 --submod_function sum-redundancy --pretrained --finetune
+python3 run_experiment.py --config ./exp_configs/cub200/config_submodular.py --select_every 10 --fraction 0.2 --submod_function saturated-coverage --pretrained --finetune
+
+# experiments with selection every 2, 4, 6, epochs. One dataset, one method.
+python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatchpb.py --select_every 2 --fraction 0.2
+python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatchpb.py --select_every 4 --fraction 0.2
+python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatchpb.py --select_every 6 --fraction 0.2
+
+# INaturalist experiments with 50% of the original dataset size.
+python3 run_experiment.py --config ./exp_configs/inaturalist/config_gradmatchpb.py --select_every 10 --fraction 0.2 --lr 0.0045 --pretrained --finetune
+
+# Gradmatch lam=1, PT,FT, cub
+python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --select_every 10 --fraction 0.2 --lr 0.005 --pretrained --finetune --lam 1

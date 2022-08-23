@@ -19,20 +19,41 @@ config = dict(
     #     fraction=0.9,
     #     select_every=1,
     #     selection_type='Entropy',
+    #     balancing=True,
     #     kappa=0
     # ),
     dss_args=dict(
-        type="GradMatch",
-        fraction=0.9,
+        type="Submodular",
+        fraction=0.3,
         select_every=1,
-        lam=0.5,
-        selection_type="PerClassPerGradient",
-        v1=True,
-        valid=False,
-        kappa=0,
-        eps=1e-100,
-        linear_layer=True,
+        selection_type='Supervised',  # Can be: 'PerClass', 'Supervised'
+        submod_func_type='facility-location',
+        # Can be: 'facility-location', , 'graph-cut', 'sum-redundancy', 'saturated-coverage'
+        optimizer='two-stage',  # two-stage, random, modular, naive, lazy, greedi etc...
+        if_convex=False,
+        linear_layer=False,
+        kappa=0
     ),
+    # dss_args=dict(
+    #     type="FacLoc",
+    #     selection_type='Supervised',
+    #     submod_func_type='facility-location',
+    #     fraction=0.3,
+    #     select_every=1,
+    #     kappa=0,
+    #     ),
+    # dss_args=dict(
+    #     type="GradMatch",
+    #     fraction=0.9,
+    #     select_every=1,
+    #     lam=0.5,
+    #     selection_type="PerClassPerGradient",
+    #     v1=True,
+    #     valid=False,
+    #     kappa=0,
+    #     eps=1e-100,
+    #     linear_layer=True,
+    # ),
     train_args=dict(
         num_epochs=3,
         device="cuda",

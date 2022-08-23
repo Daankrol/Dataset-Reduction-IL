@@ -5,4 +5,5 @@ from .craigdataloader import CRAIGDataLoader
 from .olrandomdataloader import OLRandomDataLoader
 from .randomdataloader import RandomDataLoader
 from .selcondataloader import SELCONDataLoader
-from .uncertaintydataloader import  UncertaintyDataLoader
+from .uncertaintydataloader import UncertaintyDataLoader
+from .submodulardataloader import SubmodularDataLoader

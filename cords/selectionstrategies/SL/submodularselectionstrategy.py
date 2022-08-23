@@ -38,11 +38,11 @@ class SubmodularSelectionStrategy(DataSelectionStrategy):
     """
 
     def __init__(self, trainloader, valloader, model, loss,
-                 device, num_classes, linear_layer, if_convex, selection_type, submod_func_type, optimizer):
+                 device, num_classes, linear_layer, if_convex, selection_type, submod_func_type, optimizer, logger):
         """
         Constructer method
         """
-        super().__init__(trainloader, valloader, model, num_classes, linear_layer, loss, device)
+        super().__init__(trainloader, valloader, model, num_classes, linear_layer, loss, device, logger)
         self.if_convex = if_convex
         self.selection_type = selection_type
         self.submod_func_type = submod_func_type
@@ -279,19 +279,19 @@ class SubmodularSelectionStrategy(DataSelectionStrategy):
             self.dist_mat = sparse_simmat
             if self.submod_func_type == 'facility-location':
                 fl = apricot.functions.facilityLocation.FacilityLocationSelection(random_state=0, metric='precomputed',
-                                                                                  n_samples=per_class_bud,
+                                                                                  n_samples=budget,
                                                                                   optimizer=self.optimizer)
             elif self.submod_func_type == 'graph-cut':
                 fl = apricot.functions.graphCut.GraphCutSelection(random_state=0, metric='precomputed',
-                                                                  n_samples=per_class_bud, optimizer=self.optimizer)
+                                                                  n_samples=budget, optimizer=self.optimizer)
             elif self.submod_func_type == 'sum-redundancy':
                 fl = apricot.functions.sumRedundancy.SumRedundancySelection(random_state=0, metric='precomputed',
-                                                                            n_samples=per_class_bud,
+                                                                            n_samples=budget,
                                                                             optimizer=self.optimizer)
             elif self.submod_func_type == 'saturated-coverage':
                 fl = apricot.functions.saturatedCoverage.SaturatedCoverageSelection(random_state=0,
                                                                                     metric='precomputed',
-                                                                                    n_samples=per_class_bud,
+                                                                                    n_samples=budget,
                                                                                     optimizer=self.optimizer)
 
             sim_sub = fl.fit_transform(sparse_simmat)

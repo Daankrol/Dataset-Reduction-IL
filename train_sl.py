@@ -21,6 +21,7 @@ from cords.utils.data.dataloader.SL.adaptive import (
     RandomDataLoader,
     SELCONDataLoader,
     UncertaintyDataLoader,
+    SubmodularDataLoader
 )
 
 from cords.utils.data.dataloader.SL.nonadaptive import FacLocDataLoader
@@ -87,7 +88,10 @@ class TrainClassifier:
         self.logger.propagate = False
 
         if self.cfg.wandb:
-            name = self.cfg.dss_args.type + "_" + self.cfg.dataset.name
+            if self.cfg.dss_args.type == 'Submodular':
+                name = self.cfg.dss_args.submod_func_type + "_" + self.cfg.dataset.name
+            else:
+                name = self.cfg.dss_args.type + "_" + self.cfg.dataset.name
             if self.cfg.dss_args.fraction != DotMap():
                 name += f"_{str(self.cfg.dss_args.fraction)}"
             if self.cfg.dss_args.select_every != DotMap():
@@ -707,7 +711,7 @@ class TrainClassifier:
         ############################## tSNE embeddings ##############################
         """
         # create embeddings for the train set
-        if self.cfg.dataset.name in ['cifar10', 'cifar100', 'papilion','cub200'] and self.cfg.dss_args.type not in ['Full']:
+        if self.cfg.dataset.name in ['cifar10', 'cifar100', 'papilion','cub200', 'inaturalist'] and self.cfg.dss_args.type not in ['Full']:
             self.embedding_plotter = TSNEPlotter(
                 trainloader,
                 valloader,

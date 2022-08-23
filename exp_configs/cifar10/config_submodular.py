@@ -2,6 +2,7 @@
 config = dict(
     setting="SL",
     measure_energy=True,
+    logging='DEBUG',
     wandb=True,
     is_reg=False,
     dataset=dict(name="cifar10", datadir="../data", feature="dss", type="image", img_size=32),
@@ -12,16 +13,15 @@ config = dict(
     optimizer=dict(type="sgd", momentum=0.9, lr=0.01, weight_decay=5e-4, nesterov=False),
     scheduler=dict(type="cosine_annealing", T_max=300),
     dss_args=dict(
-        type="GradMatchPB",
-        fraction=0.1,
-        select_every=20,
-        lam=0.5,
-        selection_type="PerBatch",
-        v1=True,
-        valid=False,
-        eps=1e-100,
-        linear_layer=True,
-        kappa=0,
+        type="Submodular",
+        fraction=0.2,
+        select_every=10,
+        selection_type='Supervised', # Can be: 'PerClass', 'Supervised'
+        submod_func_type='facility-location', # Can be: 'facility-location', , 'graph-cut', 'sum-redundancy', 'saturated-coverage'
+        optimizer='two-stage', # two-stage, random, modular, naive, lazy, greedi etc...
+        if_convex=False,
+        linear_layer=False,
+        kappa=0
     ),
     train_args=dict(
         num_epochs=300,

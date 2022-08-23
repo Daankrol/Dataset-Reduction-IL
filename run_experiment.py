@@ -120,6 +120,14 @@ parser.add_argument(
     help='Whether to run the DSS nonadaptively. (only once at the start)'
 )
 
+parser.add_argument(
+    "--submod_function",
+    type=str,
+    choices=["facility-location", "graph-cut", "sum-redundancy", "saturated-coverage"]
+)
+
+
+
 args = parser.parse_args()
 if args.config is None:
     parser.print_help()
@@ -136,6 +144,8 @@ if args.model is not None:
     cfg.model.architecture = args.model
 if args.selection_type is not None:
     cfg.dss_args.selection_type = args.selection_type
+if args.submod_function is not None:
+    cfg.dss_args.submod_func_type = args.submod_function
 if args.pretrained:
     cfg.model.type = 'pre-trained'
 
