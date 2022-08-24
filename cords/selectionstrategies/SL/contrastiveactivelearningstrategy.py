@@ -69,6 +69,12 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
         x2 = np.repeat(np.reshape(np.sum(np.multiply(x, x), axis=1), (rowx, 1)), repeats=rowx, axis=1)
         return np.sqrt(np.clip(x2 + x2.T - 2. * xy, 1e-12, None))
 
+    def euclidean_dist_pair_torch(self, x):
+        (rowx, colx) = x.shape
+        xy = torch.mm(x, x.t())
+        x2 = torch.sum(torch.mul(x, x), dim=1).reshape(-1, 1)
+        return torch.sqrt(torch.clamp(x2 + x2.t() - 2. * xy, min=1e-12))
+
     def find_knn(self, model_params):
         "Find k-nearest-neighbour datapoints based on feature embedding"
         self.logger.info('Finding k-nearest-neighbours')
