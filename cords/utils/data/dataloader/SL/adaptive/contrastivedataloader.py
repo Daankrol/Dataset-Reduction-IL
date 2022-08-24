@@ -1,7 +1,5 @@
 import copy
-
 from dotmap import DotMap
-
 from .adaptivedataloader import AdaptiveDSSDataLoader
 from cords.selectionstrategies.SL import ContrastiveActiveLearningStrategy
 import time
@@ -37,8 +35,8 @@ class ContrastiveDataLoader(AdaptiveDSSDataLoader):
         )
         self.train_model = dss_args.model
         self.strategy = ContrastiveActiveLearningStrategy(train_loader, val_loader, copy.deepcopy(dss_args.model),
-                                                            dss_args.num_classes, dss_args.linear_layer, dss_args.selection_type,
-                                                            logger, dss_args.metric)
+                                                          dss_args.loss, dss_args.device, dss_args.num_classess,
+                                                          dss_args.linear_layer, dss_args.selection_type, logger, dss_args.metric)
 
         self.logger.debug("Contrastive dataloader initialized.")
 

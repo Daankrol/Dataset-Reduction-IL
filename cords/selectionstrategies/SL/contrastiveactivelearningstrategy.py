@@ -6,6 +6,7 @@ from scipy.sparse import csr_matrix
 from .dataselectionstrategy import DataSelectionStrategy
 from torch.utils.data.sampler import SubsetRandomSampler
 from sklearn.metrics import pairwise_distances
+import time
 
 class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
     """
@@ -37,7 +38,6 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
     def __init__(self, trainloader, valloader, model, loss,
                  device, num_classes, linear_layer, selection_type, logger, metric='euclidean', k=10):
         super().__init__(trainloader, valloader, model, num_classes, linear_layer, loss, device, logger)
-        self.if_convex = if_convex
         self.selection_type = selection_type
         self.k = k
         if metric == 'euclidean':
@@ -58,14 +58,17 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
     def euclidean_distance_scipy(self, x):
         return pairwise_distances(x, metric='euclidean')
 
-    def euclidean_dist_pair_np(self, x):
-        # (rowx, colx) = x.shape
-        # xy = np.dot(x, x.T)
-        # x2 = np.repeat(np.reshape(np.sum(np.multiply(x, x), axis=1), (rowx, 1)), repeats=rowx, axis=1)
-        # return np.sqrt(np.clip(x2 + x2.T - 2. * xy, 1e-12, None))
-        # To reduce memory need, we use a sparse matrix to store the distance matrix
+    def euclidean_dist_pair_torch(self, x):
+        if isinstance(x, np.ndarray):
+            x = torch.from_numpy(x)
         (rowx, colx) = x.shape
-        xy = csr_matrix((x.reshape(-1), (np.arange(rowx * colx), np.arange(rowx * colx))), shape=(rowx, rowx))
+        xy = torch.mm(x, x.t())
+        x2 = torch.sum(torch.mul(x, x), dim=1).reshape(-1, 1)
+        return torch.sqrt(torch.clamp(x2 + x2.t() - 2. * xy, min=1e-12))
+
+    def euclidean_dist_pair_np(self, x):
+        (rowx, colx) = x.shape
+        xy = np.dot(x, x.T)
         x2 = np.repeat(np.reshape(np.sum(np.multiply(x, x), axis=1), (rowx, 1)), repeats=rowx, axis=1)
         return np.sqrt(np.clip(x2 + x2.T - 2. * xy, 1e-12, None))
 
