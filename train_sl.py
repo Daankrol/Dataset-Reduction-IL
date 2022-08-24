@@ -21,6 +21,7 @@ from cords.utils.data.dataloader.SL.adaptive import (
     RandomDataLoader,
     SELCONDataLoader,
     UncertaintyDataLoader,
+    SubmodularDataLoader
 )
 
 from cords.utils.data.dataloader.SL.nonadaptive import FacLocDataLoader
@@ -98,6 +99,8 @@ class TrainClassifier:
                 name += "_FT"
             if self.cfg.early_stopping:
                 name += "_ES"
+            if not self.cfg.dss_args.online:
+                name += "_offline"
             if self.cfg.scheduler.type is None and not self.cfg.early_stopping:
                 name += "_NoSched"
             if self.cfg.dss_args.kappa != DotMap() and self.cfg.dss_args.kappa > 0:
@@ -707,7 +710,7 @@ class TrainClassifier:
         ############################## tSNE embeddings ##############################
         """
         # create embeddings for the train set
-        if self.cfg.dataset.name in ['cifar10', 'cifar100', 'papilion','cub200'] and self.cfg.dss_args.type not in ['Full']:
+        if self.cfg.dataset.name in ['cifar10', 'cifar100', 'papilion','cub200'] and self.cfg.dss_args.type not in ['Full'] and not self.cfg.no_tsne:
             self.embedding_plotter = TSNEPlotter(
                 trainloader,
                 valloader,
