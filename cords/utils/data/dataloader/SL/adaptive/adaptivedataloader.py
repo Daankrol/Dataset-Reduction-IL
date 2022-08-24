@@ -51,6 +51,7 @@ class AdaptiveDSSDataLoader(DSSDataLoader):
         else:
             self.online = False
 
+        self.logger.info("Running Data Subset Selection in " + ('adaptive' if self.online else 'non-adaptive') + ' mode.' )
         self.kappa = dss_args.kappa
         if dss_args.kappa > 0:
             assert (
