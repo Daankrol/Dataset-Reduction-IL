@@ -21,7 +21,6 @@ from cords.utils.data.dataloader.SL.adaptive import (
     RandomDataLoader,
     SELCONDataLoader,
     UncertaintyDataLoader,
-    SubmodularDataLoader
 )
 
 from cords.utils.data.dataloader.SL.nonadaptive import FacLocDataLoader
@@ -88,10 +87,7 @@ class TrainClassifier:
         self.logger.propagate = False
 
         if self.cfg.wandb:
-            if self.cfg.dss_args.type == 'Submodular':
-                name = self.cfg.dss_args.submod_func_type + "_" + self.cfg.dataset.name
-            else:
-                name = self.cfg.dss_args.type + "_" + self.cfg.dataset.name
+            name = self.cfg.dss_args.type + "_" + self.cfg.dataset.name
             if self.cfg.dss_args.fraction != DotMap():
                 name += f"_{str(self.cfg.dss_args.fraction)}"
             if self.cfg.dss_args.select_every != DotMap():
@@ -711,7 +707,7 @@ class TrainClassifier:
         ############################## tSNE embeddings ##############################
         """
         # create embeddings for the train set
-        if self.cfg.dataset.name in ['cifar10', 'cifar100', 'papilion','cub200', 'inaturalist'] and self.cfg.dss_args.type not in ['Full']:
+        if self.cfg.dataset.name in ['cifar10', 'cifar100', 'papilion','cub200'] and self.cfg.dss_args.type not in ['Full']:
             self.embedding_plotter = TSNEPlotter(
                 trainloader,
                 valloader,
@@ -820,7 +816,11 @@ class TrainClassifier:
                 scheduler.step()
             timing.append(epoch_time)
             total_timing += epoch_time
+            #  report energy every epoch.
+            self.report_energy(epoch=epoch)
             print_args = self.cfg.train_args.print_args
+
+            
 
             # construct t-SNE plots if data has been resampled
             if self.cfg.dss_args.type != "Full" and dataloader.resampled and self.embedding_plotter is not None:
@@ -877,19 +877,19 @@ class TrainClassifier:
                     if "trn_recall" in print_args:
                         # Do weighted averaging recall over all classes
                         recall = torchmetrics.Recall(
-                            average="weighted", num_classes=self.cfg.model.numclasses
+                            average="macro", num_classes=self.cfg.model.numclasses
                         ).to(self.cfg.train_args.device)
                         trn_recall = recall(outputs, targets).item()
                         trn_recalls.append(trn_recall)
 
                     # calculate precision and f1
                     precision = torchmetrics.Precision(
-                        average="micro", num_classes=self.cfg.model.numclasses
+                        average="macro", num_classes=self.cfg.model.numclasses
                     ).to(self.cfg.train_args.device)
                     trn_precision = precision(outputs, targets).item()
                     trn_precisions.append(trn_precision)
                     f1 = torchmetrics.F1Score(
-                        average="micro", num_classes=self.cfg.model.numclasses
+                        average="macro", num_classes=self.cfg.model.numclasses
                     ).to(self.cfg.train_args.device)
                     trn_f1 = f1(outputs, targets).item()
                     trn_f1s.append(trn_f1)
@@ -945,19 +945,19 @@ class TrainClassifier:
                     if "val_recall" in print_args:
                         # Do micro averaging recall over all classes
                         recall = torchmetrics.Recall(
-                            average="micro", num_classes=self.cfg.model.numclasses
+                            average="macro", num_classes=self.cfg.model.numclasses
                         ).to(self.cfg.train_args.device)
                         val_recall = recall(outputs, targets).item()
                         val_recalls.append(val_recall)
 
                     # calculate precision and f1
                     precision = torchmetrics.Precision(
-                        average="micro", num_classes=self.cfg.model.numclasses
+                        average="macro", num_classes=self.cfg.model.numclasses
                     ).to(self.cfg.train_args.device)
                     val_precision = precision(outputs, targets).item()
                     val_precisions.append(val_precision)
                     f1 = torchmetrics.F1Score(
-                        average="micro", num_classes=self.cfg.model.numclasses
+                        average="macro", num_classes=self.cfg.model.numclasses
                     ).to(self.cfg.train_args.device)
                     val_f1 = f1(outputs, targets).item()
                     val_f1s.append(val_f1)
@@ -1006,19 +1006,19 @@ class TrainClassifier:
                     if "tst_recall" in print_args:
                         # Do micro averaging recall over all classes
                         recall = torchmetrics.Recall(
-                            average="micro", num_classes=self.cfg.model.numclasses
+                            average="macro", num_classes=self.cfg.model.numclasses
                         ).to(self.cfg.train_args.device)
                         tst_recall = recall(outputs, targets).item()
                         tst_recalls.append(tst_recall)
 
                     # calculate precision and f1
                     precision = torchmetrics.Precision(
-                        average="micro", num_classes=self.cfg.model.numclasses
+                        average="macro", num_classes=self.cfg.model.numclasses
                     ).to(self.cfg.train_args.device)
                     tst_precision = precision(outputs, targets).item()
                     tst_precisions.append(tst_precision)
                     f1 = torchmetrics.F1Score(
-                        average="micro", num_classes=self.cfg.model.numclasses
+                        average="macro", num_classes=self.cfg.model.numclasses
                     ).to(self.cfg.train_args.device)
                     tst_f1 = f1(outputs, targets).item()
                     tst_f1s.append(tst_f1)
@@ -1117,8 +1117,6 @@ class TrainClassifier:
                 logger.info(print_str)
                 wandb.log(metrics, step=epoch)
 
-            #  report energy every epoch.
-            self.report_energy(epoch=epoch)
 
             """
             ################################################# Checkpoint Saving #################################################
