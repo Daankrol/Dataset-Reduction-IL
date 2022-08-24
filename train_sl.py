@@ -21,7 +21,8 @@ from cords.utils.data.dataloader.SL.adaptive import (
     RandomDataLoader,
     SELCONDataLoader,
     UncertaintyDataLoader,
-    SubmodularDataLoader
+    SubmodularDataLoader,
+    ContrastiveDataLoader
 )
 
 from cords.utils.data.dataloader.SL.nonadaptive import FacLocDataLoader
@@ -607,6 +608,17 @@ class TrainClassifier:
                 pin_memory=self.cfg.dataloader.pin_memory,
                 collate_fn=self.cfg.dss_args.collate_fn,
             )
+
+        elif self.cfg.dss_args.type == "CAL":
+            self.cfg.dss_args.model = model
+            self.cfg.dss_args.loss = criterion_nored
+            self.cfg.dss_args.num_classes = self.cfg.model.numclasses
+            self.cfg.dss_args.num_epochs = self.cfg.train_args.num_epochs
+            self.cfg.dss_args.device = self.cfg.train_args.device
+            dataloader = ContrastiveDataLoader(
+                trainloader, valloader, self.cfg.dss_args, logger
+            )
+
 
 
         elif self.cfg.dss_args.type == "FacLoc":

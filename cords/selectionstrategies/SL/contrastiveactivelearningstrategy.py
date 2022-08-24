@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from scipy.sparse import csr_matrix
 from .dataselectionstrategy import DataSelectionStrategy
 from torch.utils.data.sampler import SubsetRandomSampler
-
+import time
 
 class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
     """
@@ -37,11 +37,10 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
     def __init__(self, trainloader, valloader, model, loss,
                  device, num_classes, linear_layer, selection_type, logger, metric='euclidean', k=10):
         super().__init__(trainloader, valloader, model, num_classes, linear_layer, loss, device, logger)
-        self.if_convex = if_convex
         self.selection_type = selection_type
         self.k = k
         if metric == 'euclidean':
-            self.metric = self.euclidean_dist_pair_np
+            self.metric = self.euclidean_dist_pair_torch
         elif metric == 'cossim':
             self.metric = lambda a, b: -1. * cossim_pair_np(a, b)
         else:
@@ -54,6 +53,12 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
         res = num / denom
         res[np.isneginf(res)] = 0.
         return 0.5 + 0.5 * res
+
+    def euclidean_dist_pair_torch(self, x):
+        (rowx, colx) = x.shape
+        xy = torch.mm(x, x.t())
+        x2 = torch.sum(torch.mul(x, x), dim=1).reshape(-1, 1)
+        return torch.sqrt(torch.clamp(x2 + x2.t() - 2. * xy, min=1e-12))
 
     def euclidean_dist_pair_np(self, x):
         (rowx, colx) = x.shape
