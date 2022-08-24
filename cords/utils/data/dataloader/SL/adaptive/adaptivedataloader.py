@@ -45,6 +45,12 @@ class AdaptiveDSSDataLoader(DSSDataLoader):
         ), "'kappa' is a compulsory argument. Include it as a key in dss_args"
         self.select_every = dss_args.select_every
         self.device = dss_args.device
+
+        if "online" in dss_args.keys() and dss_args.online:
+            self.online = True
+        else:
+            self.online = False
+
         self.kappa = dss_args.kappa
         if dss_args.kappa > 0:
             assert (
@@ -69,51 +75,59 @@ class AdaptiveDSSDataLoader(DSSDataLoader):
         Iter function that returns the iterator of full data loader or data subset loader or empty loader based on the
         warmstart kappa value.
         """
-        self.initialized = True
-
-        if self.cur_epoch < self.warmup_epochs + 1:
-            self.logger.debug(
-                "Epoch: {0:d} using full dataset for warm-start.".format(
-                    self.cur_epoch, self.warmup_epochs
+        if self.online:
+            self.initialized = True
+            if self.cur_epoch < self.warmup_epochs + 1:
+                self.logger.debug(
+                    "Epoch: {0:d} using full dataset for warm-start.".format(
+                        self.cur_epoch, self.warmup_epochs
+                    )
                 )
-            )
-            loader = self.wtdataloader
-            print(
-                "Epoch: {0:d} using full dataset for warm-start.".format(
-                    self.cur_epoch, self.warmup_epochs
+                loader = self.wtdataloader
+                print(
+                    "Epoch: {0:d} using full dataset for warm-start.".format(
+                        self.cur_epoch, self.warmup_epochs
+                    )
                 )
-            )
-            # print("Size: ", len(loader))
-            self.resampled = False
-        elif self.cur_epoch == self.warmup_epochs + 1:
-            self.logger.debug(
-                "Epoch: {0:d} finished with warm up so forcing a resample.".format(
-                    self.cur_epoch
-                )
-            )
-            print(
-                "Epoch: {0:d} finished with warm up so forcing a resample.".format(
-                    self.cur_epoch
-                )
-            )
-            self.resample()
-            loader = self.subset_loader
-        else:
-            self.logger.debug(
-                "Epoch: {0:d}, reading dataloader... ".format(self.cur_epoch)
-            )
-            print("Epoch: {0:d}, reading dataloader... ".format(self.cur_epoch))
-            if ((self.cur_epoch + self.warmup_epochs) % self.select_every == 0) and (
-                self.cur_epoch > 1
-            ):
-                self.resample()
-            else:
+                # print("Size: ", len(loader))
                 self.resampled = False
-            loader = self.subset_loader
-            # print("Size: ", len(loader))
-            self.logger.debug(
-                "Epoch: {0:d}, finished reading dataloader. ".format(self.cur_epoch)
-            )
+            elif self.cur_epoch == self.warmup_epochs + 1:
+                self.logger.debug(
+                    "Epoch: {0:d} finished with warm up so forcing a resample.".format(
+                        self.cur_epoch
+                    )
+                )
+                print(
+                    "Epoch: {0:d} finished with warm up so forcing a resample.".format(
+                        self.cur_epoch
+                    )
+                )
+                self.resample()
+                loader = self.subset_loader
+            else:
+                self.logger.debug(
+                    "Epoch: {0:d}, reading dataloader... ".format(self.cur_epoch)
+                )
+                print("Epoch: {0:d}, reading dataloader... ".format(self.cur_epoch))
+                if ((self.cur_epoch + self.warmup_epochs) % self.select_every == 0) and (
+                    self.cur_epoch > 1
+                ):
+                    self.resample()
+                else:
+                    self.resampled = False
+                loader = self.subset_loader
+                # print("Size: ", len(loader))
+                self.logger.debug(
+                    "Epoch: {0:d}, finished reading dataloader. ".format(self.cur_epoch)
+                )
+        else:
+            if not self.initialized:
+                self.resample()
+                self.initialized = True
+                loader = self.subset_loader
+            else:
+                loader = self.subset_loader
+
         self.cur_epoch += 1
         return loader.__iter__()
         #
@@ -140,9 +154,11 @@ class AdaptiveDSSDataLoader(DSSDataLoader):
         """
         Returns the length of the current data loader
         """
-
-        if self.cur_epoch < self.warmup_epochs:
-            return len(self.wtdataloader)
+        if online:
+            if self.cur_epoch < self.warmup_epochs:
+                return len(self.wtdataloader)
+            else:
+                return len(self.subset_loader)
         else:
             return len(self.subset_loader)
         #

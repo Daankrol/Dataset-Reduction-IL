@@ -32,7 +32,8 @@ config = dict(
         optimizer='two-stage',  # two-stage, random, modular, naive, lazy, greedi etc...
         if_convex=False,
         linear_layer=False,
-        kappa=0
+        kappa=0,
+        nonadaptive=True,
     ),
     # dss_args=dict(
     #     type="FacLoc",
