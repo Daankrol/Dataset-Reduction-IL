@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from scipy.sparse import csr_matrix
 from .dataselectionstrategy import DataSelectionStrategy
 from torch.utils.data.sampler import SubsetRandomSampler
-
+from sklearn.metrics import pairwise_distances
 
 class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
     """
@@ -55,13 +55,31 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
         res[np.isneginf(res)] = 0.
         return 0.5 + 0.5 * res
 
+    def euclidean_distance_scipy(self, x):
+        return pairwise_distances(x, metric='euclidean')
+
     def euclidean_dist_pair_np(self, x):
+        # (rowx, colx) = x.shape
+        # xy = np.dot(x, x.T)
+        # x2 = np.repeat(np.reshape(np.sum(np.multiply(x, x), axis=1), (rowx, 1)), repeats=rowx, axis=1)
+        # return np.sqrt(np.clip(x2 + x2.T - 2. * xy, 1e-12, None))
+        # To reduce memory need, we use a sparse matrix to store the distance matrix
         (rowx, colx) = x.shape
-        xy = np.dot(x, x.T)
+        xy = csr_matrix((x.reshape(-1), (np.arange(rowx * colx), np.arange(rowx * colx))), shape=(rowx, rowx))
         x2 = np.repeat(np.reshape(np.sum(np.multiply(x, x), axis=1), (rowx, 1)), repeats=rowx, axis=1)
         return np.sqrt(np.clip(x2 + x2.T - 2. * xy, 1e-12, None))
 
+
     def euclidean_dist_pair_torch(self, x):
+        # if x is a numpy array, convert it to torch tensor
+        if isinstance(x, np.ndarray):
+            x = torch.from_numpy(x)
+        # if x is a torch tensor, convert it to numpy array
+        if isinstance(x, torch.Tensor):
+            x = x.numpy()
+
+
+
         (rowx, colx) = x.shape
         xy = torch.mm(x, x.t())
         x2 = torch.sum(torch.mul(x, x), dim=1).reshape(-1, 1)
