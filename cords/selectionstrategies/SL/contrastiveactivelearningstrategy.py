@@ -10,7 +10,7 @@ import time
 
 class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
     """
-    This class extends :class:`selectionstrategies.supervisedlearning.dataselectionstrategy.DataSelectionStrategy`
+    This class extends :class:`selectionstrategises.supervisedlearning.dataselectionstrategy.DataSelectionStrategy`
     to use Contrastive Active Learning (CAL) as a data selection strategy.
 
     Parameters
@@ -41,7 +41,7 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
         self.selection_type = selection_type
         self.k = k
         if metric == 'euclidean':
-            self.metric = self.euclidean_dist_pair_np
+            self.metric = self.euclidean_distance_scipy
         elif metric == 'cossim':
             self.metric = lambda a, b: -1. * cossim_pair_np(a, b)
         else:
@@ -56,7 +56,7 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
         return 0.5 + 0.5 * res
 
     def euclidean_distance_scipy(self, x):
-        return pairwise_distances(x, metric='euclidean')
+        return pairwise_distances(x, metric='euclidean', n_jobs=-1)
 
     def euclidean_dist_pair_torch(self, x):
         if isinstance(x, np.ndarray):
@@ -77,12 +77,6 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
         # if x is a numpy array, convert it to torch tensor
         if isinstance(x, np.ndarray):
             x = torch.from_numpy(x)
-        # if x is a torch tensor, convert it to numpy array
-        if isinstance(x, torch.Tensor):
-            x = x.numpy()
-
-
-
         (rowx, colx) = x.shape
         xy = torch.mm(x, x.t())
         x2 = torch.sum(torch.mul(x, x), dim=1).reshape(-1, 1)
@@ -109,6 +103,7 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
                 
                 embeddings = np.concatenate(embeddings, axis=0)
                 knn.append(np.argsort(self.metric(embeddings), axis=1)[:, 1:self.k+1])
+            self.logger.info('Finished with computing embeddings')
             return knn
         else:
             embeddings = []
@@ -119,12 +114,13 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
                 inputs = inputs.to(self.device)
                 out, embedding = self.model(inputs, last=True, freeze=True)
                 embeddings.append(embedding)
-                if i % 100 == 0:
-                    self.logger.info('Computed embedding for {}/{}'.format(i, loader_num))
+                # if i % 100 == 0:
+                #     self.logger.info('Computed embedding for {}/{}'.format(i, loader_num))
 
             # embeddings = np.concatenate(arrays=embeddings, axis=0)
             # return np.argsort(self.metric(embeddings), axis=1)[:, 1:(self.k+1)]
             embeddings = torch.cat(embeddings, dim=0)
+            self.logger.info('Finished with computing embeddings')
             return np.argsort(self.metric(embeddings.cpu().numpy()), axis=1)[:, 1:self.k + 1]
 
     def calculate_KL_divergence(self, knn, index=None):
@@ -135,11 +131,11 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
             else:
                 loader = torch.utils.data.DataLoader(torch.utils.data.Subset(self.trainloader.dataset, index),
                                                         batch_size=self.trainloader.batch_size)
-
-            probs = np.zeros([loader.dataset.__len__(), self.num_classes])
+            probs = np.zeros([len(loader.dataset), self.num_classes])
             batch_num = len(loader)
             batch_size = loader.batch_size
             for i, (inputs, labels) in enumerate(loader):
+                inputs = inputs.to(self.device)
                 probs[i* batch_size: (i+1)*batch_size] = torch.nn.functional.softmax(self.model(inputs, freeze=True)[0], dim=1).detach().cpu().numpy()
 
             s = np.zeros(batch_num)
@@ -152,8 +148,8 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
 
     def select(self, budget, model_params):
         start_time = time.time()
-        self.knn = self.find_knn(model_params)
         self.logger.info(f'Started {self.selection_type} CAL selection.')
+        self.knn = self.find_knn(model_params)
         self.logger.info('Calculating KL divergence')
         self.fraction = budget / self.N_trn
         scores = []
