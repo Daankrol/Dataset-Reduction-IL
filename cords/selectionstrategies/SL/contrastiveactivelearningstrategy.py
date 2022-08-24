@@ -40,7 +40,7 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
         self.selection_type = selection_type
         self.k = k
         if metric == 'euclidean':
-            self.metric = self.euclidean_dist_pair_torch
+            self.metric = self.euclidean_dist_pair_np
         elif metric == 'cossim':
             self.metric = lambda a, b: -1. * cossim_pair_np(a, b)
         else:
@@ -55,6 +55,8 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
         return 0.5 + 0.5 * res
 
     def euclidean_dist_pair_torch(self, x):
+        if isinstance(x, np.ndarray):
+            x = torch.from_numpy(x)
         (rowx, colx) = x.shape
         xy = torch.mm(x, x.t())
         x2 = torch.sum(torch.mul(x, x), dim=1).reshape(-1, 1)
@@ -62,6 +64,7 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
 
     def euclidean_dist_pair_np(self, x):
         (rowx, colx) = x.shape
+        print('shape is:', x.shape)
         xy = np.dot(x, x.T)
         x2 = np.repeat(np.reshape(np.sum(np.multiply(x, x), axis=1), (rowx, 1)), repeats=rowx, axis=1)
         return np.sqrt(np.clip(x2 + x2.T - 2. * xy, 1e-12, None))
