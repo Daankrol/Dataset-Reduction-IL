@@ -123,3 +123,48 @@
 #
 # # Gradmatch lam=1, PT,FT, cub
 # python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --select_every 10 --fraction 0.2 --lr 0.005 --pretrained --finetune --lam 1
+
+## submodular methods
+# cubs, non-PT (lookup lr), lr 0.01 and 0.1
+python3 run_experiment.py --config ./exp_configs/cub200/config_submodular.py --lr 0.01 --select_every 10 --fraction 0.2 --submod_function facility-location
+python3 run_experiment.py --config ./exp_configs/cub200/config_submodular.py --lr 0.01 --select_every 10 --fraction 0.2 --submod_function sum-redundancy 
+python3 run_experiment.py --config ./exp_configs/cub200/config_submodular.py --lr 0.01 --select_every 10 --fraction 0.2 --submod_function graph-cut
+python3 run_experiment.py --config ./exp_configs/cub200/config_submodular.py --lr 0.01 --select_every 10 --fraction 0.2 --submod_function saturated-coverage 
+
+python3 run_experiment.py --config ./exp_configs/cub200/config_submodular.py --lr 0.1 --select_every 10 --fraction 0.2 --submod_function facility-location
+python3 run_experiment.py --config ./exp_configs/cub200/config_submodular.py --lr 0.1 --select_every 10 --fraction 0.2 --submod_function sum-redundancy 
+python3 run_experiment.py --config ./exp_configs/cub200/config_submodular.py --lr 0.1 --select_every 10 --fraction 0.2 --submod_function graph-cut
+python3 run_experiment.py --config ./exp_configs/cub200/config_submodular.py --lr 0.1 --select_every 10 --fraction 0.2 --submod_function saturated-coverage 
+
+# papilion, look up fraction and rates
+python3 run_experiment.py --config ./exp_configs/papilion/config_submodular.py --select_every 10 --fraction 0.2 --submod_function facility-location --pretrained --finetune
+python3 run_experiment.py --config ./exp_configs/papilion/config_submodular.py --select_every 10 --fraction 0.2 --submod_function sum-redundancy --pretrained --finetune
+python3 run_experiment.py --config ./exp_configs/papilion/config_submodular.py --select_every 10 --fraction 0.2 --submod_function graph-cut --pretrained --finetune
+python3 run_experiment.py --config ./exp_configs/papilion/config_submodular.py --select_every 10 --fraction 0.2 --submod_function saturated-coverage --pretrained --finetune
+
+
+## non-adaptive
+# multiple fractions: 0.3, 0.5, all datasets, most methods. Also random 
+# use PerClass (balancing) and PerBatch
+
+python3 run_experiment.py --config ./exp_configs/cifar10/config_random.py --fraction 0.3 --nonadaptive
+python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatch.py --fraction 0.3 --nonadaptive
+python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatchpb.py --fraction 0.3 --nonadaptive
+python3 run_experiment.py --config ./exp_configs/cifar10/config_glister.py --fraction 0.3 --nonadaptive
+python3 run_experiment.py --config ./exp_configs/cifar10/config_submodular.py --fraction 0.3 --submod_function facility-location --selection_type PerClass
+python3 run_experiment.py --config ./exp_configs/cifar10/config_submodular.py --fraction 0.3 --submod_function facility-location --selection_type PerBatch
+
+python3 run_experiment.py --config ./exp_configs/cifar10/config_random.py --fraction 0.5 --nonadaptive
+python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatch.py --fraction 0.5 --nonadaptive
+python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatchpb.py --fraction 0.5 --nonadaptive
+python3 run_experiment.py --config ./exp_configs/cifar10/config_glister.py --fraction 0.5 --nonadaptive
+python3 run_experiment.py --config ./exp_configs/cifar10/config_submodular.py --fraction 0.5 --submod_function facility-location --selection_type PerClass
+python3 run_experiment.py --config ./exp_configs/cifar10/config_submodular.py --fraction 0.5 --submod_function facility-location --selection_type PerBatch
+
+## cubs, 0.4, PT-FT
+python3 run_experiment.py --config ./exp_configs/cub200/config_random.py --fraction 0.4 --nonadaptive --pretrained --finetune
+python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatch.py --fraction 0.4 --nonadaptive --pretrained --finetune
+python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --fraction 0.4 --nonadaptive --pretrained --finetune
+python3 run_experiment.py --config ./exp_configs/cub200/config_glister.py --fraction 0.4 --nonadaptive --pretrained --finetune
+python3 run_experiment.py --config ./exp_configs/cub200/config_submodular.py --fraction 0.4 --submod_function facility-location --selection_type PerClass --pretrained --finetune
+python3 run_experiment.py --config ./exp_configs/cub200/config_submodular.py --fraction 0.4 --submod_function facility-location --selection_type PerBatch --pretrained --finetune

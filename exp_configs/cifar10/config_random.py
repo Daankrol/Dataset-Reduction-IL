@@ -4,11 +4,9 @@ config = dict(
     is_reg=False,
     wandb=True,
     measure_energy=True,
-    dataset=dict(
-        name="cifar10", datadir="../data", feature="dss", type="image", img_size=224
-    ),
+    dataset=dict(name="cifar10", datadir="../data", feature="dss", type="image", img_size=32),
     dataloader=dict(shuffle=True, batch_size=32, pin_memory=True),
-    model=dict(architecture="EfficientNet", type="pre-defined"),
+    model=dict(architecture="ResNet18", type="pre-defined"),
     ckpt=dict(is_load=False, is_save=False, dir="results/", save_every=20),
     loss=dict(type="CrossEntropyLoss", use_sigmoid=False),
     optimizer=dict(type="sgd", momentum=0.9, lr=0.01, weight_decay=5e-4, nesterov=False),
