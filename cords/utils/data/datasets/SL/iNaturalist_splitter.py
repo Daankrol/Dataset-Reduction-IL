@@ -1,4 +1,4 @@
-# The following was copied from https://github.com/macaodha/inat_comp_2018/blob/master/inat2018_loader.py
+# The following was adapated from source: https://github.com/macaodha/inat_comp_2018/blob/master/inat2018_loader.py
 import os
 from PIL import Image
 import numpy as np
