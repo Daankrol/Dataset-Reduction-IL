@@ -89,7 +89,7 @@ class TrainClassifier:
         self.logger.propagate = False
 
         if self.cfg.wandb:
-            if self.dss_args.type == 'Submodular':
+            if self.cfg.dss_args.type == 'Submodular':
                 name = self.cfg.dss_args.submod_func_type + '_' + self.cfg.dataset.name
             else:
                 name = self.cfg.dss_args.type + "_" + self.cfg.dataset.name
