@@ -131,3 +131,12 @@ class INAT(data.Dataset):
 
     def __len__(self):
         return len(self.imgs)
+
+
+# main 
+if __name__ == '__main__':
+    trainset = INAT(root='../data', partition='train')
+    valset = INAT(root='../data', partition='val')
+    testset = INAT(root='../data', partition='test')
+
+    

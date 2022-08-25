@@ -44,6 +44,9 @@ class TSNEPlotter:
         self.model.classifier = nn.Sequential()
 
         self.root = os.path.join(root, 'embeddings')
+        # if root directory does not exist, create it
+        if not os.path.exists(self.root):
+            os.makedirs(self.root)
         self.ds_name = dataset_name
 
         # check if embeddings already exist. Only do so for dataset iNaturalist as the others have varying train/val splits
