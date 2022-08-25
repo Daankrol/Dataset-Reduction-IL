@@ -43,7 +43,7 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
         if metric == 'euclidean':
             self.metric = self.euclidean_distance_scipy
         elif metric == 'cossim':
-            self.metric = lambda a, b: -1. * cossim_pair_np(a, b)
+            self.metric = lambda a, b: -1. * self.cossim_pair_np(a, b)
         else:
             raise ValueError('Invalid metric')
 
@@ -124,6 +124,7 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
             return np.argsort(self.metric(embeddings.cpu().numpy()), axis=1)[:, 1:self.k + 1]
 
     def calculate_KL_divergence(self, knn, index=None):
+        self.logger.info('Calculating KL divergence')
         self.model.eval()
         with torch.no_grad():
             if index is None:
@@ -136,10 +137,12 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
             batch_size = loader.batch_size
             for i, (inputs, labels) in enumerate(loader):
                 inputs = inputs.to(self.device)
-                probs[i* batch_size: (i+1)*batch_size] = torch.nn.functional.softmax(self.model(inputs, freeze=True)[0], dim=1).detach().cpu().numpy()
+                probs[i* batch_size: (i+1)*batch_size] = torch.nn.functional.softmax(self.model(inputs, freeze=True), dim=1).detach().cpu().numpy()
 
             s = np.zeros(batch_num)
+            print(f'starting with KL divergence. Total num batches {batch_num} with batch size {batch_size}')
             for i in range(0, batch_num, batch_size):
+                print(f'kl-for batch {i}')
                 aa = np.expand_dims(probs[i:(i+batch_size)], 1).repeat(self.k, 1)
                 bb = probs[knn[i:(i+batch_size)], :]
                 s[i:(i+batch_size)] = np.mean(np.sum( 0.5 * aa * np.log(aa/bb) + 0.5 * bb * np.log(bb/aa), axis=2), axis=1)
