@@ -126,7 +126,8 @@ class iNatSplitter():
         for cc in np.unique(self.classes):
             should_be_marked_per_class_for_validation[cc] = max(1,int(already_marked[cc] * fraction))
 
-
+        # reset already marked
+        already_marked = [0 for cc in np.unique(self.classes)]
 
         # Now iterate all images, and mark them as validation in the json (by adding the key 'validation' to the image) if 
         # for that class we have not yet marked the required number of images.
@@ -136,7 +137,7 @@ class iNatSplitter():
                 continue
             class_label = self.classes[ii]
             current_count = already_marked[class_label]
-            if current_count < should_be_marked_per_class[class_label]:
+            if current_count < should_be_marked_per_class_for_validation[class_label]:
                 img['validation'] = True
                 # also update the annotations 
                 ann_data['annotations'][ii]['validation'] = True
