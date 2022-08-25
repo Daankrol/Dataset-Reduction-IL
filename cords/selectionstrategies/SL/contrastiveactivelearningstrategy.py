@@ -140,6 +140,9 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
 
             s = np.zeros(batch_num)
             for i in range(0, batch_num, batch_size):
+                # the last batch might be smaller than batch_size
+                batch_size = min(batch_size, batch_num - i)
+
                 aa = np.expand_dims(probs[i:(i+batch_size)], 1).repeat(self.k, 1)
                 bb = probs[knn[i:(i+batch_size)], :]
                 s[i:(i+batch_size)] = np.mean(np.sum( 0.5 * aa * np.log(aa/bb) + 0.5 * bb * np.log(bb/aa), axis=2), axis=1)
