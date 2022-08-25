@@ -148,7 +148,7 @@
 # python3 run_experiment.py --config ./exp_configs/papilion/config_submodular.py --select_every 10 --fraction 0.2 --submod_function saturated-coverage --pretrained --finetune # ok
 
 ## non-adaptive
-# multiple fractions: 0.3, 0.5, all datasets, most methods. Also random 
+# multiple fractions: 0.3, 0.5, all datasets, most methods. Also random
 # use PerClass (balancing) and PerBatch
 
 # python3 run_experiment.py --config ./exp_configs/cifar10/config_random.py --fraction 0.3 --nonadaptive # ok
