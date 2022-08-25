@@ -89,7 +89,10 @@ class TrainClassifier:
         self.logger.propagate = False
 
         if self.cfg.wandb:
-            name = self.cfg.dss_args.type + "_" + self.cfg.dataset.name
+            if self.dss_args.type == 'Submodular':
+                name = self.cfg.dss_args.submod_func_type + '_' + self.cfg.dataset.name
+            else:
+                name = self.cfg.dss_args.type + "_" + self.cfg.dataset.name
             if self.cfg.dss_args.fraction != DotMap():
                 name += f"_{str(self.cfg.dss_args.fraction)}"
             if self.cfg.dss_args.select_every != DotMap():
