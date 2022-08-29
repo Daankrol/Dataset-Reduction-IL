@@ -155,14 +155,14 @@
 # python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatch.py --fraction 0.3 --nonadaptive # ok
 # python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatchpb.py --fraction 0.3 --nonadaptive # ok
 # python3 run_experiment.py --config ./exp_configs/cifar10/config_glister.py --fraction 0.3 --nonadaptive # ok
-# python3 run_experiment.py --config ./exp_configs/cifar10/config_submodular.py --fraction 0.3 --nonadaptive --submod_function facility-location --selection_type PerClass # ok
+python3 run_experiment.py --config ./exp_configs/cifar10/config_submodular.py --fraction 0.3 --nonadaptive --submod_function facility-location --selection_type PerClass
 # python3 run_experiment.py --config ./exp_configs/cifar10/config_submodular.py --fraction 0.3 --nonadaptive --submod_function facility-location --selection_type PerBatch # ok
 
 # python3 run_experiment.py --config ./exp_configs/cifar10/config_random.py --fraction 0.5 --nonadaptive # ok
 # python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatch.py --fraction 0.5 --nonadaptive # ok
 # python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatchpb.py --fraction 0.5 --nonadaptive # ok
 # python3 run_experiment.py --config ./exp_configs/cifar10/config_glister.py --fraction 0.5 --nonadaptive # ok
-# python3 run_experiment.py --config ./exp_configs/cifar10/config_submodular.py --fraction 0.5 --nonadaptive --submod_function facility-location --selection_type PerClass # ok
+python3 run_experiment.py --config ./exp_configs/cifar10/config_submodular.py --fraction 0.5 --nonadaptive --submod_function facility-location --selection_type PerClass
 # python3 run_experiment.py --config ./exp_configs/cifar10/config_submodular.py --fraction 0.5 --nonadaptive --submod_function facility-location --selection_type PerBatch # ok
 
 ## cubs, 0.4, PT-FT
@@ -170,5 +170,5 @@
 # python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatch.py --fraction 0.4 --nonadaptive --pretrained --finetune # ok
 # python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --fraction 0.4 --nonadaptive --pretrained --finetune # ok
 # python3 run_experiment.py --config ./exp_configs/cub200/config_glister.py --fraction 0.4 --nonadaptive --pretrained --finetune # ok
-# python3 run_experiment.py --config ./exp_configs/cub200/config_submodular.py --fraction 0.4 --nonadaptive --submod_function facility-location --selection_type PerClass --pretrained --finetune # ok
+python3 run_experiment.py --config ./exp_configs/cub200/config_submodular.py --fraction 0.4 --nonadaptive --submod_function facility-location --selection_type PerClass --pretrained --finetune
 # python3 run_experiment.py --config ./exp_configs/cub200/config_submodular.py --fraction 0.4 --nonadaptive --submod_function facility-location --selection_type PerBatch --pretrained --finetune # ok

@@ -841,7 +841,7 @@ class TrainClassifier:
             
 
             # construct t-SNE plots if data has been resampled
-            if self.cfg.dss_args.type != "Full" and dataloader.resampled and self.embedding_plotter is not None:
+            if self.cfg.dss_args.type != "Full" and dataloader.resampled and self.embedding_plotter is not None and self.cfg.dss_args.online:
                 self.logger.info(f'EMBEDDING - dataloader is resampled. Epoch: {epoch}')
                 self.embedding_plotter.make_plot(epoch, selected_indices=dataloader.subset_indices)
 

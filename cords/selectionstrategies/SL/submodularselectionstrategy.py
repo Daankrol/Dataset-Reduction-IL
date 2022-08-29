@@ -259,7 +259,7 @@ class SubmodularSelectionStrategy(DataSelectionStrategy):
                 total_greedy_list.extend(idxs[greedyList])
                 gammas.extend(gamma)
 
-        elif self.selection_type == 'Supervised':
+        elif self.selection_type == 'Supervised' or self.selection_type == 'PerClass':
             for i in range(self.num_classes):
                 if i == 0:
                     idxs = torch.where(labels == i)[0]
