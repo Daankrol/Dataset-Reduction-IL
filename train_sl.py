@@ -1049,6 +1049,10 @@ class TrainClassifier:
 
                     # confusion matrix
                     if epoch % 10 == 0 or epoch == self.cfg.train_args.num_epochs - 1:
+                        print('Confusion matrix for test set')
+                        print('amount of samples in output:', outputs.cpu().numpy().__len__() )
+                        print('amount of samples in targets:', targets.cpu().numpy().__len__() )
+                        print('amount of unique classes:', np.unique(targets.cpu().numpy()).__len__() )
                         wandb.log(
                             {
                                 "tst_confusion_matrix": wandb.plot.confusion_matrix(
