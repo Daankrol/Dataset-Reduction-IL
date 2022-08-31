@@ -1129,6 +1129,8 @@ class TrainClassifier:
                 print_str += " , " + "Test F1: " + str(tst_f1s[-1])
                 metrics["tst_f1"] = tst_f1s[-1]
 
+                metrics["data_seen"] = total_data_seen
+                metrics["current_lr"] = current_lr
                 # report metric to ray for hyperparameter optimization
                 if (
                     "report_tune" in self.cfg
