@@ -1248,4 +1248,7 @@ class TrainClassifier:
         wandb.run.summary["best_test_f1"] = max(tst_f1s)
         wandb.run.summary["best_test_precision"] = max(tst_precisions)
         wandb.run.summary["best_test_recall"] = max(tst_recalls)
+        wandb.run.summary["train_ds_size"] = len(trn_loader.dataset)
+        wandb.run.summary["test_ds_size"] = len(tst_loader.dataset)
+        wandb.run.summary["val_ds_size"] = len(val_loader.dataset)
         wandb.finish()
