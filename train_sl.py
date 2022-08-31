@@ -424,6 +424,7 @@ class TrainClassifier:
         subtrn_losses = list()
         timing = list()
         total_timing = 0.0
+        total_data_seen = 0
         trn_acc = list()
         val_acc = list()  # np.zeros(cfg['train_args']['num_epochs'])
         tst_acc = list()  # np.zeros(cfg['train_args']['num_epochs'])
@@ -806,6 +807,8 @@ class TrainClassifier:
                 else:
                     inputs, targets, weights = data
 
+                total_data_seen += inputs.size(0)
+
                 inputs = inputs.to(self.cfg.train_args.device)
                 targets = targets.to(self.cfg.train_args.device, non_blocking=True)
                 weights = weights.to(self.cfg.train_args.device)
@@ -827,6 +830,10 @@ class TrainClassifier:
                         _, predicted = outputs.max(1)
                     subtrn_total += targets.size(0)
                     subtrn_correct += predicted.eq(targets).sum().item()
+            
+            current_lr = scheduler.get_last_lr()
+            self.logger.info('Scheduler: current LR: {}'.format(current_lr))
+            self.logger.info('Amount of data seen: {}'.format(total_data_seen))
             epoch_time = time.time() - start_time
             if cum_weights != 0:
                 subtrn_loss = subtrn_loss / cum_weights
@@ -837,8 +844,6 @@ class TrainClassifier:
             #  report energy every epoch.
             self.report_energy(epoch=epoch)
             print_args = self.cfg.train_args.print_args
-
-            
 
             # construct t-SNE plots if data has been resampled
             if self.cfg.dss_args.type != "Full" and dataloader.resampled and self.embedding_plotter is not None and self.cfg.dss_args.online:
