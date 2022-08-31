@@ -174,9 +174,12 @@
 # python3 run_experiment.py --config ./exp_configs/cub200/config_submodular.py --fraction 0.4 --nonadaptive --submod_function facility-location --selection_type PerBatch --pretrained --finetune # ok
 
 ## non-pretrained with warm up with larger subset sizes. 
-python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatchpb.py --fraction 0.2 --select_every 20
-python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatchpb.py --fraction 0.2 --select_every 30
-python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatchpb.py --fraction 0.3 --select_every 20
-python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatchpb.py --fraction 0.3 --select_every 30
-python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatchpb.py --fraction 0.4 --select_every 20
-python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatchpb.py --fraction 0.4 --select_every 30
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatchpb.py --fraction 0.2 --select_every 20 # ok
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatchpb.py --fraction 0.2 --select_every 30 # ok
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatchpb.py --fraction 0.3 --select_every 20 # ok
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatchpb.py --fraction 0.3 --select_every 30 # ok
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatchpb.py --fraction 0.4 --select_every 20 # ok
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_gradmatchpb.py --fraction 0.4 --select_every 30 # ok
+
+## 31-8 warm up slide 11, full with 0.01 LR as this was not done yet 
+python3 run_experiment.py --config ./exp_configs/cub200/config_full.py --lr 0.01
