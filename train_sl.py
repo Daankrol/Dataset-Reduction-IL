@@ -1023,7 +1023,8 @@ class TrainClassifier:
                                 tst_correct += predicted.eq(targets).sum().item()
                         tst_loss = tst_loss / samples
                         tst_losses.append(tst_loss)
-
+                    
+                    print('Amount of samples in test set that were inferenced:', samples)
                     if "tst_acc" in print_args:
                         tst_acc.append(tst_correct / tst_total)
                     if "tst_recall" in print_args:
