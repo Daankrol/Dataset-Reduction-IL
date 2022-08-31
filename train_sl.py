@@ -831,7 +831,7 @@ class TrainClassifier:
                     subtrn_total += targets.size(0)
                     subtrn_correct += predicted.eq(targets).sum().item()
             
-            current_lr = scheduler.get_last_lr()
+            current_lr = scheduler.get_last_lr()[0]
             self.logger.info('Scheduler: current LR: {}'.format(current_lr))
             self.logger.info('Amount of data seen: {}'.format(total_data_seen))
             epoch_time = time.time() - start_time
