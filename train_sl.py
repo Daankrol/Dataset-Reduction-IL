@@ -831,7 +831,10 @@ class TrainClassifier:
                     subtrn_total += targets.size(0)
                     subtrn_correct += predicted.eq(targets).sum().item()
             
-            current_lr = scheduler.get_last_lr()[0]
+            if scheduler is not None:
+                current_lr = scheduler.get_last_lr()[0]
+            else:
+                current_lr = self.cfg.optimizer.lr
             epoch_time = time.time() - start_time
             if cum_weights != 0:
                 subtrn_loss = subtrn_loss / cum_weights

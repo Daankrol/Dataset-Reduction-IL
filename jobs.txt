@@ -186,3 +186,11 @@
 # python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatch.py --lr 0.01 # ok
 # python3 run_experiment.py --config ./exp_configs/cub200/config_random.py --lr 0.01 --select_every 1 # ok
 
+## 1-9 - TL experiments without a scheduler
+##         - Cub200, PT, FT, 20x10,  Random, full, gradmatch
+python3 run_experiment.py --config ./exp_configs/cub200/config_full.py --disable_scheduler --lr 0.005 --pretrained --finetune
+python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --lr 0.005 --disable_scheduler --select_every 10 --fraction 0.2 --pretrained --finetune
+python3 run_experiment.py --config ./exp_configs/cub200/config_random.py --lr 0.005 --disable_scheduler --select_every 1 --fraction 0.2 --pretrained --finetune
+python3 run_experiment.py --config ./exp_configs/cub200/config_random.py --lr 0.005 --disable_scheduler --select_every 10 --fraction 0.2 --pretrained --finetune
+
+## data dependent scheduler
