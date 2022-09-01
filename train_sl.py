@@ -845,6 +845,7 @@ class TrainClassifier:
                     total_training_samples = len(trainloader.dataset)
                     self.logger.info('Current data for scheduler: {}/{}'.format(scheduler_total_data_seen, total_training_samples))
                     if scheduler_total_data_seen > total_training_samples:
+                        self.logger.info('{}% of the training data has been seen. Stepping scheduler.'.format(100*scheduler_total_data_seen/total_training_samples))
                         scheduler_total_data_seen -= total_training_samples
                         scheduler.step()
                 else:
