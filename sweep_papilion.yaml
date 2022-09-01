@@ -16,8 +16,6 @@ parameters:
     max: 0.1
   config:
     value: ./exp_configs/papilion/config_full.py
-  batch_size:
-    value: 32
   disable_scheduler:
     value: True
   early_stopping:
