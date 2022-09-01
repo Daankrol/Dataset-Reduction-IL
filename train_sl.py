@@ -870,6 +870,8 @@ class TrainClassifier:
 
                 if ("trn_loss" in print_args) or ("trn_acc" in print_args):
                     samples = 0
+                    all_predictions = torch.tensor([]).to(self.cfg.train_args.device)
+                    all_targets = torch.tensor([]).to(self.cfg.train_args.device)
                     with torch.no_grad():
                         for _, data in enumerate(trainloader):
                             if is_selcon:
@@ -889,6 +891,10 @@ class TrainClassifier:
                                     predicted = outputs
                                 else:
                                     _, predicted = outputs.max(1)
+                                all_predictions = torch.cat(
+                                    (all_predictions, predicted)
+                                )
+                                all_targets = torch.cat((all_targets, targets))
                                 trn_total += targets.size(0)
                                 trn_correct += predicted.eq(targets).sum().item()
 
@@ -902,19 +908,19 @@ class TrainClassifier:
                         recall = torchmetrics.Recall(
                             average="macro", num_classes=self.cfg.model.numclasses
                         ).to(self.cfg.train_args.device)
-                        trn_recall = recall(outputs, targets).item()
+                        trn_recall = recall(all_predictions, all_targets).item()
                         trn_recalls.append(trn_recall)
 
                     # calculate precision and f1
                     precision = torchmetrics.Precision(
                         average="macro", num_classes=self.cfg.model.numclasses
                     ).to(self.cfg.train_args.device)
-                    trn_precision = precision(outputs, targets).item()
+                    trn_precision = precision(all_predictions, all_targets).item()
                     trn_precisions.append(trn_precision)
                     f1 = torchmetrics.F1Score(
                         average="macro", num_classes=self.cfg.model.numclasses
                     ).to(self.cfg.train_args.device)
-                    trn_f1 = f1(outputs, targets).item()
+                    trn_f1 = f1(all_predictions, all_targets).item()
                     trn_f1s.append(trn_f1)
 
                     if epoch % 10 == 0 or epoch == self.cfg.train_args.num_epochs - 1:
@@ -922,8 +928,8 @@ class TrainClassifier:
                         wandb.log(
                             {
                                 "trn_confusion_matrix": wandb.plot.confusion_matrix(
-                                    probs=outputs.cpu().numpy(),
-                                    y_true=targets.cpu().numpy(),
+                                    probs=all_predictions.cpu().numpy(),
+                                    y_true=all_targets.cpu().numpy(),
                                     title="trn_conf_mat",
                                 )
                             },
@@ -932,6 +938,8 @@ class TrainClassifier:
 
                 if ("val_loss" in print_args) or ("val_acc" in print_args):
                     samples = 0
+                    all_predictions = torch.tensor([]).to(self.cfg.train_args.device)
+                    all_targets = torch.tensor([]).to(self.cfg.train_args.device)
                     with torch.no_grad():
                         for _, data in enumerate(valloader):
                             if is_selcon:
@@ -953,7 +961,10 @@ class TrainClassifier:
                                     _, predicted = outputs.max(1)
                                 val_total += targets.size(0)
                                 val_correct += predicted.eq(targets).sum().item()
-
+                                all_predictions = torch.cat(
+                                    (all_predictions, predicted)
+                                )
+                                all_targets = torch.cat((all_targets, targets))
                         val_loss = val_loss / samples
                         val_losses.append(val_loss)
 
@@ -970,19 +981,19 @@ class TrainClassifier:
                         recall = torchmetrics.Recall(
                             average="macro", num_classes=self.cfg.model.numclasses
                         ).to(self.cfg.train_args.device)
-                        val_recall = recall(outputs, targets).item()
+                        val_recall = recall(all_predictions, all_targets).item()
                         val_recalls.append(val_recall)
 
                     # calculate precision and f1
                     precision = torchmetrics.Precision(
                         average="macro", num_classes=self.cfg.model.numclasses
                     ).to(self.cfg.train_args.device)
-                    val_precision = precision(outputs, targets).item()
+                    val_precision = precision(all_predictions, all_targets).item()
                     val_precisions.append(val_precision)
                     f1 = torchmetrics.F1Score(
                         average="macro", num_classes=self.cfg.model.numclasses
                     ).to(self.cfg.train_args.device)
-                    val_f1 = f1(outputs, targets).item()
+                    val_f1 = f1(all_predictions, all_targets).item()
                     val_f1s.append(val_f1)
 
                     # confusion matrix
@@ -990,8 +1001,8 @@ class TrainClassifier:
                         wandb.log(
                             {
                                 "val_confusion_matrix": wandb.plot.confusion_matrix(
-                                    probs=outputs.cpu().numpy(),
-                                    y_true=targets.cpu().numpy(),
+                                    probs=all_predictions.cpu().numpy(),
+                                    y_true=all_targets.cpu().numpy(),
                                     title="val_conf_mat",
                                 )
                             },
@@ -1000,6 +1011,10 @@ class TrainClassifier:
 
                 if ("tst_loss" in print_args) or ("tst_acc" in print_args):
                     samples = 0
+                    # all outputs is used to save all output tensors, concatenate them and then calculate the metrics
+                    all_predictions = torch.tensor([]).to(self.cfg.train_args.device)
+                    all_targets = torch.tensor([]).to(self.cfg.train_args.device)
+
                     with torch.no_grad():
                         for _, data in enumerate(testloader):
                             if is_selcon:
@@ -1021,6 +1036,9 @@ class TrainClassifier:
                                     _, predicted = outputs.max(1)
                                 tst_total += targets.size(0)
                                 tst_correct += predicted.eq(targets).sum().item()
+                                # concatenate the outputs tensor to all_outputs, all_outputs should remain a tensor
+                            all_predictions = torch.cat((all_predictions, predicted))
+                            all_targets = torch.cat((all_targets, targets))
                         tst_loss = tst_loss / samples
                         tst_losses.append(tst_loss)
                     
@@ -1032,19 +1050,19 @@ class TrainClassifier:
                         recall = torchmetrics.Recall(
                             average="macro", num_classes=self.cfg.model.numclasses
                         ).to(self.cfg.train_args.device)
-                        tst_recall = recall(outputs, targets).item()
+                        tst_recall = recall(all_predictions, all_targets).item()
                         tst_recalls.append(tst_recall)
 
                     # calculate precision and f1
                     precision = torchmetrics.Precision(
                         average="macro", num_classes=self.cfg.model.numclasses
                     ).to(self.cfg.train_args.device)
-                    tst_precision = precision(outputs, targets).item()
+                    tst_precision = precision(all_predictions, all_targets).item()
                     tst_precisions.append(tst_precision)
                     f1 = torchmetrics.F1Score(
                         average="macro", num_classes=self.cfg.model.numclasses
                     ).to(self.cfg.train_args.device)
-                    tst_f1 = f1(outputs, targets).item()
+                    tst_f1 = f1(all_predictions, all_targets).item()
                     tst_f1s.append(tst_f1)
 
                     # confusion matrix
@@ -1056,8 +1074,8 @@ class TrainClassifier:
                         wandb.log(
                             {
                                 "tst_confusion_matrix": wandb.plot.confusion_matrix(
-                                    probs=outputs.cpu().numpy(),
-                                    y_true=targets.cpu().numpy(),
+                                    probs=all_predictions.cpu().numpy(),
+                                    y_true=all_targets.cpu().numpy(),
                                     title="tst_conf_mat",
                                 )
                             },
