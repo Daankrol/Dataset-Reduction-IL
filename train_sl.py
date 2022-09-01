@@ -832,8 +832,6 @@ class TrainClassifier:
                     subtrn_correct += predicted.eq(targets).sum().item()
             
             current_lr = scheduler.get_last_lr()[0]
-            self.logger.info('Scheduler: current LR: {}'.format(current_lr))
-            self.logger.info('Amount of data seen: {}'.format(total_data_seen))
             epoch_time = time.time() - start_time
             if cum_weights != 0:
                 subtrn_loss = subtrn_loss / cum_weights
@@ -908,6 +906,9 @@ class TrainClassifier:
                         recall = torchmetrics.Recall(
                             average="macro", num_classes=self.cfg.model.numclasses
                         ).to(self.cfg.train_args.device)
+
+                        all_targets = all_targets.type(torch.int32)
+                        all_predictions = all_predictions.type(torch.int32)
                         trn_recall = recall(all_predictions, all_targets).item()
                         trn_recalls.append(trn_recall)
 
@@ -928,7 +929,7 @@ class TrainClassifier:
                         wandb.log(
                             {
                                 "trn_confusion_matrix": wandb.plot.confusion_matrix(
-                                    probs=all_predictions.cpu().numpy(),
+                                    preds=all_predictions.cpu().numpy(),
                                     y_true=all_targets.cpu().numpy(),
                                     title="trn_conf_mat",
                                 )
@@ -974,6 +975,8 @@ class TrainClassifier:
                                 logger.info("Stopped because of EarlyStopping")
                                 break
 
+                    all_targets = all_targets.type(torch.int32)
+                    all_predictions = all_predictions.type(torch.int32)
                     if "val_acc" in print_args:
                         val_acc.append(val_correct / val_total)
                     if "val_recall" in print_args:
@@ -1001,7 +1004,7 @@ class TrainClassifier:
                         wandb.log(
                             {
                                 "val_confusion_matrix": wandb.plot.confusion_matrix(
-                                    probs=all_predictions.cpu().numpy(),
+                                    preds=all_predictions.cpu().numpy(),
                                     y_true=all_targets.cpu().numpy(),
                                     title="val_conf_mat",
                                 )
@@ -1041,8 +1044,10 @@ class TrainClassifier:
                             all_targets = torch.cat((all_targets, targets))
                         tst_loss = tst_loss / samples
                         tst_losses.append(tst_loss)
-                    
-                    print('Amount of samples in test set that were inferenced:', samples)
+
+                    all_targets = all_targets.type(torch.int32)
+                    all_predictions = all_predictions.type(torch.int32)
+                    # print('Amount of samples in test set that were inferenced:', samples)
                     if "tst_acc" in print_args:
                         tst_acc.append(tst_correct / tst_total)
                     if "tst_recall" in print_args:
@@ -1067,14 +1072,10 @@ class TrainClassifier:
 
                     # confusion matrix
                     if epoch % 10 == 0 or epoch == self.cfg.train_args.num_epochs - 1:
-                        print('Confusion matrix for test set')
-                        print('amount of samples in output:', outputs.cpu().numpy().__len__() )
-                        print('amount of samples in targets:', targets.cpu().numpy().__len__() )
-                        print('amount of unique classes:', np.unique(targets.cpu().numpy()).__len__() )
                         wandb.log(
                             {
                                 "tst_confusion_matrix": wandb.plot.confusion_matrix(
-                                    probs=all_predictions.cpu().numpy(),
+                                    preds=all_predictions.cpu().numpy(),
                                     y_true=all_targets.cpu().numpy(),
                                     title="tst_conf_mat",
                                 )
