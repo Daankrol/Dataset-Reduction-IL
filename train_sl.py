@@ -107,6 +107,8 @@ class TrainClassifier:
                 name += "_offline"
             if self.cfg.scheduler.type is None and not self.cfg.early_stopping:
                 name += "_NoSched"
+            if self.cfg.scheduler.data_dependent:
+                name += '_dataScheduler'
             if self.cfg.dss_args.kappa != DotMap() and self.cfg.dss_args.kappa > 0:
                 name += f"_k-{str(self.cfg.dss_args.kappa)}"
             if self.cfg.dss_args.lam != DotMap() and self.cfg.dss_args.lam > 0:
@@ -843,7 +845,7 @@ class TrainClassifier:
             if not scheduler == None:
                 if self.cfg.scheduler.data_dependent:
                     total_training_samples = len(trainloader.dataset)
-                    self.logger.info('Current data for scheduler: {}/{}'.format(scheduler_total_data_seen, total_training_samples))
+                    self.logger.debug('Current data for scheduler: {}/{}'.format(scheduler_total_data_seen, total_training_samples))
                     if scheduler_total_data_seen >= total_training_samples:
                         self.logger.info('{}% of the training data has been seen. Stepping scheduler.'.format(100*scheduler_total_data_seen/total_training_samples))
                         scheduler_total_data_seen -= total_training_samples
