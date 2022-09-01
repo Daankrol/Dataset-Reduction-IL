@@ -12,15 +12,13 @@ config = dict(
     model=dict(architecture="ResNet18", type="pre-defined"),
     ckpt=dict(is_load=False, is_save=False, dir="results/", save_every=20),
     loss=dict(type="CrossEntropyLoss", use_sigmoid=False),
-    optimizer=dict(type="sgd", momentum=0.9, lr=0.005, weight_decay=5e-4, nesterov=False),
+    optimizer=dict(type="sgd", momentum=0.9, lr=0.01, weight_decay=5e-4, nesterov=False),
     scheduler=dict(type="cosine_annealing", T_max=300),
     # early_stopping=True,
     dss_args=dict(
-        type="CAL",
-        fraction=0.1,
-        select_every=1,
-        selection_type='PerBatch',
-        metric='euclidean',
+        type="Full",
+        # fraction=0.1,
+        # select_every=1,
         kappa=0
     ),
     # dss_args=dict(
@@ -36,14 +34,6 @@ config = dict(
     #     kappa=0,
     # ),
     # dss_args=dict(
-    #     type="FacLoc",
-    #     selection_type='Supervised',
-    #     submod_func_type='facility-location',
-    #     fraction=0.3,
-    #     select_every=1,
-    #     kappa=0,
-    #     ),
-    # dss_args=dict(
     #     type="GradMatch",
     #     fraction=0.5,
     #     select_every=1,
@@ -56,7 +46,7 @@ config = dict(
     #     linear_layer=True,
     # ),
     train_args=dict(
-        num_epochs=3,
+        num_epochs=5,
         device="cuda",
         print_every=1,
         results_dir="../results/",

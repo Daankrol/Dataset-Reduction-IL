@@ -194,7 +194,7 @@
 # python3 run_experiment.py --config ./exp_configs/cub200/config_random.py --lr 0.005 --disable_scheduler --select_every 10 --fraction 0.2 --pretrained --finetune # ok
 
 ## data dependent scheduler
-python3 run_experiment.py --config ./exp_configs/cub200/config_full.py --disable_scheduler --lr 0.005 --pretrained --finetune
-python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --lr 0.005 --data_dependent_scheduler --select_every 10 --fraction 0.2 --pretrained --finetune
-python3 run_experiment.py --config ./exp_configs/cub200/config_random.py --lr 0.005 --disable_scheduler --select_every 1 --fraction 0.2 --pretrained --finetune
-python3 run_experiment.py --config ./exp_configs/cub200/config_random.py --lr 0.005 --disable_scheduler --select_every 10 --fraction 0.2 --pretrained --finetune
+# python3 run_experiment.py --config ./exp_configs/cub200/config_full.py --lr 0.005 --pretrained --finetune # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --lr 0.005 --data_dependent_scheduler --select_every 10 --fraction 0.2 --pretrained --finetune # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_random.py --lr 0.005 --data_dependent_scheduler --select_every 1 --fraction 0.2 --pretrained --finetune # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_random.py --lr 0.005 --data_dependent_scheduler --select_every 10 --fraction 0.2 --pretrained --finetune # ok

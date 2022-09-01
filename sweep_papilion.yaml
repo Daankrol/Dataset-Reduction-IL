@@ -1,5 +1,7 @@
 program: run_experiment.py
 name: lr_sweep_papilion
+entity: daankrol
+project: Dataset Reduction for IL
 command:
   - ${interpreter}
   - ${program}

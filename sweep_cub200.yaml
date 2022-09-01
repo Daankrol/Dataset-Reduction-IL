@@ -1,4 +1,6 @@
 program: run_experiment.py
+entity: daankrol
+project: Dataset Reduction for IL
 name: lr_sweep_cub200
 command:
   - ${interpreter}
