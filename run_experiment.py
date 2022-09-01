@@ -126,6 +126,12 @@ parser.add_argument(
     choices=["facility-location", "graph-cut", "sum-redundancy", "saturated-coverage"]
 )
 
+parser.add_argument(
+    '--data_dependent_scheduler',
+    action='store_true',
+    help='Enable data dependent scheduling of LR'
+)
+
 
 
 args = parser.parse_args()
@@ -151,6 +157,8 @@ if args.pretrained:
 
 if args.finetune:
     cfg.model.fine_tune = args.finetune
+if args.data_dependent_scheduler:
+    cfg.scheduler.data_dependent = args.data_dependent_scheduler
 
 if args.fraction is not None:
     cfg.dss_args.fraction = args.fraction

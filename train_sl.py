@@ -425,6 +425,7 @@ class TrainClassifier:
         timing = list()
         total_timing = 0.0
         total_data_seen = 0
+        scheduler_total_data_seen = 0
         trn_acc = list()
         val_acc = list()  # np.zeros(cfg['train_args']['num_epochs'])
         tst_acc = list()  # np.zeros(cfg['train_args']['num_epochs'])
@@ -808,6 +809,7 @@ class TrainClassifier:
                     inputs, targets, weights = data
 
                 total_data_seen += inputs.size(0)
+                scheduler_total_data_seen += inputs.size(0)
 
                 inputs = inputs.to(self.cfg.train_args.device)
                 targets = targets.to(self.cfg.train_args.device, non_blocking=True)
@@ -839,7 +841,14 @@ class TrainClassifier:
             if cum_weights != 0:
                 subtrn_loss = subtrn_loss / cum_weights
             if not scheduler == None:
-                scheduler.step()
+                if self.cfg.scheduler.data_dependent:
+                    total_training_samples = len(trainloader.dataset)
+                    self.logger.info('Current data for scheduler: {}/{}'.format(scheduler_total_data_seen, total_training_samples))
+                    if scheduler_total_data_seen > total_training_samples:
+                        scheduler_total_data_seen -= total_training_samples
+                        scheduler.step()
+                else:
+                    scheduler.step()
             timing.append(epoch_time)
             total_timing += epoch_time
             #  report energy every epoch.
