@@ -22,7 +22,8 @@ from cords.utils.data.dataloader.SL.adaptive import (
     SELCONDataLoader,
     UncertaintyDataLoader,
     SubmodularDataLoader,
-    ContrastiveDataLoader
+    ContrastiveDataLoader,
+    PrototypicalDataLoader,
 )
 
 from cords.utils.data.dataloader.SL.nonadaptive import FacLocDataLoader
@@ -165,6 +166,13 @@ class TrainClassifier:
     """
     ############################## Model Creation ##############################
     """
+
+    def get_pretrained_model(self):
+        return EfficientNetB0_PyTorch(
+                    num_classes=self.cfg.model.numclasses,
+                    pretrained=True,
+                    fine_tune=False,
+                )
 
     def create_model(self):
         print(f"using model: {self.cfg.model.architecture} with {self.cfg.model}")
@@ -714,6 +722,18 @@ class TrainClassifier:
             self.cfg.dss_args.num_epochs = self.cfg.train_args.num_epochs
             self.cfg.dss_args.num_classes = self.cfg.model.numclasses
             dataloader = UncertaintyDataLoader(
+                trainloader, valloader, self.cfg.dss_args, logger
+            )
+        elif self.cfg.dss_args.type in ["Prototypical"]:
+            """
+            ##############################  Prototypical Dataloader Additional Arguments ##############################
+            """
+            self.cfg.dss_args.model = model
+            self.cfg.dss_args.device = self.cfg.train_args.device
+            self.cfg.dss_args.num_epochs = self.cfg.train_args.num_epochs
+            self.cfg.dss_args.num_classes = self.cfg.model.numclasses
+            self.cfg.dss_args.pretrained_model = self.get_pretrained_model()
+            dataloader = PrototypicalDataLoader(
                 trainloader, valloader, self.cfg.dss_args, logger
             )
 
