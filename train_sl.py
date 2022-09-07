@@ -940,18 +940,18 @@ class TrainClassifier:
                     trn_f1 = f1(all_predictions, all_targets).item()
                     trn_f1s.append(trn_f1)
 
-                    if epoch % 10 == 0 or epoch == self.cfg.train_args.num_epochs - 1:
-                        # confusion matrix
-                        wandb.log(
-                            {
-                                "trn_confusion_matrix": wandb.plot.confusion_matrix(
-                                    preds=all_predictions.cpu().numpy(),
-                                    y_true=all_targets.cpu().numpy(),
-                                    title="trn_conf_mat",
-                                )
-                            },
-                            step=epoch,
-                        )
+                    # if epoch % 10 == 0 or epoch == self.cfg.train_args.num_epochs - 1:
+                    #     # confusion matrix
+                    #     wandb.log(
+                    #         {
+                    #             "trn_confusion_matrix": wandb.plot.confusion_matrix(
+                    #                 preds=all_predictions.cpu().numpy(),
+                    #                 y_true=all_targets.cpu().numpy(),
+                    #                 title="trn_conf_mat",
+                    #             )
+                    #         },
+                    #         step=epoch,
+                    #     )
 
                 if ("val_loss" in print_args) or ("val_acc" in print_args):
                     samples = 0
@@ -1015,18 +1015,18 @@ class TrainClassifier:
                     val_f1 = f1(all_predictions, all_targets).item()
                     val_f1s.append(val_f1)
 
-                    # confusion matrix
-                    if epoch % 10 == 0 or epoch == self.cfg.train_args.num_epochs - 1:
-                        wandb.log(
-                            {
-                                "val_confusion_matrix": wandb.plot.confusion_matrix(
-                                    preds=all_predictions.cpu().numpy(),
-                                    y_true=all_targets.cpu().numpy(),
-                                    title="val_conf_mat",
-                                )
-                            },
-                            step=epoch,
-                        )
+                    # # confusion matrix
+                    # if epoch % 10 == 0 or epoch == self.cfg.train_args.num_epochs - 1:
+                    #     wandb.log(
+                    #         {
+                    #             "val_confusion_matrix": wandb.plot.confusion_matrix(
+                    #                 preds=all_predictions.cpu().numpy(),
+                    #                 y_true=all_targets.cpu().numpy(),
+                    #                 title="val_conf_mat",
+                    #             )
+                    #         },
+                    #         step=epoch,
+                    #     )
 
                 if ("tst_loss" in print_args) or ("tst_acc" in print_args):
                     samples = 0
@@ -1086,18 +1086,18 @@ class TrainClassifier:
                     tst_f1 = f1(all_predictions, all_targets).item()
                     tst_f1s.append(tst_f1)
 
-                    # confusion matrix
-                    if epoch % 10 == 0 or epoch == self.cfg.train_args.num_epochs - 1:
-                        wandb.log(
-                            {
-                                "tst_confusion_matrix": wandb.plot.confusion_matrix(
-                                    preds=all_predictions.cpu().numpy(),
-                                    y_true=all_targets.cpu().numpy(),
-                                    title="tst_conf_mat",
-                                )
-                            },
-                            step=epoch,
-                        )
+                    # # confusion matrix
+                    # if epoch == self.cfg.train_args.num_epochs - 1:
+                    #     wandb.log(
+                    #         {
+                    #             "tst_confusion_matrix": wandb.plot.confusion_matrix(
+                    #                 preds=all_predictions.cpu().numpy(),
+                    #                 y_true=all_targets.cpu().numpy(),
+                    #                 title="tst_conf_mat",
+                    #             )
+                    #         },
+                    #         step=epoch,
+                    #     )
 
                 if "subtrn_acc" in print_args:
                     subtrn_acc.append(subtrn_correct / subtrn_total)
@@ -1226,6 +1226,40 @@ class TrainClassifier:
         """
         ################################################# Results Summary #################################################
         """
+
+        # confusion matrix on test set 
+        all_predictions = torch.tensor([]).to(self.cfg.train_args.device)
+        all_targets = torch.tensor([]).to(self.cfg.train_args.device)
+
+        with torch.no_grad():
+            for _, data in enumerate(testloader):
+                if is_selcon:
+                    inputs, targets, _ = data
+                else:
+                    inputs, targets = data
+
+                inputs, targets = inputs.to(
+                    self.cfg.train_args.device
+                ), targets.to(self.cfg.train_args.device, non_blocking=True)
+                outputs = model(inputs)
+                if is_selcon:
+                    predicted = outputs
+                else:
+                    _, predicted = outputs.max(1)
+                all_predictions = torch.cat((all_predictions, predicted))
+                all_targets = torch.cat((all_targets, targets))
+        all_targets = all_targets.type(torch.int32)
+        all_predictions = all_predictions.type(torch.int32)
+        wandb.log(
+            {
+                "tst_confusion_matrix": wandb.plot.confusion_matrix(
+                    preds=all_predictions.cpu().numpy(),
+                    y_true=all_targets.cpu().numpy(),
+                    title="Confusion Matrix on test dataset",
+                )
+            }
+        )
+
 
         logger.info(
             self.cfg.dss_args.type + " Selection Run---------------------------------"
