@@ -4,9 +4,6 @@ import torch
 import torch.nn.functional as F
 import numpy as np
 
-
-# Adapted from: https://github.com/PatrickZH/DeepCore/blob/main/deepcore/methods/uncertainty.py 
-
 class PrototypicalStrategy(DataSelectionStrategy):
     def __init__(
         self,
@@ -49,6 +46,7 @@ class PrototypicalStrategy(DataSelectionStrategy):
         scores = []
         # we want to fill the budget with samples from each class
         for c in range(self.num_classes):
+            self.logger.debug(f'Computing prototype and selecting samples for class {c}')
             class_index = np.arange(self.N_trn)[self.trn_lbls == c]
             budget_for_class = int(self.fraction * len(class_index))
 
