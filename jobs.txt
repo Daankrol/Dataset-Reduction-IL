@@ -224,3 +224,7 @@
 # python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --lr 0.01 --select_every 10 --fraction 0.2 # ok
 # python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --lr 0.005 --select_every 10 --fraction 0.2 # ok
 # python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --lr 0.001 --select_every 10 --fraction 0.2 # ok
+
+## EXP settings based on GradMatch paper
+# GradmatchPB-Warm, kappa=0.5, 350 epochs, TMax = 350, 30% every 20
+# python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb_long.py --lr 0.01 --epochs 350 --kappa 0.5 --fraction 0.3 --select_every 20 # ok
