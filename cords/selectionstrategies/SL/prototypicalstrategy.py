@@ -34,7 +34,7 @@ class PrototypicalStrategy(DataSelectionStrategy):
         self.trainloader = trainloader
         self.valloader = valloader
         self.model = model
-        self.pretrained_model = pretrained_model
+        self.pretrained_model = pretrained_model.to(device)
         self.N_trn = len(trainloader.sampler.data_source)
 
     def select(self, budget, model_params):
