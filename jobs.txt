@@ -201,26 +201,26 @@
  
 ## 6-9 not all methods of slide 11 (warm up) ran with lr=0.01 and not all have new metrics.
 # GLISTER, CRAIG, Gradmatch-warm k 0.05, graph-cut, facility-location, 
-python3 run_experiment.py --config ./exp_configs/cub200/config_glister.py --lr 0.01 --select_every 10 --fraction 0.2
-python3 run_experiment.py --config ./exp_configs/cub200/config_random.py --lr 0.01 --select_every 10 --fraction 0.2
-python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --lr 0.01 --select_every 10 --fraction 0.2
-python3 run_experiment.py --config ./exp_configs/cub200/config_craig.py --lr 0.01 --select_every 10 --fraction 0.2
-python3 run_experiment.py --config ./exp_configs/cub200/config_craigpb.py --lr 0.01 --select_every 10 --fraction 0.2
-python3 run_experiment.py --config ./exp_configs/cub200/config_.py --lr 0.01 --select_every 10 --fraction 0.2
-python3 run_experiment.py --config ./exp_configs/cub200/config_submodular.py --lr 0.01 --fraction 0.2 --select_every 10 --submod_function facility-location --selection_type PerBatch
-python3 run_experiment.py --config ./exp_configs/cub200/config_submodular.py --lr 0.01 --fraction 0.2 --select_every 10 --submod_function facility-location --selection_type PerClass
-python3 run_experiment.py --config ./exp_configs/cub200/config_submodular.py --lr 0.01 --fraction 0.2 --select_every 10 --submod_function graph-cut --selection_type PerBatch
-python3 run_experiment.py --config ./exp_configs/cub200/config_submodular.py --lr 0.01 --fraction 0.2 --select_every 10 --submod_function graph-cut --selection_type PerClass
+# python3 run_experiment.py --config ./exp_configs/cub200/config_glister.py --lr 0.01 --select_every 10 --fraction 0.2 # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_random.py --lr 0.01 --select_every 10 --fraction 0.2 # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --lr 0.01 --select_every 10 --fraction 0.2 # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_craig.py --lr 0.01 --select_every 10 --fraction 0.2 # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_craigpb.py --lr 0.01 --select_every 10 --fraction 0.2 # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_.py --lr 0.01 --select_every 10 --fraction 0.2 # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_submodular.py --lr 0.01 --fraction 0.2 --select_every 10 --submod_function facility-location --selection_type PerBatch # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_submodular.py --lr 0.01 --fraction 0.2 --select_every 10 --submod_function facility-location --selection_type PerClass # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_submodular.py --lr 0.01 --fraction 0.2 --select_every 10 --submod_function graph-cut --selection_type PerBatch # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_submodular.py --lr 0.01 --fraction 0.2 --select_every 10 --submod_function graph-cut --selection_type PerClass # ok
 
 # try to outperform Full on Cub200 non-PT with GradmatchPB at multiple fractions and also do warm-up once with rate 20x10, try Gradmatch-pb with higher LR. 
-python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --lr 0.01 --select_every 10 --fraction 0.2 --kappa 0.05
-python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --lr 0.01 --select_every 10 --fraction 0.3 --kappa 0.05
-python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --lr 0.01 --select_every 10 --fraction 0.2 --kappa 0.05 --data_dependent_scheduler
-python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --lr 0.01 --select_every 10 --fraction 0.3 --kappa 0.05 --data_dependent_scheduler
+# python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --lr 0.01 --select_every 10 --fraction 0.2 --kappa 0.05 # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --lr 0.01 --select_every 10 --fraction 0.3 --kappa 0.05 # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --lr 0.01 --select_every 10 --fraction 0.2 --kappa 0.05 --data_dependent_scheduler # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --lr 0.01 --select_every 10 --fraction 0.3 --kappa 0.05 --data_dependent_scheduler # ok
 
 ## do LR search on Pap with Full training. (look at wandb)
-python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --lr 0.01 --select_every 10 --fraction 0.2
-python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --lr 0.05 --select_every 10 --fraction 0.2
-python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --lr 0.01 --select_every 10 --fraction 0.2 
-python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --lr 0.005 --select_every 10 --fraction 0.2
-python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --lr 0.001 --select_every 10 --fraction 0.2
+# python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --lr 0.01 --select_every 10 --fraction 0.2 # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --lr 0.05 --select_every 10 --fraction 0.2 # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --lr 0.01 --select_every 10 --fraction 0.2 # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --lr 0.005 --select_every 10 --fraction 0.2 # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --lr 0.001 --select_every 10 --fraction 0.2 # ok
