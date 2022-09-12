@@ -41,6 +41,7 @@ class PrototypicalStrategy(DataSelectionStrategy):
         self.logger.info("Budget: {0:d}".format(budget))
         self.fraction = budget / self.N_trn
         self.update_model(model_params)
+        self.pretrained_model.eval()
         
         # per-class sampling
         self.get_labels()
