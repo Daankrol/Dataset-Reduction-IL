@@ -817,6 +817,7 @@ class TrainClassifier:
             model.train()
             start_time = time.time()
             cum_weights = 0
+            model.train()
 
 
             for _, data in enumerate(dataloader):

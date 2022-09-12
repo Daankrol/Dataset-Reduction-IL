@@ -34,22 +34,23 @@ class PrototypicalStrategy(DataSelectionStrategy):
         self.pretrained_model = pretrained_model.to(device)
         self.N_trn = len(trainloader.sampler.data_source)
 
+
     def select(self, budget, model_params):
         start_time = time.time()
         self.logger.info(f"Started Prototypical selection.")
         self.logger.info("Budget: {0:d}".format(budget))
         self.fraction = budget / self.N_trn
+        self.update_model(model_params)
         
         # per-class sampling
         self.get_labels()
         indices = np.array([], dtype=np.int64)
-        scores = []
+
         # we want to fill the budget with samples from each class
         for c in range(self.num_classes):
             self.logger.debug(f'Computing prototype and selecting samples for class {c}')
             class_index = np.arange(self.N_trn)[self.trn_lbls == c]
             budget_for_class = int(self.fraction * len(class_index))
-
             indices = np.append(indices, self.select_from_class(class_index, budget_for_class))
 
         end_time = time.time()
@@ -59,29 +60,28 @@ class PrototypicalStrategy(DataSelectionStrategy):
             )
         )
         self.logger.info("Selected {} samples with a budget of {}".format(len(indices), budget))
-
         return indices, torch.ones(len(indices))
 
     def select_from_class(self, class_indices, budget_for_class):
-        self.pretrained_model.eval()
         # compute the mean feature vector for this class
         mean_feature = torch.zeros(self.pretrained_model.embDim).to(self.device)
         loader = torch.utils.data.DataLoader(torch.utils.data.Subset(self.trainloader.dataset, class_indices), batch_size=32, shuffle=False)
-        for x, y in loader:
-            x = x.to(self.device)
-            _, e = self.pretrained_model(x, last=True, freeze=True)
-            mean_feature += e.sum(dim=0)
-        mean_feature /= len(class_indices)
+        with torch.no_grad():
+            for x, y in loader:
+                x = x.to(self.device)
+                _, e = self.pretrained_model(x, last=True, freeze=True)
+                mean_feature += e.sum(dim=0)
+            mean_feature /= len(class_indices)
 
-        # for each sample in the class, compute the (euclidian) distance to the mean feature vector
-        # select the top 'budget_for_class' samples with the highest distance
-        distances = []
-        for i in class_indices:
-            x = self.trainloader.dataset[i][0].unsqueeze(0).to(self.device)
-            _, e = self.pretrained_model(x, last=True, freeze=True)
-            distances.append(F.pairwise_distance(e, mean_feature.unsqueeze(0)).item())
-        distances = np.array(distances)
-        indices = class_indices[np.argsort(distances)[-budget_for_class:]]
+            # for each sample in the class, compute the (euclidian) distance to the mean feature vector
+            # select the top 'budget_for_class' samples with the highest distance
+            distances = []
+            for i in class_indices:
+                x = self.trainloader.dataset[i][0].unsqueeze(0).to(self.device)
+                _, e = self.pretrained_model(x, last=True, freeze=True)
+                distances.append(F.pairwise_distance(e, mean_feature.unsqueeze(0)).item())
+            distances = np.array(distances)
+            indices = class_indices[np.argsort(distances)[-budget_for_class:]]
         return indices
 
 

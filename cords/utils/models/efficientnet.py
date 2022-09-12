@@ -279,9 +279,11 @@ def test():
 
     net = EfficientNetB0_PyTorch(num_classes=10, pretrained=True, fine_tune=True)
     print(net.get_embedding_dim())
-    x = torch.randn(2, 3, 224, 224)
+    x = torch.randn(2, 3, 33, 33)
+    # x.to('cuda')
     y = net(x)
     print(y.shape)
+    print(y)
 
 
 if __name__ == "__main__":

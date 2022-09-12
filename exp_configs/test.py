@@ -3,6 +3,7 @@ config = dict(
     setting="SL",
     measure_energy=False,
     wandb=True,
+    logging='DEBUG',
     no_tsne=True,
     is_reg=False,
     dataset=dict(
@@ -16,8 +17,9 @@ config = dict(
     scheduler=dict(type="cosine_annealing", T_max=300),
     # early_stopping=True,
     dss_args=dict(
-        type="Full",
-        # fraction=0.1,
+        type="Prototypical",
+        fraction=0.1,
+        online=False,
         # select_every=1,
         kappa=0
     ),

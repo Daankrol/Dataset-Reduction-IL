@@ -228,3 +228,7 @@
 ## EXP settings based on GradMatch paper
 # GradmatchPB-Warm, kappa=0.5, 350 epochs, TMax = 350, 30% every 20
 # python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb_long.py --lr 0.01 --epochs 350 --kappa 0.5 --fraction 0.3 --select_every 20 # ok
+
+## EXP for prototypical offline dataset reduction
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_prototypical.py --fraction 0.6 --nonadaptive # ok
+python3 run_experiment.py --config ./exp_configs/cifar10/config_prototypical.py --fraction 0.5 --nonadaptive
