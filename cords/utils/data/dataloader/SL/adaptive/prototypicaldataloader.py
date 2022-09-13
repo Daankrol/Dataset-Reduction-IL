@@ -35,7 +35,7 @@ class PrototypicalDataLoader(AdaptiveDSSDataLoader):
         self.strategy = PrototypicalStrategy(
             train_loader, val_loader, copy.deepcopy(dss_args.model),
             dss_args.num_classes, dss_args.linear_layer, dss_args.loss,
-            dss_args.device, dss_args.selection_type, dss_args.pretrained_model, logger)
+            dss_args.device, dss_args.selection_type, logger)
 
         self.logger.debug("Prototypical dataloader initialized.")
 

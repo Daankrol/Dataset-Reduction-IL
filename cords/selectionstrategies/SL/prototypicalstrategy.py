@@ -3,6 +3,7 @@ import time
 import torch
 import torch.nn.functional as F
 import numpy as np
+from cords.utils.models.efficientnet import EfficientNetB0_PyTorch
 
 class PrototypicalStrategy(DataSelectionStrategy):
     def __init__(
@@ -15,7 +16,6 @@ class PrototypicalStrategy(DataSelectionStrategy):
         loss,
         device,
         selection_type,
-        pretrained_model,
         logger
     ):
         super().__init__(
@@ -28,7 +28,9 @@ class PrototypicalStrategy(DataSelectionStrategy):
             device,
             logger,
         )
-        self.pretrained_model = pretrained_model.to(device)
+        # self.pretrained_model = pretrained_model.to(device)
+        self.pretrained_model = EfficientNetB0_Pytorch(num_classes=num_classes, pretrained=True, fine_tune=False).to(device)
+        self.pretrained_model.eval()
 
 
     def select(self, budget, model_params):
@@ -36,8 +38,8 @@ class PrototypicalStrategy(DataSelectionStrategy):
         self.logger.info(f"Started Prototypical selection.")
         self.logger.info("Budget: {0:d}".format(budget))
         self.fraction = budget / self.N_trn
-        self.update_model(model_params)
-        self.pretrained_model.eval()
+        # self.update_model(model_params)
+        # self.pretrained_model.eval()
         
         # per-class sampling
         self.get_labels()
