@@ -839,25 +839,25 @@ class TrainClassifier:
                 total_data_seen += inputs.size(0)
                 scheduler_total_data_seen += inputs.size(0)
 
-                # show if the model is in train mode and which fraction of paramaters are trainable
-                logger.debug(
-                    "Model is in train mode: {0}".format(model.training)
-                )
-                logger.debug(
-                    "Fraction of trainable parameters: {0:.2f}".format(
-                        self.get_trainable_params(model)
-                    )
-                )
-                if self.cfg.dss_args.pretrained_model is not None:
-                    logger.debug(
-                        "Pretrained model is in train mode: {0}".format(
-                            self.cfg.dss_args.pretrained_model.training)
-                    )
-                    logger.debug(
-                        "Fraction of trainable parameters in pretrained net: {0:.2f}".format(
-                            self.get_trainable_params(self.cfg.dss_args.pretrained_model)
-                        )
-                    )
+                # # show if the model is in train mode and which fraction of paramaters are trainable
+                # logger.debug(
+                #     "Model is in train mode: {0}".format(model.training)
+                # )
+                # logger.debug(
+                #     "Fraction of trainable parameters: {0:.2f}".format(
+                #         self.get_trainable_params(model)
+                #     )
+                # )
+                # if self.cfg.dss_args.pretrained_model is not None:
+                #     logger.debug(
+                #         "Pretrained model is in train mode: {0}".format(
+                #             self.cfg.dss_args.pretrained_model.training)
+                #     )
+                #     logger.debug(
+                #         "Fraction of trainable parameters in pretrained net: {0:.2f}".format(
+                #             self.get_trainable_params(self.cfg.dss_args.pretrained_model)
+                #         )
+                #     )
                 
 
                 inputs = inputs.to(self.cfg.train_args.device)
