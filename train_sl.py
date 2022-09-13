@@ -174,6 +174,12 @@ class TrainClassifier:
                     fine_tune=False,
                 )
 
+    def get_trainable_params(self, model):
+        # Return the fraction of parameters that are trainable
+        trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+        total_params = sum(p.numel() for p in model.parameters())
+        return trainable_params / total_params
+        
     def create_model(self):
         print(f"using model: {self.cfg.model.architecture} with {self.cfg.model}")
         if self.cfg.model.architecture == "EfficientNet":
@@ -817,7 +823,6 @@ class TrainClassifier:
             model.train()
             start_time = time.time()
             cum_weights = 0
-            model.train()
 
 
             for _, data in enumerate(dataloader):
@@ -833,6 +838,27 @@ class TrainClassifier:
 
                 total_data_seen += inputs.size(0)
                 scheduler_total_data_seen += inputs.size(0)
+
+                # show if the model is in train mode and which fraction of paramaters are trainable
+                logger.debug(
+                    "Model is in train mode: {0}".format(model.training)
+                )
+                logger.debug(
+                    "Fraction of trainable parameters: {0:.2f}".format(
+                        self.get_trainable_params(model)
+                    )
+                )
+                if self.cfg.dss_args.pretrained_model is not None:
+                    logger.debug(
+                        "Pretrained model is in train mode: {0}".format(
+                            self.cfg.dss_args.pretrained_model.training)
+                    )
+                    logger.debug(
+                        "Fraction of trainable parameters in pretrained net: {0:.2f}".format(
+                            self.get_trainable_params(self.cfg.dss_args.pretrained_model)
+                        )
+                    )
+                
 
                 inputs = inputs.to(self.cfg.train_args.device)
                 targets = targets.to(self.cfg.train_args.device, non_blocking=True)

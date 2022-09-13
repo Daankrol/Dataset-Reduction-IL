@@ -28,11 +28,7 @@ class PrototypicalStrategy(DataSelectionStrategy):
             device,
             logger,
         )
-        self.trainloader = trainloader
-        self.valloader = valloader
-        self.model = model
         self.pretrained_model = pretrained_model.to(device)
-        self.N_trn = len(trainloader.sampler.data_source)
 
 
     def select(self, budget, model_params):
@@ -61,13 +57,14 @@ class PrototypicalStrategy(DataSelectionStrategy):
             )
         )
         self.logger.info("Selected {} samples with a budget of {}".format(len(indices), budget))
+        self.logger.debug("Selected {} unique samples from {} total samples".format(len(np.unique(indices)), len(indices)))
         return indices, torch.ones(len(indices))
 
     def select_from_class(self, class_indices, budget_for_class):
         # compute the mean feature vector for this class
-        mean_feature = torch.zeros(self.pretrained_model.embDim).to(self.device)
         loader = torch.utils.data.DataLoader(torch.utils.data.Subset(self.trainloader.dataset, class_indices), batch_size=32, shuffle=False)
         with torch.no_grad():
+            mean_feature = torch.zeros(self.pretrained_model.embDim).to(self.device)
             for x, y in loader:
                 x = x.to(self.device)
                 _, e = self.pretrained_model(x, last=True, freeze=True)
