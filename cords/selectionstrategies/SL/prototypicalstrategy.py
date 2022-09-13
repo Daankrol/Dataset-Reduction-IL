@@ -29,7 +29,7 @@ class PrototypicalStrategy(DataSelectionStrategy):
             logger,
         )
         # self.pretrained_model = pretrained_model.to(device)
-        self.pretrained_model = EfficientNetB0_Pytorch(num_classes=num_classes, pretrained=True, fine_tune=False).to(device)
+        self.pretrained_model = EfficientNetB0_PyTorch(num_classes,pretrained=True, fine_tune=False).to(device)
         self.pretrained_model.eval()
 
 
