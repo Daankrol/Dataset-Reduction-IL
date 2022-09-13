@@ -49,6 +49,7 @@ class PrototypicalStrategy(DataSelectionStrategy):
             class_index = np.arange(self.N_trn)[self.trn_lbls == c]
             budget_for_class = int(self.fraction * len(class_index))
             indices = np.append(indices, self.select_from_class(class_index, budget_for_class))
+            self.logger.debug(f'Selected {len(indices)} samples for class {c} with a class-budget of {budget_for_class}')
 
         end_time = time.time()
         self.logger.info(
