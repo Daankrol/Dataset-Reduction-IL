@@ -43,7 +43,8 @@ class PrototypicalStrategy(DataSelectionStrategy):
         # we want to fill the budget with samples from each class
         for c in range(self.num_classes):
             self.logger.debug(f'Computing prototype and selecting samples for class {c}')
-            class_index = np.arange(self.N_trn)[self.trn_lbls == c]
+            # class_index = np.arange(self.N_trn)[self.trn_lbls == c]
+            class_index = torch.where(self.trn_lbls == c)[0].tolist()
             budget_for_class = int(self.fraction * len(class_index))
             indices = np.append(indices, self.select_from_class(class_index, budget_for_class))
             self.logger.debug(f'Selected {len(indices)} samples for class {c} with a class-budget of {budget_for_class}')
@@ -66,7 +67,7 @@ class PrototypicalStrategy(DataSelectionStrategy):
     @torch.no_grad()
     def select_from_class(self, class_indices, budget_for_class):
         # compute the mean feature vector for this class
-        loader = torch.utils.data.DataLoader(torch.utils.data.Subset(self.trainloader.dataset, class_indices), batch_size=32, shuffle=False)
+        loader = torch.utils.data.DataLoader(torch.utils.data.Subset(self.trainloader.dataset, class_indices), batch_size=self.trainloader.batch_size, shuffle=False)
         # with torch.no_grad():
         mean_feature = torch.zeros(self.pretrained_model.embDim).to(self.device)
         for x, y in loader:
