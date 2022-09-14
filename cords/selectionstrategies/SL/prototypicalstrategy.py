@@ -19,7 +19,7 @@ class PrototypicalStrategy(DataSelectionStrategy):
         super().__init__(
             trainloader,
             valloader,
-            model,
+            None,
             num_classes,
             linear_layer,
             loss,

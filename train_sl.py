@@ -475,12 +475,12 @@ class TrainClassifier:
         ############################## Offline Dataset Reduction ##############################
         """
         # todo check in config if offline and if prototypical
-        if elf.cfg.dss_args.type in ["Prototypical"] and not self.cfg.dss_args.online:
+        if self.cfg.dss_args.type in ["Prototypical"] and not self.cfg.dss_args.online:
             self.logger.info('Offline Dataset Reduction with Prototypical method.')
             self.cfg.dss_args.device = self.cfg.train_args.device
             self.cfg.dss_args.num_epochs = self.cfg.train_args.num_epochs
-            self.cfg.dss_args.num_classes = self.cfg.model.numclasses
-            dataloader = PrototypicalDataLoader(trainloader, valloader, dss_args, logger)
+            self.cfg.dss_args.num_classes = num_cls
+            dataloader = PrototypicalDataLoader(trainloader, valloader, self.cfg.dss_args, logger)
             dataloader.resample()
             dataloader.initialized = True
 
