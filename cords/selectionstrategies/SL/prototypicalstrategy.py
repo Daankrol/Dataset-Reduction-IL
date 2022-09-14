@@ -30,6 +30,7 @@ class PrototypicalStrategy(DataSelectionStrategy):
     def select(self, budget, model_params):
         self.pretrained_model = EfficientNetB0_PyTorch(num_classes=self.num_classes, pretrained=True, fine_tune=False).to(self.device)
         self.pretrained_model.eval()
+        self.pretrained_model.no_grad = True
         start_time = time.time()
         self.logger.info(f"Started Prototypical selection.")
         self.logger.info("Budget: {0:d}".format(budget))
@@ -56,6 +57,9 @@ class PrototypicalStrategy(DataSelectionStrategy):
         )
         self.logger.info("Selected {} samples with a budget of {}".format(len(indices), budget))
         self.logger.debug("Selected {} unique samples from {} total samples".format(len(np.unique(indices)), len(indices)))
+
+        # Remove model from memory as we are not going to use it anymore 
+        del self.pretrained_model
 
         return indices, [1 for _ in range(len(indices))]
 
