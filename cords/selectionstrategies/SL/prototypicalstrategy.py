@@ -28,12 +28,11 @@ class PrototypicalStrategy(DataSelectionStrategy):
             device,
             logger,
         )
-        # self.pretrained_model = pretrained_model.to(device)
-        self.pretrained_model = EfficientNetB0_Pytorch(num_classes=num_classes, pretrained=True, fine_tune=False).to(device)
-        self.pretrained_model.eval()
 
 
     def select(self, budget, model_params):
+        self.pretrained_model = EfficientNetB0_Pytorch(num_classes=num_classes, pretrained=True, fine_tune=False).to(device)
+        self.pretrained_model.eval()
         start_time = time.time()
         self.logger.info(f"Started Prototypical selection.")
         self.logger.info("Budget: {0:d}".format(budget))
@@ -61,6 +60,11 @@ class PrototypicalStrategy(DataSelectionStrategy):
         )
         self.logger.info("Selected {} samples with a budget of {}".format(len(indices), budget))
         self.logger.debug("Selected {} unique samples from {} total samples".format(len(np.unique(indices)), len(indices)))
+
+        # remove the model from cuda memory 
+        del self.pretrained_model
+        torch.cuda.empty_cache()
+        
         return indices, torch.ones(len(indices))
 
     def select_from_class(self, class_indices, budget_for_class):

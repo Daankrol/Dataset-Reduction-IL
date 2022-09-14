@@ -848,6 +848,14 @@ class TrainClassifier:
                     loss = torch.dot(losses.view(-1), weights / (weights.sum()))
                 else:
                     loss = torch.dot(losses, weights / (weights.sum()))
+                
+                # check if gradients are changing and are not zero 
+                self.logger.debug('gradients before backward pass')
+                for name, param in model.named_parameters():
+                    if param.requires_grad:
+                        self.logger.debug(name, param.grad)
+
+
                 loss.backward()
                 subtrn_loss += loss.item() * weights.sum()
                 cum_weights += weights.sum()

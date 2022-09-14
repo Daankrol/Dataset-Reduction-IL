@@ -98,7 +98,7 @@ class SubmodularSelectionStrategy(DataSelectionStrategy):
 
         if self.if_convex:
             for batch_idx, (inputs, targets) in enumerate(subset_loader):
-                inputs, targets = inputs, targets
+                inputs, targets = inputs.to(self.device), targets.to(self.device)
                 if self.selection_type == 'PerBatch':
                     self.N += 1
                     g_is.append(inputs.view(inputs.size()[0], -1).mean(dim=0).view(1, -1))
