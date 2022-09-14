@@ -31,7 +31,7 @@ class PrototypicalStrategy(DataSelectionStrategy):
 
 
     def select(self, budget, model_params):
-        self.pretrained_model = EfficientNetB0_PyTorch(num_classes=num_classes, pretrained=True, fine_tune=False).to(device)
+        self.pretrained_model = EfficientNetB0_PyTorch(num_classes=self.num_classes, pretrained=True, fine_tune=False).to(device)
         self.pretrained_model.eval()
         start_time = time.time()
         self.logger.info(f"Started Prototypical selection.")
