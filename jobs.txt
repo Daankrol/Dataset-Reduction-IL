@@ -233,5 +233,4 @@
 # python3 run_experiment.py --config ./exp_configs/cifar10/config_prototypical.py --fraction 0.6 --nonadaptive # ok
 # python3 run_experiment.py --config ./exp_configs/cifar10/config_prototypical.py --fraction 0.5 --nonadaptive # ok
 # python3 run_experiment.py --config ./exp_configs/cifar10/config_full.py # ok
-# python3 run_experiment.py --config ./exp_configs/cifar10/config_prototypical.py --fraction 1 --nonadaptive # ok
-
+python3 run_experiment.py --config ./exp_configs/cifar10/config_prototypical.py --fraction 0.8 --nonadaptive

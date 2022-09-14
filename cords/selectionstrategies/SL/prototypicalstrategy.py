@@ -42,13 +42,10 @@ class PrototypicalStrategy(DataSelectionStrategy):
         # we want to fill the budget with samples from each class
         for c in range(self.num_classes):
             self.logger.debug(f'Computing prototype and selecting samples for class {c}')
-            class_index = torch.where(self.trn_lbls == c)[0].tonumpy()
+            class_index = torch.where(self.trn_lbls == c)[0].numpy()
             budget_for_class = int(self.fraction * len(class_index))
             selected_indices = self.select_from_class(class_index, budget_for_class)
-
-            # verify that these indices are of the correct class in the full train dataset
-            assert np.all(self.trn_lbls[selected_indices] == c), "Selected indices are not of the correct class!"
-
+            print(type(selected_indices), selected_indices.shape, selected_indices[0])
             indices = np.append(indices, selected_indices)
             self.logger.debug(f'Selected {len(indices)} samples for class {c} with a class-budget of {budget_for_class}')
 
@@ -68,7 +65,8 @@ class PrototypicalStrategy(DataSelectionStrategy):
         # compute the mean feature vector for this class
         loader = torch.utils.data.DataLoader(torch.utils.data.Subset(self.trainloader.dataset, class_indices), batch_size=self.trainloader.batch_size, shuffle=False)
         mean_feature = torch.zeros(self.pretrained_model.embDim).to(self.device)
-        for batch_idx, (inputs, targets) in loader:
+        for batch_idx, (inputs, targets) in enumerate(loader):
+            # print('Data shape:', data.shape)
             inputs = inputs.to(self.device)
             _, features = self.pretrained_model(inputs, last=True, freeze=True)
             # add the sum of the features to the mean feature vector
@@ -85,4 +83,4 @@ class PrototypicalStrategy(DataSelectionStrategy):
             distances[i] = torch.norm(features - mean_feature)
         # select the top 'budget_for_class' samples with the highest distance
         _, selected_indices = torch.topk(distances, budget_for_class)
-        return class_indices[selected_indices]
+        return class_indices[selected_indices.cpu()]
