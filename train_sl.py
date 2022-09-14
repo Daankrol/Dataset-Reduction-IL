@@ -489,270 +489,9 @@ class TrainClassifier:
         if self.cfg.early_stopping:
             early_stopping = EarlyStopping(patience=15, min_delta=0, logger=logger)
 
-        """
-        ############################## Custom Dataloader Creation ##############################
-        """
+        ## Custom dataloaders
+        dataloader = self.create_dataloader(model, criterion_nored, trainloader, valloader, logger, trainset)
 
-        if "collate_fn" not in self.cfg.dss_args:
-            self.cfg.dss_args.collate_fn = None
-
-        if self.cfg.dss_args.type in [
-            "GradMatch",
-            "GradMatchPB",
-            "GradMatch-Warm",
-            "GradMatchPB-Warm",
-        ]:
-            """
-            ############################## GradMatch Dataloader Additional Arguments ##############################
-            """
-            self.cfg.dss_args.model = model
-            self.cfg.dss_args.loss = criterion_nored
-            self.cfg.dss_args.eta = self.cfg.optimizer.lr
-            self.cfg.dss_args.num_classes = self.cfg.model.numclasses
-            self.cfg.dss_args.num_epochs = self.cfg.train_args.num_epochs
-            self.cfg.dss_args.device = self.cfg.train_args.device
-
-            dataloader = GradMatchDataLoader(
-                trainloader,
-                valloader,
-                self.cfg.dss_args,
-                logger,
-                batch_size=self.cfg.dataloader.batch_size,
-                shuffle=self.cfg.dataloader.shuffle,
-                pin_memory=self.cfg.dataloader.pin_memory,
-                collate_fn=self.cfg.dss_args.collate_fn,
-            )
-
-        elif self.cfg.dss_args.type in [
-            "GLISTER",
-            "GLISTER-Warm",
-            "GLISTERPB",
-            "GLISTERPB-Warm",
-        ]:
-            """
-            ############################## GLISTER Dataloader Additional Arguments ##############################
-            """
-            self.cfg.dss_args.model = model
-            self.cfg.dss_args.loss = criterion_nored
-            self.cfg.dss_args.eta = self.cfg.optimizer.lr
-            self.cfg.dss_args.num_classes = self.cfg.model.numclasses
-            self.cfg.dss_args.num_epochs = self.cfg.train_args.num_epochs
-            self.cfg.dss_args.device = self.cfg.train_args.device
-            dataloader = GLISTERDataLoader(
-                trainloader,
-                valloader,
-                self.cfg.dss_args,
-                logger,
-                batch_size=self.cfg.dataloader.batch_size,
-                shuffle=self.cfg.dataloader.shuffle,
-                pin_memory=self.cfg.dataloader.pin_memory,
-                collate_fn=self.cfg.dss_args.collate_fn,
-            )
-
-        elif self.cfg.dss_args.type in [
-            "CRAIG",
-            "CRAIG-Warm",
-            "CRAIGPB",
-            "CRAIGPB-Warm",
-        ]:
-            """
-            ############################## CRAIG Dataloader Additional Arguments ##############################
-            """
-            self.cfg.dss_args.model = model
-            self.cfg.dss_args.loss = criterion_nored
-            self.cfg.dss_args.num_classes = self.cfg.model.numclasses
-            self.cfg.dss_args.num_epochs = self.cfg.train_args.num_epochs
-            self.cfg.dss_args.device = self.cfg.train_args.device
-
-            dataloader = CRAIGDataLoader(
-                trainloader,
-                valloader,
-                self.cfg.dss_args,
-                logger,
-                batch_size=self.cfg.dataloader.batch_size,
-                shuffle=self.cfg.dataloader.shuffle,
-                pin_memory=self.cfg.dataloader.pin_memory,
-                collate_fn=self.cfg.dss_args.collate_fn,
-            )
-
-        elif self.cfg.dss_args.type in ["Random", "Random-Warm"]:
-            """
-            ############################## Random Dataloader Additional Arguments ##############################
-            """
-            self.cfg.dss_args.device = self.cfg.train_args.device
-            self.cfg.dss_args.num_epochs = self.cfg.train_args.num_epochs
-
-            dataloader = RandomDataLoader(
-                trainloader,
-                self.cfg.dss_args,
-                logger,
-                batch_size=self.cfg.dataloader.batch_size,
-                shuffle=self.cfg.dataloader.shuffle,
-                pin_memory=self.cfg.dataloader.pin_memory,
-                collate_fn=self.cfg.dss_args.collate_fn,
-            )
-
-        elif self.cfg.dss_args.type == ["OLRandom", "OLRandom-Warm"]:
-            """
-            ############################## OLRandom Dataloader Additional Arguments ##############################
-            """
-            self.cfg.dss_args.device = self.cfg.train_args.device
-            self.cfg.dss_args.num_epochs = self.cfg.train_args.num_epochs
-
-            dataloader = OLRandomDataLoader(
-                trainloader,
-                self.cfg.dss_args,
-                logger,
-                batch_size=self.cfg.dataloader.batch_size,
-                shuffle=self.cfg.dataloader.shuffle,
-                pin_memory=self.cfg.dataloader.pin_memory,
-                collate_fn=self.cfg.dss_args.collate_fn,
-            )
-
-        elif self.cfg.dss_args.type == "Submodular":
-            """
-            ############################## Submodular Dataloader Additional Arguments ##############################
-            """
-            self.cfg.dss_args.model = model
-            self.cfg.dss_args.loss = criterion_nored
-            self.cfg.dss_args.num_classes = self.cfg.model.numclasses
-            self.cfg.dss_args.num_epochs = self.cfg.train_args.num_epochs
-            self.cfg.dss_args.device = self.cfg.train_args.device
-
-            dataloader = SubmodularDataLoader(
-                trainloader,
-                valloader,
-                self.cfg.dss_args,
-                logger,
-                batch_size=self.cfg.dataloader.batch_size,
-                shuffle=self.cfg.dataloader.shuffle,
-                pin_memory=self.cfg.dataloader.pin_memory,
-                collate_fn=self.cfg.dss_args.collate_fn,
-            )
-
-        elif self.cfg.dss_args.type == "CAL":
-            self.cfg.dss_args.model = model
-            self.cfg.dss_args.loss = criterion_nored
-            self.cfg.dss_args.num_classes = self.cfg.model.numclasses
-            self.cfg.dss_args.num_epochs = self.cfg.train_args.num_epochs
-            self.cfg.dss_args.device = self.cfg.train_args.device
-            dataloader = ContrastiveDataLoader(
-                trainloader, valloader, self.cfg.dss_args, logger
-            )
-
-
-
-        elif self.cfg.dss_args.type == "FacLoc":
-            """
-            ############################## Facility Location Dataloader Additional Arguments ##############################
-            """
-            self.cfg.dss_args.device = self.cfg.train_args.device
-            self.cfg.dss_args.model = model
-            self.cfg.dss_args.data_type = self.cfg.dataset.type
-
-            dataloader = FacLocDataLoader(
-                trainloader,
-                valloader,
-                self.cfg.dss_args,
-                logger,
-                batch_size=self.cfg.dataloader.batch_size,
-                shuffle=self.cfg.dataloader.shuffle,
-                pin_memory=self.cfg.dataloader.pin_memory,
-                collate_fn=self.cfg.dss_args.collate_fn,
-            )
-            if (
-                self.cfg.dataset.name == "sst2_facloc"
-                and self.count_pkl(self.cfg.dataset.ss_path) < 1
-            ):
-
-                ss_indices = dataloader.subset_indices
-                file_ss = open(self.cfg.dataset.ss_path, "wb")
-                try:
-                    pickle.dump(ss_indices, file_ss)
-                except EOFError:
-                    pass
-                file_ss.close()
-
-        elif self.cfg.dss_args.type == "Full":
-            """
-            ############################## Full Dataloader Additional Arguments ##############################
-            """
-            wt_trainset = WeightedSubset(
-                trainset, list(range(len(trainset))), [1] * len(trainset)
-            )
-
-            dataloader = torch.utils.data.DataLoader(
-                wt_trainset,
-                batch_size=self.cfg.dataloader.batch_size,
-                shuffle=self.cfg.dataloader.shuffle,
-                pin_memory=self.cfg.dataloader.pin_memory,
-                collate_fn=self.cfg.dss_args.collate_fn,
-            )
-
-        elif self.cfg.dss_args.type in ["SELCON"]:
-            """
-            ############################## SELCON Dataloader Additional Arguments ##############################
-            """
-            self.cfg.dss_args.model = model
-            self.cfg.dss_args.lr = self.cfg.optimizer.lr
-            self.cfg.dss_args.loss = criterion_nored  # doubt: or criterion
-            self.cfg.dss_args.device = self.cfg.train_args.device
-            self.cfg.dss_args.optimizer = optimizer
-            self.cfg.dss_args.criterion = criterion
-            self.cfg.dss_args.num_classes = self.cfg.model.numclasses
-            self.cfg.dss_args.batch_size = self.cfg.dataloader.batch_size
-
-            # todo: not done yet
-            self.cfg.dss_args.delta = torch.tensor(self.cfg.dss_args.delta)
-            # self.cfg.dss_args.linear_layer = self.cfg.dss_args.linear_layer # already there, check glister init
-            self.cfg.dss_args.num_epochs = self.cfg.train_args.num_epochs
-
-            dataloader = SELCONDataLoader(
-                trainset,
-                validset,
-                trainloader,
-                valloader,
-                self.cfg.dss_args,
-                logger,
-                batch_size=self.cfg.dataloader.batch_size,
-                shuffle=self.cfg.dataloader.shuffle,
-                pin_memory=self.cfg.dataloader.pin_memory,
-            )
-
-        elif self.cfg.dss_args.type in ["Uncertainty"]:
-            """
-            ############################## Uncertainty Dataloader Additional Arguments ##############################
-            """
-            self.cfg.dss_args.model = model
-            self.cfg.dss_args.device = self.cfg.train_args.device
-            self.cfg.dss_args.num_epochs = self.cfg.train_args.num_epochs
-            self.cfg.dss_args.num_classes = self.cfg.model.numclasses
-            dataloader = UncertaintyDataLoader(
-                trainloader, valloader, self.cfg.dss_args, logger
-            )
-        elif self.cfg.dss_args.type in ["Prototypical"]:
-            """
-            ##############################  Prototypical Dataloader Additional Arguments ##############################
-            """
-            self.cfg.dss_args.model = model
-            self.cfg.dss_args.device = self.cfg.train_args.device
-            self.cfg.dss_args.num_epochs = self.cfg.train_args.num_epochs
-            self.cfg.dss_args.num_classes = self.cfg.model.numclasses
-            dataloader = PrototypicalDataLoader(
-                trainloader, valloader, self.cfg.dss_args, logger
-            )
-
-        else:
-            raise NotImplementedError
-
-        if self.cfg.dss_args.type in ["SELCON"]:
-            is_selcon = True
-        else:
-            is_selcon = False
-
-        """
-        ############################## tSNE embeddings ##############################
-        """
         # create embeddings for the train set
         if self.cfg.dataset.name in ['cifar10', 'cifar100', 'papilion','cub200'] and self.cfg.dss_args.type not in ['Full'] and not self.cfg.no_tsne:
             self.embedding_plotter = TSNEPlotter(
@@ -766,15 +505,7 @@ class TrainClassifier:
             )
         else:
             self.embedding_plotter = None
-        # self.embedding_plotter = UMAPPlotter(
-        #     trainloader,
-        #     valloader,
-        #     testloader,
-        #     None,
-        #     self.cfg.train_args.device,
-        #     root=self.cfg.dataset.datadir,
-        #     dataset_name=self.cfg.dataset.name,
-        # )
+
         """
         ################################################# Checkpoint Loading #################################################
         """
@@ -1293,7 +1024,6 @@ class TrainClassifier:
             }
         )
 
-
         logger.info(
             self.cfg.dss_args.type + " Selection Run---------------------------------"
         )
@@ -1359,3 +1089,189 @@ class TrainClassifier:
         wandb.run.summary["test_ds_size"] = len(testloader.dataset)
         wandb.run.summary["val_ds_size"] = len(valloader.dataset)
         wandb.finish()
+
+
+    def create_dataloader(self, model, criterion_nored, trainloader, valloader, logger, trainset):
+        if "collate_fn" not in self.cfg.dss_args:
+            self.cfg.dss_args.collate_fn = None
+        
+        self.cfg.dss_args.model = model
+        self.cfg.dss_args.num_classes = self.cfg.model.numclasses
+        self.cfg.dss_args.num_epochs = self.cfg.train_args.num_epochs
+        self.cfg.dss_args.device = self.cfg.train_args.device
+        self.cfg.dss_args.loss = criterion_nored
+
+        if self.cfg.dss_args.type in [
+            "GradMatch",
+            "GradMatchPB",
+            "GradMatch-Warm",
+            "GradMatchPB-Warm",
+        ]:
+            """
+            ############################## GradMatch Dataloader Additional Arguments ##############################
+            """
+            
+            self.cfg.dss_args.eta = self.cfg.optimizer.lr
+            dataloader = GradMatchDataLoader(
+                trainloader,
+                valloader,
+                self.cfg.dss_args,
+                logger,
+                batch_size=self.cfg.dataloader.batch_size,
+                shuffle=self.cfg.dataloader.shuffle,
+                pin_memory=self.cfg.dataloader.pin_memory,
+                collate_fn=self.cfg.dss_args.collate_fn,
+            )
+
+        elif self.cfg.dss_args.type in [
+            "GLISTER",
+            "GLISTER-Warm",
+            "GLISTERPB",
+            "GLISTERPB-Warm",
+        ]:
+            """
+            ############################## GLISTER Dataloader Additional Arguments ##############################
+            """
+            self.cfg.dss_args.eta = self.cfg.optimizer.lr
+            dataloader = GLISTERDataLoader(
+                trainloader,
+                valloader,
+                self.cfg.dss_args,
+                logger,
+                batch_size=self.cfg.dataloader.batch_size,
+                shuffle=self.cfg.dataloader.shuffle,
+                pin_memory=self.cfg.dataloader.pin_memory,
+                collate_fn=self.cfg.dss_args.collate_fn,
+            )
+
+        elif self.cfg.dss_args.type in [
+            "CRAIG",
+            "CRAIG-Warm",
+            "CRAIGPB",
+            "CRAIGPB-Warm",
+        ]:
+            dataloader = CRAIGDataLoader(
+                trainloader,
+                valloader,
+                self.cfg.dss_args,
+                logger,
+                batch_size=self.cfg.dataloader.batch_size,
+                shuffle=self.cfg.dataloader.shuffle,
+                pin_memory=self.cfg.dataloader.pin_memory,
+                collate_fn=self.cfg.dss_args.collate_fn,
+            )
+
+        elif self.cfg.dss_args.type in ["Random", "Random-Warm"]:
+            dataloader = RandomDataLoader(
+                trainloader,
+                self.cfg.dss_args,
+                logger,
+                batch_size=self.cfg.dataloader.batch_size,
+                shuffle=self.cfg.dataloader.shuffle,
+                pin_memory=self.cfg.dataloader.pin_memory,
+                collate_fn=self.cfg.dss_args.collate_fn,
+            )
+
+        elif self.cfg.dss_args.type == ["OLRandom", "OLRandom-Warm"]:
+            dataloader = OLRandomDataLoader(
+                trainloader,
+                self.cfg.dss_args,
+                logger,
+                batch_size=self.cfg.dataloader.batch_size,
+                shuffle=self.cfg.dataloader.shuffle,
+                pin_memory=self.cfg.dataloader.pin_memory,
+                collate_fn=self.cfg.dss_args.collate_fn,
+            )
+        elif self.cfg.dss_args.type == "Submodular":
+            dataloader = SubmodularDataLoader(
+                trainloader,
+                valloader,
+                self.cfg.dss_args,
+                logger,
+                batch_size=self.cfg.dataloader.batch_size,
+                shuffle=self.cfg.dataloader.shuffle,
+                pin_memory=self.cfg.dataloader.pin_memory,
+                collate_fn=self.cfg.dss_args.collate_fn,
+            )
+
+        elif self.cfg.dss_args.type == "CAL":
+            dataloader = ContrastiveDataLoader(
+                trainloader, valloader, self.cfg.dss_args, logger
+            )
+        elif self.cfg.dss_args.type == "FacLoc":
+            self.cfg.dss_args.data_type = self.cfg.dataset.type
+            dataloader = FacLocDataLoader(
+                trainloader,
+                valloader,
+                self.cfg.dss_args,
+                logger,
+                batch_size=self.cfg.dataloader.batch_size,
+                shuffle=self.cfg.dataloader.shuffle,
+                pin_memory=self.cfg.dataloader.pin_memory,
+                collate_fn=self.cfg.dss_args.collate_fn,
+            )
+            if (
+                self.cfg.dataset.name == "sst2_facloc"
+                and self.count_pkl(self.cfg.dataset.ss_path) < 1
+            ):
+
+                ss_indices = dataloader.subset_indices
+                file_ss = open(self.cfg.dataset.ss_path, "wb")
+                try:
+                    pickle.dump(ss_indices, file_ss)
+                except EOFError:
+                    pass
+                file_ss.close()
+
+        elif self.cfg.dss_args.type == "Full":
+            wt_trainset = WeightedSubset(
+                trainset, list(range(len(trainset))), [1] * len(trainset)
+            )
+            dataloader = torch.utils.data.DataLoader(
+                wt_trainset,
+                batch_size=self.cfg.dataloader.batch_size,
+                shuffle=self.cfg.dataloader.shuffle,
+                pin_memory=self.cfg.dataloader.pin_memory,
+                collate_fn=self.cfg.dss_args.collate_fn,
+            )
+
+        elif self.cfg.dss_args.type in ["SELCON"]:
+            self.cfg.dss_args.lr = self.cfg.optimizer.lr
+            self.cfg.dss_args.loss = criterion_nored  # doubt: or criterion
+            self.cfg.dss_args.optimizer = optimizer
+            self.cfg.dss_args.criterion = criterion
+            self.cfg.dss_args.batch_size = self.cfg.dataloader.batch_size
+
+            # todo: not done yet
+            self.cfg.dss_args.delta = torch.tensor(self.cfg.dss_args.delta)
+            # self.cfg.dss_args.linear_layer = self.cfg.dss_args.linear_layer # already there, check glister init
+
+            dataloader = SELCONDataLoader(
+                trainset,
+                validset,
+                trainloader,
+                valloader,
+                self.cfg.dss_args,
+                logger,
+                batch_size=self.cfg.dataloader.batch_size,
+                shuffle=self.cfg.dataloader.shuffle,
+                pin_memory=self.cfg.dataloader.pin_memory,
+            )
+
+        elif self.cfg.dss_args.type in ["Uncertainty"]:
+            dataloader = UncertaintyDataLoader(
+                trainloader, valloader, self.cfg.dss_args, logger
+            )
+        elif self.cfg.dss_args.type in ["Prototypical"]:
+            dataloader = PrototypicalDataLoader(
+                trainloader, valloader, self.cfg.dss_args, logger
+            )
+        else:
+            raise NotImplementedError
+
+        if self.cfg.dss_args.type in ["SELCON"]:
+            is_selcon = True
+        else:
+            is_selcon = False
+        
+        return dataloader
