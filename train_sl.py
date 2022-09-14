@@ -871,11 +871,11 @@ class TrainClassifier:
                 else:
                     loss = torch.dot(losses, weights / (weights.sum()))
                 
-                # check if gradients are changing and are not zero 
-                self.logger.debug('gradients before backward pass')
-                for name, param in model.named_parameters():
-                    if param.requires_grad:
-                        self.logger.debug(f'{name} {param.grad}')
+                # # check if gradients are changing and are not zero 
+                # self.logger.debug('gradients before backward pass')
+                # for name, param in model.named_parameters():
+                #     if param.requires_grad:
+                #         self.logger.debug(f'{name} {param.grad}')
 
 
                 loss.backward()

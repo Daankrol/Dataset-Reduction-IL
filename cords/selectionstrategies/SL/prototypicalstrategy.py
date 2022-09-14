@@ -27,7 +27,6 @@ class PrototypicalStrategy(DataSelectionStrategy):
             logger,
         )
 
-
     def select(self, budget, model_params):
         self.pretrained_model = EfficientNetB0_PyTorch(num_classes=self.num_classes, pretrained=True, fine_tune=False).to(self.device)
         self.pretrained_model.eval()
@@ -65,16 +64,18 @@ class PrototypicalStrategy(DataSelectionStrategy):
 
         return indices, [1 for _ in range(len(indices))]
 
-    @torch.no_grad()
+
     def select_from_class(self, class_indices, budget_for_class):
         # compute the mean feature vector for this class
         loader = torch.utils.data.DataLoader(torch.utils.data.Subset(self.trainloader.dataset, class_indices), batch_size=self.trainloader.batch_size, shuffle=False)
         # with torch.no_grad():
         mean_feature = torch.zeros(self.pretrained_model.embDim).to(self.device)
-        for x, y in loader:
-            x = x.to(self.device)
-            _, e = self.pretrained_model(x, last=True, freeze=True)
-            mean_feature += e.sum(dim=0)
+        for batch_idx, (inputs, targets) in loader:
+            inputs, targets = inputs.to(self.device), targets.to(self.device)
+            _, features = self.pretrained_model(inputs, last=True, freeze=True)
+            # add the sum of the features to the mean feature vector
+            mean_feature += torch.sum(features, dim=0)
+        # divide by the number of samples (in all batches) to get the mean feature vector
         mean_feature /= len(class_indices)
 
         # for each sample in the class, compute the (euclidian) distance to the mean feature vector
@@ -85,7 +86,10 @@ class PrototypicalStrategy(DataSelectionStrategy):
             _, e = self.pretrained_model(x, last=True, freeze=True)
             distances.append(F.pairwise_distance(e, mean_feature.unsqueeze(0)).item())
         distances = np.array(distances)
-        indices = class_indices[np.argsort(distances)[-budget_for_class:]]
-        return indices
+        # sort the indices by distance
+        sorted_indices = np.argsort(distances)[::-1]
+        # select the top 'budget_for_class' samples
+        return class_indices[sorted_indices[:budget_for_class]]
 
+        
 
