@@ -235,3 +235,23 @@
 # python3 run_experiment.py --config ./exp_configs/cifar10/config_full.py # ok
 # python3 run_experiment.py --config ./exp_configs/cifar10/config_prototypical.py --fraction 1 --nonadaptive # ok
 
+## 14/7 every epoch exps without schedulers
+python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --lr 0.005 --disable_scheduler --select_every 1 --fraction 0.3 --pretrained --finetune
+python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --lr 0.005 --disable_scheduler --select_every 2 --fraction 0.3 --pretrained --finetune
+python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb-warm.py --lr 0.005 --disable_scheduler --select_every 4 --fraction 0.5 --pretrained --finetune
+
+## Papilion dataset without schedulers, non-pretrained. 
+python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatch.py --select_every 10 --fraction 0.2 --lr 0.01 --disable_scheduler
+python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatch.py --select_every 10 --fraction 0.2 --lr 0.01
+python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --select_every 10 --fraction 0.2 --lr 0.01 --disable_scheduler
+python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --select_every 10 --fraction 0.2 --lr 0.01 --disable_scheduler
+python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb-warm.py --select_every 10 --fraction 0.2 --lr 0.01 --kappa 0.05
+python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb-warm.py --select_every 10 --fraction 0.2 --lr 0.01 --kappa 0.05 --disable_scheduler
+python3 run_experiment.py --config ./exp_configs/papilion/config_glister.py --select_every 10 --fraction 0.2 --lr 0.01
+python3 run_experiment.py --config ./exp_configs/papilion/config_craig.py --select_every 10 --fraction 0.2 --lr 0.01
+python3 run_experiment.py --config ./exp_configs/papilion/config_craigpb.py --select_every 10 --fraction 0.2 --lr 0.01
+python3 run_experiment.py --config ./exp_configs/papilion/config_random.py --select_every 10 --fraction 0.2 --lr 0.01
+python3 run_experiment.py --config ./exp_configs/papilion/config_submodular.py --fraction 0.2 --select_every 10 --lr 0.01 --submod_function facility-location --selection_type PerBatch
+python3 run_experiment.py --config ./exp_configs/papilion/config_submodular.py --fraction 0.2 --select_every 10 --lr 0.01 --submod_function graph-cut --selection_type PerBatch
+python3 run_experiment.py --config ./exp_configs/papilion/config_full.py --lr 0.01
+python3 run_experiment.py --config ./exp_configs/papilion/config_full.py --lr 0.01 --disable_scheduler --early_stopping
