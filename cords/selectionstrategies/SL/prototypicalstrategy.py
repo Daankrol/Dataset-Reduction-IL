@@ -64,7 +64,7 @@ class PrototypicalStrategy(DataSelectionStrategy):
         # remove the model from cuda memory 
         del self.pretrained_model
         torch.cuda.empty_cache()
-        
+
         return indices, torch.ones(len(indices))
 
     def select_from_class(self, class_indices, budget_for_class):
