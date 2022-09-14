@@ -42,7 +42,7 @@ class PrototypicalStrategy(DataSelectionStrategy):
         # we want to fill the budget with samples from each class
         for c in range(self.num_classes):
             self.logger.debug(f'Computing prototype and selecting samples for class {c}')
-            class_index = torch.where(self.trn_lbls == c)[0].tonumpy()
+            class_index = torch.where(self.trn_lbls == c)[0].numpy()
             budget_for_class = int(self.fraction * len(class_index))
             selected_indices = self.select_from_class(class_index, budget_for_class)
 
