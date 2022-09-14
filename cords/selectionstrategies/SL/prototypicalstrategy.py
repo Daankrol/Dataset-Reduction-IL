@@ -31,7 +31,7 @@ class PrototypicalStrategy(DataSelectionStrategy):
 
 
     def select(self, budget, model_params):
-        self.pretrained_model = EfficientNetB0_PyTorch(num_classes=self.num_classes, pretrained=True, fine_tune=False).to(device)
+        self.pretrained_model = EfficientNetB0_PyTorch(num_classes=self.num_classes, pretrained=True, fine_tune=False).to(self.device)
         self.pretrained_model.eval()
         start_time = time.time()
         self.logger.info(f"Started Prototypical selection.")
@@ -65,28 +65,28 @@ class PrototypicalStrategy(DataSelectionStrategy):
         del self.pretrained_model
         torch.cuda.empty_cache()
 
-        return indices, torch.ones(len(indices))
+        return indices, [1 for _ in range(len(indices))]
 
     def select_from_class(self, class_indices, budget_for_class):
         # compute the mean feature vector for this class
         loader = torch.utils.data.DataLoader(torch.utils.data.Subset(self.trainloader.dataset, class_indices), batch_size=32, shuffle=False)
-        with torch.no_grad():
-            mean_feature = torch.zeros(self.pretrained_model.embDim).to(self.device)
-            for x, y in loader:
-                x = x.to(self.device)
-                _, e = self.pretrained_model(x, last=True, freeze=True)
-                mean_feature += e.sum(dim=0)
-            mean_feature /= len(class_indices)
+        # with torch.no_grad():
+        mean_feature = torch.zeros(self.pretrained_model.embDim).to(self.device)
+        for x, y in loader:
+            x = x.to(self.device)
+            _, e = self.pretrained_model(x, last=True, freeze=True)
+            mean_feature += e.sum(dim=0)
+        mean_feature /= len(class_indices)
 
-            # for each sample in the class, compute the (euclidian) distance to the mean feature vector
-            # select the top 'budget_for_class' samples with the highest distance
-            distances = []
-            for i in class_indices:
-                x = self.trainloader.dataset[i][0].unsqueeze(0).to(self.device)
-                _, e = self.pretrained_model(x, last=True, freeze=True)
-                distances.append(F.pairwise_distance(e, mean_feature.unsqueeze(0)).item())
-            distances = np.array(distances)
-            indices = class_indices[np.argsort(distances)[-budget_for_class:]]
+        # for each sample in the class, compute the (euclidian) distance to the mean feature vector
+        # select the top 'budget_for_class' samples with the highest distance
+        distances = []
+        for i in class_indices:
+            x = self.trainloader.dataset[i][0].unsqueeze(0).to(self.device)
+            _, e = self.pretrained_model(x, last=True, freeze=True)
+            distances.append(F.pairwise_distance(e, mean_feature.unsqueeze(0)).item())
+        distances = np.array(distances)
+        indices = class_indices[np.argsort(distances)[-budget_for_class:]]
         return indices
 
 

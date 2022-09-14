@@ -853,7 +853,7 @@ class TrainClassifier:
                 self.logger.debug('gradients before backward pass')
                 for name, param in model.named_parameters():
                     if param.requires_grad:
-                        self.logger.debug(name, param.grad)
+                        self.logger.debug(f'{name} {param.grad}')
 
 
                 loss.backward()
