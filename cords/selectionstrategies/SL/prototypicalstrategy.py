@@ -67,7 +67,7 @@ class PrototypicalStrategy(DataSelectionStrategy):
     def select_from_class(self, class_indices, budget_for_class):
         # compute the mean feature vector for this class
         loader = torch.utils.data.DataLoader(torch.utils.data.Subset(self.trainloader.dataset, class_indices), batch_size=self.trainloader.batch_size, shuffle=False)
-        mean_feature = torch.zeros(self.pretrained_model.embDim).to(self.device)
+        mean_feature = torch.zeros(self.pretrained_model.embDim, requires_grad=False).to(self.device)
         for batch_idx, (inputs, targets) in enumerate(loader):
             # print('Data shape:', data.shape)
             inputs = inputs.to(self.device)
@@ -79,7 +79,7 @@ class PrototypicalStrategy(DataSelectionStrategy):
 
         # for each sample in the class, compute the (euclidian) distance to the mean feature vector
         # select the top 'budget_for_class' samples with the highest distance
-        distances = torch.zeros(len(class_indices)).to(self.device)
+        distances = torch.zeros(len(class_indices), requires_grad=False).to(self.device)
         for i, idx in enumerate(class_indices):
             sample = self.trainloader.dataset[idx][0].unsqueeze(0).to(self.device)
             _, features = self.pretrained_model(sample, last=True, freeze=True)
