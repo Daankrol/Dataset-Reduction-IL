@@ -45,7 +45,6 @@ class PrototypicalStrategy(DataSelectionStrategy):
             class_index = torch.where(self.trn_lbls == c)[0].numpy()
             budget_for_class = int(self.fraction * len(class_index))
             selected_indices = self.select_from_class(class_index, budget_for_class)
-            print(type(selected_indices), selected_indices.shape, selected_indices[0])
             indices = np.append(indices, selected_indices)
             self.logger.debug(f'Selected {len(indices)} samples for class {c} with a class-budget of {budget_for_class}')
 
