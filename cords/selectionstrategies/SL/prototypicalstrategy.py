@@ -10,12 +10,10 @@ class PrototypicalStrategy(DataSelectionStrategy):
         self,
         trainloader,
         valloader,
-        model,
         num_classes,
         linear_layer,
         loss,
         device,
-        selection_type,
         logger
     ):
         super().__init__(
@@ -37,8 +35,6 @@ class PrototypicalStrategy(DataSelectionStrategy):
         self.logger.info(f"Started Prototypical selection.")
         self.logger.info("Budget: {0:d}".format(budget))
         self.fraction = budget / self.N_trn
-        # self.update_model(model_params)
-        # self.pretrained_model.eval()
         
         # per-class sampling
         self.get_labels()
@@ -67,6 +63,7 @@ class PrototypicalStrategy(DataSelectionStrategy):
 
         return indices, [1 for _ in range(len(indices))]
 
+    @torch.no_grad()
     def select_from_class(self, class_indices, budget_for_class):
         # compute the mean feature vector for this class
         loader = torch.utils.data.DataLoader(torch.utils.data.Subset(self.trainloader.dataset, class_indices), batch_size=32, shuffle=False)

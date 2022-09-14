@@ -117,7 +117,6 @@ class AdaptiveDSSDataLoader(DSSDataLoader):
                 else:
                     self.resampled = False
                 loader = self.subset_loader
-                # print("Size: ", len(loader))
                 self.logger.debug(
                     "Epoch: {0:d}, finished reading dataloader. ".format(self.cur_epoch)
                 )

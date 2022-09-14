@@ -469,6 +469,27 @@ class TrainClassifier:
         checkpoint_path = os.path.join(ckpt_dir, "model.pt")
         os.makedirs(ckpt_dir, exist_ok=True)
 
+
+
+        """
+        ############################## Offline Dataset Reduction ##############################
+        """
+        # todo check in config if offline and if prototypical
+        if elf.cfg.dss_args.type in ["Prototypical"] and not self.cfg.dss_args.online:
+            self.logger.info('Offline Dataset Reduction with Prototypical method.')
+            self.cfg.dss_args.device = self.cfg.train_args.device
+            self.cfg.dss_args.num_epochs = self.cfg.train_args.num_epochs
+            self.cfg.dss_args.num_classes = self.cfg.model.numclasses
+            dataloader = PrototypicalDataLoader(trainloader, valloader, dss_args, logger)
+            dataloader.resample()
+            dataloader.initialized = True
+
+
+
+        """
+        ############################## Model Initialization ##############################
+        """
+
         # Model Creation
         self.cfg.model.numclasses = num_cls
         model = self.create_model()
@@ -730,17 +751,17 @@ class TrainClassifier:
             dataloader = UncertaintyDataLoader(
                 trainloader, valloader, self.cfg.dss_args, logger
             )
-        elif self.cfg.dss_args.type in ["Prototypical"]:
-            """
-            ##############################  Prototypical Dataloader Additional Arguments ##############################
-            """
-            self.cfg.dss_args.model = model
-            self.cfg.dss_args.device = self.cfg.train_args.device
-            self.cfg.dss_args.num_epochs = self.cfg.train_args.num_epochs
-            self.cfg.dss_args.num_classes = self.cfg.model.numclasses
-            dataloader = PrototypicalDataLoader(
-                trainloader, valloader, self.cfg.dss_args, logger
-            )
+        # elif self.cfg.dss_args.type in ["Prototypical"]:
+        #     """
+        #     ##############################  Prototypical Dataloader Additional Arguments ##############################
+        #     """
+        #     self.cfg.dss_args.model = model
+        #     self.cfg.dss_args.device = self.cfg.train_args.device
+        #     self.cfg.dss_args.num_epochs = self.cfg.train_args.num_epochs
+        #     self.cfg.dss_args.num_classes = self.cfg.model.numclasses
+        #     dataloader = PrototypicalDataLoader(
+        #         trainloader, valloader, self.cfg.dss_args, logger
+        #     )
 
         else:
             raise NotImplementedError
