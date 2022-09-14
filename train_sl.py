@@ -751,17 +751,18 @@ class TrainClassifier:
             dataloader = UncertaintyDataLoader(
                 trainloader, valloader, self.cfg.dss_args, logger
             )
-        # elif self.cfg.dss_args.type in ["Prototypical"]:
-        #     """
-        #     ##############################  Prototypical Dataloader Additional Arguments ##############################
-        #     """
-        #     self.cfg.dss_args.model = model
-        #     self.cfg.dss_args.device = self.cfg.train_args.device
-        #     self.cfg.dss_args.num_epochs = self.cfg.train_args.num_epochs
-        #     self.cfg.dss_args.num_classes = self.cfg.model.numclasses
-        #     dataloader = PrototypicalDataLoader(
-        #         trainloader, valloader, self.cfg.dss_args, logger
-        #     )
+        elif self.cfg.dss_args.type in ["Prototypical"]:
+            """
+            ##############################  Prototypical Dataloader Additional Arguments ##############################
+            """
+            pass
+            # self.cfg.dss_args.model = model
+            # self.cfg.dss_args.device = self.cfg.train_args.device
+            # self.cfg.dss_args.num_epochs = self.cfg.train_args.num_epochs
+            # self.cfg.dss_args.num_classes = self.cfg.model.numclasses
+            # dataloader = PrototypicalDataLoader(
+            #     trainloader, valloader, self.cfg.dss_args, logger
+            # )
 
         else:
             raise NotImplementedError
