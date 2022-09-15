@@ -262,9 +262,10 @@ python3 run_experiment.py --config ./exp_configs/cifar10/config_prototypical.py 
 python3 run_experiment.py --config ./exp_configs/cifar10/config_prototypical.py --fraction 0.6 --nonadaptive
 python3 run_experiment.py --config ./exp_configs/cifar10/config_prototypical.py --fraction 0.4 --nonadaptive
 
-## cubs
+## cubs 
 python3 run_experiment.py --config ./exp_configs/cub200/config_prototypical.py --fraction 0.8 --nonadaptive
 python3 run_experiment.py --config ./exp_configs/cub200/config_prototypical.py --fraction 0.8 --nonadaptive --disable_scheduler
+python3 run_experiment.py --config ./exp_configs/cub200/config_prototypical.py --fraction 0.8 --nonadaptive --disable_scheduler --pretrained --finetune --lr 0.005
 python3 run_experiment.py --config ./exp_configs/cub200/config_prototypical.py --fraction 0.6 --nonadaptive
 python3 run_experiment.py --config ./exp_configs/cub200/config_prototypical.py --fraction 0.4 --nonadaptive
 
