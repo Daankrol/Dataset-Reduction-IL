@@ -178,6 +178,8 @@ if args.lam is not None:
 
 if args.nonadaptive:
     cfg.dss_args.online = False
+else:
+    cfg.dss_args.online = True
 
 clf = TrainClassifier(cfg)
 clf.train()
