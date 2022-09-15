@@ -3,7 +3,7 @@ from train_sl import TrainClassifier
 from cords.utils.config_utils import load_config_data
 import argparse
 import os
-import os.path as osp
+from dotmap import DotMap
 from pyJoules.energy_meter import measure_energy, EnergyMeter, EnergyContext
 from pyJoules.device.rapl_device import RaplPackageDomain
 from pyJoules.device.nvidia_device import NvidiaGPUDomain
@@ -178,7 +178,7 @@ if args.lam is not None:
 
 if args.nonadaptive:
     cfg.dss_args.online = False
-else:
+elif args.dss_args.online is None or args.dss_args.online == DotMap():
     cfg.dss_args.online = True
 
 clf = TrainClassifier(cfg)
