@@ -178,7 +178,7 @@ if args.lam is not None:
 
 if args.nonadaptive:
     cfg.dss_args.online = False
-elif args.dss_args.online is None or args.dss_args.online == DotMap():
+elif cfg.dss_args.online is None or cfg.dss_args.online == DotMap():
     cfg.dss_args.online = True
 
 clf = TrainClassifier(cfg)
