@@ -480,7 +480,11 @@ class TrainClassifier:
             self.cfg.dss_args.device = self.cfg.train_args.device
             self.cfg.dss_args.num_epochs = self.cfg.train_args.num_epochs
             self.cfg.dss_args.num_classes = num_cls
-            dataloader = PrototypicalDataLoader(trainloader, valloader, self.cfg.dss_args, logger)
+            dataloader = PrototypicalDataLoader(trainloader, valloader, self.cfg.dss_args, logger,
+                batch_size=self.cfg.dataloader.batch_size,
+                shuffle=self.cfg.dataloader.shuffle,
+                pin_memory=self.cfg.dataloader.pin_memory,
+                collate_fn=self.cfg.dss_args.collate_fn )
             dataloader.resample()
             dataloader.initialized = True
 
