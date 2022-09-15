@@ -490,7 +490,7 @@ class TrainClassifier:
             early_stopping = EarlyStopping(patience=15, min_delta=0, logger=logger)
 
         ## Custom dataloaders
-        dataloader = self.create_dataloader(model, criterion_nored, trainloader, valloader, logger, trainset)
+        dataloader, is_selcon = self.create_dataloader(model, criterion_nored, trainloader, valloader, logger, trainset)
 
         # create embeddings for the train set
         if self.cfg.dataset.name in ['cifar10', 'cifar100', 'papilion','cub200'] and self.cfg.dss_args.type not in ['Full'] and not self.cfg.no_tsne:
@@ -1274,4 +1274,4 @@ class TrainClassifier:
         else:
             is_selcon = False
         
-        return dataloader
+        return dataloader, is_selcon
