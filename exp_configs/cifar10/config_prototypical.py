@@ -17,6 +17,7 @@ config = dict(
         type="Prototypical",
         fraction=0.4,
         select_every=20,
+        online=False,
         kappa=0,
     ),
     train_args=dict(

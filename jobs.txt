@@ -258,5 +258,16 @@
 
 ## 15/9 nonadaptive Prototypical Dataset reduction 
 python3 run_experiment.py --config ./exp_configs/cifar10/config_prototypical.py --fraction 0.8 --nonadaptive
+python3 run_experiment.py --config ./exp_configs/cifar10/config_prototypical.py --fraction 0.8 --nonadaptive --disable_scheduler
 python3 run_experiment.py --config ./exp_configs/cifar10/config_prototypical.py --fraction 0.6 --nonadaptive
 python3 run_experiment.py --config ./exp_configs/cifar10/config_prototypical.py --fraction 0.4 --nonadaptive
+
+## cubs
+python3 run_experiment.py --config ./exp_configs/cub200/config_prototypical.py --fraction 0.8 --nonadaptive
+python3 run_experiment.py --config ./exp_configs/cub200/config_prototypical.py --fraction 0.8 --nonadaptive --disable_scheduler
+python3 run_experiment.py --config ./exp_configs/cub200/config_prototypical.py --fraction 0.6 --nonadaptive
+python3 run_experiment.py --config ./exp_configs/cub200/config_prototypical.py --fraction 0.4 --nonadaptive
+
+## no schedule uncertainty 
+python3 run_experiment.py --config ./exp_configs/cifar10/config_uncertainty.py --fraction 0.4 --select_every 5 --disable_scheduler
+python3 run_experiment.py --config ./exp_configs/cifar10/config_uncertainty.py --fraction 0.4 --select_every 2 --disable_scheduler

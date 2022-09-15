@@ -90,10 +90,9 @@ class UncertaintyStrategy(DataSelectionStrategy):
             else:
                 loader = torch.utils.data.DataLoader(
                     torch.utils.data.Subset(self.trainloader.dataset, index),
-                    batch_size=self.trainloader.batch_size)
+                    batch_size=self.trainloader.batch_size, pin_memory=True)
             
             scores = np.array([])
-            batch_num = len(loader)
 
             for i, (input, _) in enumerate(loader):
                 if self.selection_type == "LeastConfidence":
