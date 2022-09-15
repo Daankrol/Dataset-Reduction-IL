@@ -16,13 +16,13 @@ config = dict(
     optimizer=dict(type="sgd", momentum=0.9, lr=0.01, weight_decay=5e-4, nesterov=False),
     scheduler=dict(type="cosine_annealing", T_max=300),
     # early_stopping=True,
-    dss_args=dict(
-        type="Prototypical",
-        fraction=0.1,
-        online=False,
-        # select_every=1,
-        kappa=0
-    ),
+    # dss_args=dict(
+    #     type="Prototypical",
+    #     fraction=0.1,
+    #     online=False,
+    #     # select_every=1,
+    #     kappa=0
+    # ),
     # dss_args=dict(
     #     type="Submodular",
     #     fraction=0.01,
@@ -35,18 +35,18 @@ config = dict(
     #     linear_layer=False,
     #     kappa=0,
     # ),
-    # dss_args=dict(
-    #     type="GradMatch",
-    #     fraction=0.5,
-    #     select_every=1,
-    #     lam=0.5,
-    #     selection_type="PerClassPerGradient",
-    #     v1=True,
-    #     valid=False,
-    #     kappa=0,
-    #     eps=1e-100,
-    #     linear_layer=True,
-    # ),
+    dss_args=dict(
+        type="GradMatch",
+        fraction=0.5,
+        select_every=1,
+        lam=0.5,
+        selection_type="PerBatch",
+        v1=True,
+        valid=False,
+        kappa=0,
+        eps=1e-100,
+        linear_layer=True,
+    ),
     train_args=dict(
         num_epochs=5,
         device="cuda",

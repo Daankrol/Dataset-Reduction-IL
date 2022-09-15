@@ -41,6 +41,7 @@ from cords.utils.utils import EarlyStopping
 from cords.utils.tSNE_plotter import TSNEPlotter
 from cords.utils.UMAP_plotter import UMAPPlotter
 
+
 class TrainClassifier:
     def __init__(self, config_file_data):
         self.cfg = config_file_data
@@ -169,17 +170,17 @@ class TrainClassifier:
 
     def get_pretrained_model(self):
         return EfficientNetB0_PyTorch(
-                    num_classes=self.cfg.model.numclasses,
-                    pretrained=True,
-                    fine_tune=False,
-                )
+            num_classes=self.cfg.model.numclasses,
+            pretrained=True,
+            fine_tune=False,
+        )
 
     def get_trainable_params(self, model):
         # Return the fraction of parameters that are trainable
         trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
         total_params = sum(p.numel() for p in model.parameters())
         return trainable_params / total_params
-        
+
     def create_model(self):
         print(f"using model: {self.cfg.model.architecture} with {self.cfg.model}")
         if self.cfg.model.architecture == "EfficientNet":
@@ -384,9 +385,9 @@ class TrainClassifier:
         tst_batch_size = self.cfg.dataloader.batch_size
 
         if (
-            self.cfg.dataset.name == "sst2_facloc"
-            and self.count_pkl(self.cfg.dataset.ss_path) == 1
-            and self.cfg.dss_args.type == "FacLoc"
+                self.cfg.dataset.name == "sst2_facloc"
+                and self.count_pkl(self.cfg.dataset.ss_path) == 1
+                and self.cfg.dss_args.type == "FacLoc"
         ):
             self.cfg.dss_args.type = "Full"
             file_ss = open(self.cfg.dataset.ss_path, "rb")
@@ -490,10 +491,12 @@ class TrainClassifier:
             early_stopping = EarlyStopping(patience=15, min_delta=0, logger=logger)
 
         ## Custom dataloaders
-        dataloader, is_selcon = self.create_dataloader(model, criterion_nored, trainloader, valloader, logger, trainset)
+        dataloader, is_selcon = self.create_dataloader(model, criterion_nored, trainloader, valloader, logger, trainset,
+                                                       validset, optimizer, criterion)
 
         # create embeddings for the train set
-        if self.cfg.dataset.name in ['cifar10', 'cifar100', 'papilion','cub200'] and self.cfg.dss_args.type not in ['Full'] and not self.cfg.no_tsne:
+        if self.cfg.dataset.name in ['cifar10', 'cifar100', 'papilion', 'cub200'] and self.cfg.dss_args.type not in [
+            'Full'] and not self.cfg.no_tsne:
             self.embedding_plotter = TSNEPlotter(
                 trainloader,
                 valloader,
@@ -554,7 +557,6 @@ class TrainClassifier:
             start_time = time.time()
             cum_weights = 0
 
-
             for _, data in enumerate(dataloader):
                 if is_selcon:
                     (
@@ -568,7 +570,7 @@ class TrainClassifier:
 
                 total_data_seen += inputs.size(0)
                 scheduler_total_data_seen += inputs.size(0)
-                
+
                 inputs = inputs.to(self.cfg.train_args.device)
                 targets = targets.to(self.cfg.train_args.device, non_blocking=True)
                 weights = weights.to(self.cfg.train_args.device)
@@ -579,13 +581,12 @@ class TrainClassifier:
                     loss = torch.dot(losses.view(-1), weights / (weights.sum()))
                 else:
                     loss = torch.dot(losses, weights / (weights.sum()))
-                
-                # check if gradients are changing and are not zero 
-                self.logger.debug('gradients before backward pass')
-                for name, param in model.named_parameters():
-                    if param.requires_grad:
-                        self.logger.debug(f'{name} {param.grad}')
 
+                # # check if gradients are changing and are not zero
+                # self.logger.debug('gradients before backward pass')
+                # for name, param in model.named_parameters():
+                #     if param.requires_grad:
+                #         self.logger.debug(f'{name} {param.grad}')
 
                 loss.backward()
                 subtrn_loss += loss.item() * weights.sum()
@@ -598,7 +599,7 @@ class TrainClassifier:
                         _, predicted = outputs.max(1)
                     subtrn_total += targets.size(0)
                     subtrn_correct += predicted.eq(targets).sum().item()
-            
+
             if scheduler is not None:
                 current_lr = scheduler.get_last_lr()[0]
             else:
@@ -609,9 +610,11 @@ class TrainClassifier:
             if not scheduler == None:
                 if self.cfg.scheduler.data_dependent:
                     total_training_samples = len(trainloader.dataset)
-                    self.logger.debug('Current data for scheduler: {}/{}'.format(scheduler_total_data_seen, total_training_samples))
+                    self.logger.debug(
+                        'Current data for scheduler: {}/{}'.format(scheduler_total_data_seen, total_training_samples))
                     if scheduler_total_data_seen >= total_training_samples:
-                        self.logger.info('{}% of the training data has been seen. Stepping scheduler.'.format(100*scheduler_total_data_seen/total_training_samples))
+                        self.logger.info('{}% of the training data has been seen. Stepping scheduler.'.format(
+                            100 * scheduler_total_data_seen / total_training_samples))
                         scheduler_total_data_seen -= total_training_samples
                         scheduler.step()
                         self.logger.info('New learning rate: {}'.format(scheduler.get_last_lr()[0]))
@@ -633,7 +636,7 @@ class TrainClassifier:
             """
 
             if ((epoch + 1) % self.cfg.train_args.print_every == 0) or (
-                epoch == self.cfg.train_args.num_epochs - 1
+                    epoch == self.cfg.train_args.num_epochs - 1
             ):
                 trn_loss = 0
                 trn_correct = 0
@@ -885,7 +888,7 @@ class TrainClassifier:
                         metrics["val_acc"] = val_acc[-1]
                     if arg == "val_recall":
                         print_str += (
-                            " , " + "Validation Recall: " + str(val_recalls[-1])
+                                " , " + "Validation Recall: " + str(val_recalls[-1])
                         )
                         metrics["val_recall"] = val_recalls[-1]
 
@@ -937,15 +940,14 @@ class TrainClassifier:
                 metrics["current_lr"] = current_lr
                 # report metric to ray for hyperparameter optimization
                 if (
-                    "report_tune" in self.cfg
-                    and self.cfg.report_tune
-                    and len(dataloader)
+                        "report_tune" in self.cfg
+                        and self.cfg.report_tune
+                        and len(dataloader)
                 ):
                     tune.report(mean_accuracy=val_acc[-1])
 
                 logger.info(print_str)
                 wandb.log(metrics, step=epoch)
-
 
             """
             ################################################# Checkpoint Saving #################################################
@@ -1090,11 +1092,11 @@ class TrainClassifier:
         wandb.run.summary["val_ds_size"] = len(valloader.dataset)
         wandb.finish()
 
-
-    def create_dataloader(self, model, criterion_nored, trainloader, valloader, logger, trainset):
+    def create_dataloader(self, model, criterion_nored, trainloader, valloader, logger, trainset, validset, optimizer,
+                          criterion):
         if "collate_fn" not in self.cfg.dss_args:
             self.cfg.dss_args.collate_fn = None
-        
+
         self.cfg.dss_args.model = model
         self.cfg.dss_args.num_classes = self.cfg.model.numclasses
         self.cfg.dss_args.num_epochs = self.cfg.train_args.num_epochs
@@ -1110,7 +1112,7 @@ class TrainClassifier:
             """
             ############################## GradMatch Dataloader Additional Arguments ##############################
             """
-            
+
             self.cfg.dss_args.eta = self.cfg.optimizer.lr
             dataloader = GradMatchDataLoader(
                 trainloader,
@@ -1211,8 +1213,8 @@ class TrainClassifier:
                 collate_fn=self.cfg.dss_args.collate_fn,
             )
             if (
-                self.cfg.dataset.name == "sst2_facloc"
-                and self.count_pkl(self.cfg.dataset.ss_path) < 1
+                    self.cfg.dataset.name == "sst2_facloc"
+                    and self.count_pkl(self.cfg.dataset.ss_path) < 1
             ):
 
                 ss_indices = dataloader.subset_indices
@@ -1273,5 +1275,5 @@ class TrainClassifier:
             is_selcon = True
         else:
             is_selcon = False
-        
+
         return dataloader, is_selcon
