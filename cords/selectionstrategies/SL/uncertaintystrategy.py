@@ -108,6 +108,7 @@ class UncertaintyStrategy(DataSelectionStrategy):
                 elif self.selection_type == "Entropy":
                     preds = torch.nn.functional.softmax(self.model(input.to(self.device)), dim=1).cpu()
                     scores = np.append(scores, (np.log(preds + 1e-6) * preds).sum(axis=1))
+        self.model.train()
         return scores
 
 
