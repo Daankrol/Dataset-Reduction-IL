@@ -67,23 +67,27 @@ class PrototypicalStrategy(DataSelectionStrategy):
     def select_from_class(self, class_indices, budget_for_class):
         # compute the mean feature vector for this class
         loader = torch.utils.data.DataLoader(torch.utils.data.Subset(self.trainloader.dataset, class_indices), batch_size=self.trainloader.batch_size, shuffle=False)
-        mean_feature = torch.zeros(self.pretrained_model.embDim, requires_grad=False).to(self.device)
-        for batch_idx, (inputs, targets) in enumerate(loader):
-            # print('Data shape:', data.shape)
-            inputs = inputs.to(self.device)
-            _, features = self.pretrained_model(inputs, last=True, freeze=True)
-            # add the sum of the features to the mean feature vector
-            mean_feature += torch.sum(features, dim=0)
-        # divide by the number of samples (in all batches) to get the mean feature vector
-        mean_feature /= len(class_indices)
+        
+        # return 'budget_for_class' samples randomly
+        return np.random.choice(class_indices, budget_for_class, replace=False)        
+        
+        # mean_feature = torch.zeros(self.pretrained_model.embDim, requires_grad=False).to(self.device)
+        # for batch_idx, (inputs, targets) in enumerate(loader):
+        #     # print('Data shape:', data.shape)
+        #     inputs = inputs.to(self.device)
+        #     _, features = self.pretrained_model(inputs, last=True, freeze=True)
+        #     # add the sum of the features to the mean feature vector
+        #     mean_feature += torch.sum(features, dim=0)
+        # # divide by the number of samples (in all batches) to get the mean feature vector
+        # mean_feature /= len(class_indices)
 
-        # for each sample in the class, compute the (euclidian) distance to the mean feature vector
-        # select the top 'budget_for_class' samples with the highest distance
-        distances = torch.zeros(len(class_indices), requires_grad=False).to(self.device)
-        for i, idx in enumerate(class_indices):
-            sample = self.trainloader.dataset[idx][0].unsqueeze(0).to(self.device)
-            _, features = self.pretrained_model(sample, last=True, freeze=True)
-            distances[i] = torch.norm(features - mean_feature)
-        # select the top 'budget_for_class' samples with the highest distance
-        _, selected_indices = torch.topk(distances, budget_for_class)
-        return class_indices[selected_indices.cpu()]
+        # # for each sample in the class, compute the (euclidian) distance to the mean feature vector
+        # # select the top 'budget_for_class' samples with the highest distance
+        # distances = torch.zeros(len(class_indices), requires_grad=False).to(self.device)
+        # for i, idx in enumerate(class_indices):
+        #     sample = self.trainloader.dataset[idx][0].unsqueeze(0).to(self.device)
+        #     _, features = self.pretrained_model(sample, last=True, freeze=True)
+        #     distances[i] = torch.norm(features - mean_feature)
+        # # select the top 'budget_for_class' samples with the highest distance
+        # _, selected_indices = torch.topk(distances, budget_for_class)
+        # return class_indices[selected_indices.cpu()]
