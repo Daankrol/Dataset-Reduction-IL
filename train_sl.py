@@ -484,7 +484,7 @@ class TrainClassifier:
                 batch_size=self.cfg.dataloader.batch_size,
                 shuffle=self.cfg.dataloader.shuffle,
                 pin_memory=self.cfg.dataloader.pin_memory,
-                collate_fn=self.cfg.dss_args.collate_fn )
+                collate_fn=None )
             dataloader.resample()
             dataloader.initialized = True
 
