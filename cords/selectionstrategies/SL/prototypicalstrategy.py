@@ -58,35 +58,38 @@ class PrototypicalStrategy(DataSelectionStrategy):
                 end_time - start_time
             )
         )
-        self.logger.info("Selected {} samples with a budget of {}".format(len(indices), budget))
-        self.logger.debug("Selected {} unique samples from {} total samples".format(len(np.unique(indices)), len(indices)))
-
+        self.logger.debug("Selected {} samples with a budget of {}".format(len(indices), budget))
         # remove the model from cuda memory 
         del self.pretrained_model
         torch.cuda.empty_cache()
 
         return indices, [1 for _ in range(len(indices))]
 
+    @torch.no_grad()
     def select_from_class(self, class_indices, budget_for_class):
         # compute the mean feature vector for this class
-        loader = torch.utils.data.DataLoader(torch.utils.data.Subset(self.trainloader.dataset, class_indices), batch_size=32, shuffle=False)
-        # with torch.no_grad():
-        mean_feature = torch.zeros(self.pretrained_model.embDim).to(self.device)
-        for x, y in loader:
-            x = x.to(self.device)
-            _, e = self.pretrained_model(x, last=True, freeze=True)
-            mean_feature += e.sum(dim=0)
+        loader = torch.utils.data.DataLoader(torch.utils.data.Subset(self.trainloader.dataset, class_indices), batch_size=self.trainloader.batch_size, shuffle=False, pin_memory=True)
+        mean_feature = torch.zeros(self.pretrained_model.embDim, requires_grad=False).to(self.device)
+        for batch_idx, (inputs, targets) in enumerate(loader):
+            # print('Data shape:', data.shape)
+            inputs = inputs.to(self.device)
+            _, features = self.pretrained_model(inputs, last=True, freeze=True)
+            # add the sum of the features to the mean feature vector
+            mean_feature += torch.sum(features, dim=0)
+        # divide by the number of samples (in all batches) to get the mean feature vector
         mean_feature /= len(class_indices)
 
-        # for each sample in the class, compute the (euclidian) distance to the mean feature vector
-        # select the top 'budget_for_class' samples with the highest distance
-        distances = []
-        for i in class_indices:
-            x = self.trainloader.dataset[i][0].unsqueeze(0).to(self.device)
-            _, e = self.pretrained_model(x, last=True, freeze=True)
-            distances.append(F.pairwise_distance(e, mean_feature.unsqueeze(0)).item())
-        distances = np.array(distances)
-        indices = class_indices[np.argsort(distances)[-budget_for_class:]]
-        return indices
 
+        # for all samples of this class, compute the (euclidian) distance to the mean feature vector
+        # select the top 'budget_for_class' samples with the highest distance
+        # do this batch wise
+        distances = torch.zeros(len(class_indices), requires_grad=False).to(self.device)
+        for batch_idx, (inputs, targets) in enumerate(loader):
+            inputs = inputs.to(self.device)
+            _, features = self.pretrained_model(inputs, last=True, freeze=True)
+            for i, feature in enumerate(features):
+                distances[batch_idx * self.trainloader.batch_size + i] = torch.norm(feature - mean_feature)
+        # select the top 'budget_for_class' samples with the highest distance
+        _, selected_indices = torch.topk(distances, budget_for_class)
+        return class_indices[selected_indices.cpu()]
 

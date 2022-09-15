@@ -1091,7 +1091,7 @@ class TrainClassifier:
         wandb.finish()
 
 
-    def create_dataloader(self, model, criterion_nored, trainloader, valloader, logger, trainset):
+    def create_dataloader(self, model, criterion_nored, trainloader, valloader, logger, trainset, validset, optimizer, criterion):
         if "collate_fn" not in self.cfg.dss_args:
             self.cfg.dss_args.collate_fn = None
         
@@ -1260,11 +1260,17 @@ class TrainClassifier:
 
         elif self.cfg.dss_args.type in ["Uncertainty"]:
             dataloader = UncertaintyDataLoader(
-                trainloader, valloader, self.cfg.dss_args, logger
+                trainloader, valloader, self.cfg.dss_args, logger,
+                batch_size=self.cfg.dataloader.batch_size,
+                shuffle=self.cfg.dataloader.shuffle,
+                pin_memory=self.cfg.dataloader.pin_memory,
             )
         elif self.cfg.dss_args.type in ["Prototypical"]:
             dataloader = PrototypicalDataLoader(
-                trainloader, valloader, self.cfg.dss_args, logger
+                trainloader, valloader, self.cfg.dss_args, logger,
+                batch_size=self.cfg.dataloader.batch_size,
+                shuffle=self.cfg.dataloader.shuffle,
+                pin_memory=self.cfg.dataloader.pin_memory
             )
         else:
             raise NotImplementedError
