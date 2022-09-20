@@ -47,6 +47,10 @@ class SubmodularSelectionStrategy(DataSelectionStrategy):
         self.selection_type = selection_type
         self.submod_func_type = submod_func_type
         self.optimizer = optimizer
+        assert self.submod_func_type in ['facility-location', 'graph-cut', 'sum-redundancy', 'saturated-coverage'], \
+            "submod_func_type must be one of 'facility-location', 'graph-cut', 'sum-redundancy', 'saturated-coverage'"
+        assert self.selection_type in ['PerClass', 'Supervised'], \
+            "selection_type must be one of 'PerClass', 'Supervised'"
 
     def distance(self, x, y, exp=2):
         """
@@ -259,7 +263,7 @@ class SubmodularSelectionStrategy(DataSelectionStrategy):
                 total_greedy_list.extend(idxs[greedyList])
                 gammas.extend(gamma)
 
-        elif self.selection_type == 'Supervised' or self.selection_type == 'PerClass':
+        elif self.selection_type == 'Supervised':
             for i in range(self.num_classes):
                 if i == 0:
                     idxs = torch.where(labels == i)[0]
