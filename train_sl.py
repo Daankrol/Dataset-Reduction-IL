@@ -24,6 +24,7 @@ from cords.utils.data.dataloader.SL.adaptive import (
     SubmodularDataLoader,
     ContrastiveDataLoader,
     PrototypicalDataLoader,
+    GrandDataLoader
 )
 
 from cords.utils.data.dataloader.SL.nonadaptive import FacLocDataLoader
@@ -1273,6 +1274,13 @@ class TrainClassifier:
                 batch_size=self.cfg.dataloader.batch_size,
                 shuffle=self.cfg.dataloader.shuffle,
                 pin_memory=self.cfg.dataloader.pin_memory
+            )
+        elif self.cfg.dss_args.type in ["Grand"]:
+            dataloader = GrandDataLoader(
+                trainloader, valloader, self.cfg.dss_args, logger,
+                batch_size=self.cfg.dataloader.batch_size,
+                shuffle=self.cfg.dataloader.shuffle,
+                pin_memory=self.cfg.dataloader.pin_memory,
             )
         else:
             raise NotImplementedError

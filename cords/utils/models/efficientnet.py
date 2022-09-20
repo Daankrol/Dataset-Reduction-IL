@@ -222,6 +222,7 @@ class EfficientNetB0_PyTorch(nn.Module):
         super(EfficientNetB0_PyTorch, self).__init__()
         # load pretrained weights from the torchvision model
         self.model = models.efficientnet_b0(pretrained=pretrained)
+        self.embedding_recorder = EmbeddingRecorder()
         if fine_tune:
             for param in self.model.parameters():
                 param.requires_grad = True
@@ -253,6 +254,7 @@ class EfficientNetB0_PyTorch(nn.Module):
                 out = self.model.features(x)
                 out = F.adaptive_avg_pool2d(out, 1)
                 e = out.view(out.size(0), -1)
+                self.embedding_recorder(e)
                 dropout_rate = self.model.classifier[0].p
                 if self.training and dropout_rate > 0:
                     e = F.dropout(e, p=dropout_rate)
@@ -260,6 +262,7 @@ class EfficientNetB0_PyTorch(nn.Module):
             out = self.model.features(x)
             out = F.adaptive_avg_pool2d(out, 1)
             e = out.view(out.size(0), -1)
+            self.embedding_recorder(e)
             dropout_rate = self.model.classifier[0].p
             if self.training and dropout_rate > 0:
                 e = F.dropout(e, p=dropout_rate)
@@ -268,6 +271,22 @@ class EfficientNetB0_PyTorch(nn.Module):
             return out, e
         else:
             return out
+
+class EmbeddingRecorder(torch.nn.Module):
+    def __init__(self, record_embedding: bool = False):
+        super().__init__()
+        self.record_embedding = record_embedding
+
+    def forward(self, x):
+        if self.record_embedding:
+            self.embedding = x
+        return x
+
+    def __enter__(self):
+        self.record_embedding = True
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.record_embedding = False
 
 
 def test():
