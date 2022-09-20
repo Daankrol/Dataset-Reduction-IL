@@ -48,7 +48,7 @@ class GrandStrategy(DataSelectionStrategy):
         self.fraction = budget / self.N_trn
         
         for run in range(self.repeats):
-            self.logger.debug('GRAND: model run {}/{}'.format(run, self.repeats))
+            self.logger.debug('GRAND: model run {}/{}'.format(run+1, self.repeats))
             random_seed = int(time.time() * 1000) % 100000
             torch.manual_seed(random_seed)
             np.random.seed(random_seed)
@@ -71,12 +71,12 @@ class GrandStrategy(DataSelectionStrategy):
                 with torch.no_grad():
                     bias_param_grads = torch.autograd.grad(loss, outputs)[0]
                     grads = torch.cat([bias_param_grads, (
-                        self.model.embedding_recorder.embedding.view(batch_num, 1, embedding_dim).repeat(1,
-                                                self.args.num_classes, 1) * bias_param_grads.view(
-                                                batch_num, self.args.num_classes, 1).repeat(1, 1, embedding_dim)).
+                        model.embedding_recorder.embedding.view(batch_num, 1, embedding_dim).repeat(1,
+                                                self.num_classes, 1) * bias_param_grads.view(
+                                                batch_num, self.num_classes, 1).repeat(1, 1, embedding_dim)).
                                                 view(batch_num, -1)], dim=1)
                     norm_matrix[batch_idx * self.trainloader.batch_size :min((batch_idx + 1) * self.trainloader.batch_size, self.N_trn),
-                        self.cur_repeat] = torch.norm(grads, dim=1, p=2) 
+                        run] = torch.norm(grads, dim=1, p=2)
 
         # average the scores over the 10 runs
         norm_matrix = torch.mean(norm_matrix, dim=1).cpu().detach().numpy()

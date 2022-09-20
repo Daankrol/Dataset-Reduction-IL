@@ -17,8 +17,9 @@ config = dict(
     scheduler=dict(type="cosine_annealing", T_max=300),
     # early_stopping=True,
     dss_args=dict(
-        type="Prototypical",
-        fraction=0.4,
+        type="Grand",
+        fraction=0.9,
+        selection_type="Supervised",
         online=False,
         # select_every=1,
         kappa=0
