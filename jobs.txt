@@ -274,19 +274,19 @@
 # python3 run_experiment.py --config ./exp_configs/cifar10/config_uncertainty.py --fraction 0.4 --select_every 2 --disable_scheduler # ok
 
 ## 20-9 prototypical on pap (with scheduler), and with pretrained nets, uncertainty on cifar, cub, pap, 20x10, 40x10
-python3 run_experiment.py --config ./exp_configs/papilion/config_prototypical.py --fraction 0.8 --nonadaptive --lr 0.01
-python3 run_experiment.py --config ./exp_configs/papilion/config_prototypical.py --fraction 0.9 --nonadaptive --lr 0.01
-python3 run_experiment.py --config ./exp_configs/papilion/config_prototypical.py --fraction 0.7 --nonadaptive --lr 0.01
+# python3 run_experiment.py --config ./exp_configs/papilion/config_prototypical.py --fraction 0.8 --nonadaptive --lr 0.01 # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_prototypical.py --fraction 0.9 --nonadaptive --lr 0.01 # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_prototypical.py --fraction 0.7 --nonadaptive --lr 0.01 # ok
 
-python3 run_experiment.py --config ./exp_configs/papilion/config_prototypical.py --fraction 0.8 --nonadaptive --lr 0.005 --pretrained --finetune
-python3 run_experiment.py --config ./exp_configs/papilion/config_prototypical.py --fraction 0.9 --nonadaptive --lr 0.005 --pretrained --finetune
-python3 run_experiment.py --config ./exp_configs/papilion/config_prototypical.py --fraction 0.7 --nonadaptive --lr 0.005 --pretrained --finetune
+# python3 run_experiment.py --config ./exp_configs/papilion/config_prototypical.py --fraction 0.8 --nonadaptive --lr 0.005 --pretrained --finetune # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_prototypical.py --fraction 0.9 --nonadaptive --lr 0.005 --pretrained --finetune # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_prototypical.py --fraction 0.7 --nonadaptive --lr 0.005 --pretrained --finetune # ok
 
-python3 run_experiment.py --config ./exp_configs/cifar10/config_uncertainty.py --select_every 10 --fraction 0.2
-python3 run_experiment.py --config ./exp_configs/cifar10/config_uncertainty.py --select_every 10 --fraction 0.4
-python3 run_experiment.py --config ./exp_configs/cub200/config_uncertainty.py --select_every 10 --fraction 0.2
-python3 run_experiment.py --config ./exp_configs/cub200/config_uncertainty.py --select_every 10 --fraction 0.4
-python3 run_experiment.py --config ./exp_configs/papilion/config_uncertainty.py --select_every 10 --fraction 0.2
-python3 run_experiment.py --config ./exp_configs/papilion/config_uncertainty.py --select_every 10 --fraction 0.4
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_uncertainty.py --select_every 10 --fraction 0.2 # ok
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_uncertainty.py --select_every 10 --fraction 0.4 # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_uncertainty.py --select_every 10 --fraction 0.2 # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_uncertainty.py --select_every 10 --fraction 0.4 # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_uncertainty.py --select_every 10 --fraction 0.2 # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_uncertainty.py --select_every 10 --fraction 0.4 # ok
 
 # uncertainty with warm up -> wait for results of fraction size. 
