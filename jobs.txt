@@ -257,18 +257,18 @@
 # python3 run_experiment.py --config ./exp_configs/papilion/config_full.py --lr 0.01 --disable_scheduler --early_stopping # ok
 
 ## 15/9 nonadaptive Prototypical Dataset reduction 
-python3 run_experiment.py --config ./exp_configs/cifar10/config_prototypical.py --fraction 0.8 --nonadaptive
-python3 run_experiment.py --config ./exp_configs/cifar10/config_prototypical.py --fraction 0.8 --nonadaptive --disable_scheduler
-python3 run_experiment.py --config ./exp_configs/cifar10/config_prototypical.py --fraction 0.6 --nonadaptive
-python3 run_experiment.py --config ./exp_configs/cifar10/config_prototypical.py --fraction 0.4 --nonadaptive
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_prototypical.py --fraction 0.8 --nonadaptive # ok
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_prototypical.py --fraction 0.8 --nonadaptive --disable_scheduler # ok
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_prototypical.py --fraction 0.6 --nonadaptive # ok
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_prototypical.py --fraction 0.4 --nonadaptive # ok
 
 ## cubs 
-python3 run_experiment.py --config ./exp_configs/cub200/config_prototypical.py --fraction 0.8 --nonadaptive
-python3 run_experiment.py --config ./exp_configs/cub200/config_prototypical.py --fraction 0.8 --nonadaptive --disable_scheduler
-python3 run_experiment.py --config ./exp_configs/cub200/config_prototypical.py --fraction 0.8 --nonadaptive --disable_scheduler --pretrained --finetune --lr 0.005
-python3 run_experiment.py --config ./exp_configs/cub200/config_prototypical.py --fraction 0.6 --nonadaptive
-python3 run_experiment.py --config ./exp_configs/cub200/config_prototypical.py --fraction 0.4 --nonadaptive
+# python3 run_experiment.py --config ./exp_configs/cub200/config_prototypical.py --fraction 0.8 --nonadaptive # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_prototypical.py --fraction 0.8 --nonadaptive --disable_scheduler # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_prototypical.py --fraction 0.8 --nonadaptive --disable_scheduler --pretrained --finetune --lr 0.005 # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_prototypical.py --fraction 0.6 --nonadaptive # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_prototypical.py --fraction 0.4 --nonadaptive # ok
 
 ## no schedule uncertainty 
-python3 run_experiment.py --config ./exp_configs/cifar10/config_uncertainty.py --fraction 0.4 --select_every 5 --disable_scheduler
-python3 run_experiment.py --config ./exp_configs/cifar10/config_uncertainty.py --fraction 0.4 --select_every 2 --disable_scheduler
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_uncertainty.py --fraction 0.4 --select_every 5 --disable_scheduler # ok
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_uncertainty.py --fraction 0.4 --select_every 2 --disable_scheduler # ok
