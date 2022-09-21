@@ -290,13 +290,13 @@
 # python3 run_experiment.py --config ./exp_configs/papilion/config_uncertainty.py --select_every 10 --fraction 0.4 # ok
 
 # GraND exps 
-python3 run_experiment.py --config ./exp_configs/cifar10/config_prototypical.py --fraction 0.5 --nonadaptive 
-python3 run_experiment.py --config ./exp_configs/cifar10/config_prototypical.py --fraction 0.8 --nonadaptive
-python3 run_experiment.py --config ./exp_configs/cub200/config_prototypical.py --fraction 0.8 --nonadaptive
-python3 run_experiment.py --config ./exp_configs/cub200/config_prototypical.py --fraction 0.8 --nonadaptive --selection_type PerClass
-python3 run_experiment.py --config ./exp_configs/papilion/config_prototypical.py --fraction 0.8 --nonadaptive
-python3 run_experiment.py --config ./exp_configs/papilion/config_prototypical.py --fraction 0.8 --nonadaptive --selection_type PerClass
-python3 run_experiment.py --config ./exp_configs/papilion/config_prototypical.py --fraction 0.6 --nonadaptive
-python3 run_experiment.py --config ./exp_configs/papilion/config_prototypical.py --fraction 0.6 --nonadaptive --selection_type PerClass
+python3 run_experiment.py --config ./exp_configs/cifar10/config_grand.py --fraction 0.5 --nonadaptive 
+python3 run_experiment.py --config ./exp_configs/cifar10/config_grand.py --fraction 0.8 --nonadaptive
+python3 run_experiment.py --config ./exp_configs/cub200/config_grand.py --fraction 0.8 --nonadaptive
+python3 run_experiment.py --config ./exp_configs/cub200/config_grand.py --fraction 0.8 --nonadaptive --selection_type PerClass
+python3 run_experiment.py --config ./exp_configs/papilion/config_grand.py --fraction 0.8 --nonadaptive
+python3 run_experiment.py --config ./exp_configs/papilion/config_grand.py --fraction 0.8 --nonadaptive --selection_type PerClass
+python3 run_experiment.py --config ./exp_configs/papilion/config_grand.py --fraction 0.6 --nonadaptive
+python3 run_experiment.py --config ./exp_configs/papilion/config_grand.py --fraction 0.6 --nonadaptive --selection_type PerClass
 
 # uncertainty with warm up -> wait for results of fraction size. 
