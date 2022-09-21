@@ -5,6 +5,7 @@ import torch.nn.functional as F
 import numpy as np
 import torchvision.models as models
 from cords.utils.models.efficientnet import EfficientNetB0_PyTorch
+from torch.utils.data import DataLoader
 
 class GrandStrategy(DataSelectionStrategy):
     def __init__(
@@ -18,7 +19,8 @@ class GrandStrategy(DataSelectionStrategy):
         device,
         selection_type,
         logger,
-        repeats=10
+        repeats=10,
+        train_epochs=0,
     ):
         super().__init__(
             trainloader,
@@ -43,9 +45,11 @@ class GrandStrategy(DataSelectionStrategy):
         # average the scores over the 10 runs
         # larger (norm) scores are more important and should be selected
 
-        ### Notes: Do we need to do a training epoch before we can calculate the normed gradients?
         norm_matrix = torch.zeros((self.N_trn, 10), requires_grad=False).to(self.device)
         self.fraction = budget / self.N_trn
+        
+        # use a trainloader without shuffling such that the indices for PerClass selection are correct
+        dataloader = DataLoader(self.trainset, batch_size=self.trainloader.batch_size, shuffle=False)
         
         for run in range(self.repeats):
             self.logger.debug('GRAND: model run {}/{}'.format(run+1, self.repeats))
@@ -58,10 +62,16 @@ class GrandStrategy(DataSelectionStrategy):
             model.embedding_recorder.record_embedding = True
             embedding_dim = model.get_embedding_dim()
             optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
+
+            # get metric at initialization time or train for some epochs first
+            if self.train_epochs > 0:
+                self.train(model, optimizer, self.train_epochs)
+        
+
             model.eval()
 
             # calculate the GraND scores for all samples by the normed gradients
-            for batch_idx, (inputs, targets) in enumerate(self.trainloader):
+            for batch_idx, (inputs, targets) in enumerate(dataloader):
                 optimizer.zero_grad()
                 inputs, targets = inputs.to(self.device), targets.to(self.device)
                 outputs = model(inputs)
@@ -84,15 +94,25 @@ class GrandStrategy(DataSelectionStrategy):
             # select the samples with the highest scores
             selected_idxs = np.argsort(norm_matrix)[-budget:]
         elif self.selection_type == 'PerClass':
-            self.get_labels()
+            labels = self.get_labels_of_dataloader(dataloader)
             selected_idxs = np.array([], dtype=np.int64)
             for i in range(self.num_classes):
-                class_idxs = np.arange(self.N_trn)[self.trn_lbls == i]
+                class_idxs = np.arange(self.N_trn)[labels == i]
                 class_budget = round(self.fraction * len(class_idxs))
                 selected_idxs = np.concatenate((selected_idxs, class_idxs[np.argsort(norm_matrix[class_idxs])[-class_budget:]]))
             
         return selected_idxs, torch.ones(len(selected_idxs))
 
+    def train(self, model, optimizer, epochs=10):
+        model.train()
+        for epoch in range(epochs):
+            for batch_idx, (inputs, targets) in enumerate(self.trainloader):
+                optimizer.zero_grad()
+                inputs, targets = inputs.to(self.device), targets.to(self.device)
+                outputs = model(inputs)
+                loss = self.criterion(outputs, targets)
+                loss.backward()
+                optimizer.step()
 
 
 
