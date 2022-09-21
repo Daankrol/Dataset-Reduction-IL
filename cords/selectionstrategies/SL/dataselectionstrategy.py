@@ -65,6 +65,22 @@ class DataSelectionStrategy(object):
                     self.val_lbls = torch.cat((self.val_lbls, targets.view(-1, 1)), dim=0)
             self.val_lbls = self.val_lbls.view(-1)
 
+    def get_labels_of_dataloader(self, dataloader):
+        """
+        Get the labels of the dataloader
+
+        Parameters
+        ----------
+        dataloader: class
+            PyTorch dataloader object
+        """
+        for batch_idx, (inputs, targets) in enumerate(dataloader):
+            if batch_idx == 0:
+                labels = targets.view(-1, 1)
+            else:
+                labels = torch.cat((labels, targets.view(-1, 1)), dim=0)
+        return labels.view(-1)
+
     def compute_gradients(self, valid=False, perBatch=False, perClass=False):
         """
         Computes the gradient of each element.

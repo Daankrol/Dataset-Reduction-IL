@@ -11,3 +11,4 @@ from .uncertaintystrategy import UncertaintyStrategy
 from .contrastiveactivelearningstrategy import ContrastiveActiveLearningStrategy
 from .prototypicalstrategy import PrototypicalStrategy
 from .grandstrategy import GrandStrategy
+from .el2nstrategy import EL2NStrategy

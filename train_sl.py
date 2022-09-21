@@ -26,6 +26,7 @@ from cords.utils.data.dataloader.SL.adaptive import (
     PrototypicalDataLoader,
     GrandDataLoader
 )
+from cords.utils.data.dataloader.SL.adaptive.el2ndataloader import EL2NDataLoader
 
 from cords.utils.data.dataloader.SL.nonadaptive import FacLocDataLoader
 from cords.utils.data.datasets.SL import gen_dataset
@@ -1277,6 +1278,13 @@ class TrainClassifier:
             )
         elif self.cfg.dss_args.type in ["Grand"]:
             dataloader = GrandDataLoader(
+                trainloader, valloader, self.cfg.dss_args, logger,
+                batch_size=self.cfg.dataloader.batch_size,
+                shuffle=self.cfg.dataloader.shuffle,
+                pin_memory=self.cfg.dataloader.pin_memory,
+            )
+        elif self.cfg.dss_args.type in ["EL2N"]:
+            dataloader = EL2NDataLoader(
                 trainloader, valloader, self.cfg.dss_args, logger,
                 batch_size=self.cfg.dataloader.batch_size,
                 shuffle=self.cfg.dataloader.shuffle,
