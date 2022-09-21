@@ -329,3 +329,13 @@
 # python3 run_experiment.py --config ./exp_configs/cub200/config_craigpb.py --select_every 20 --fraction 0.3 --kappa 0.03 --epochs 500 # ok
 # python3 run_experiment.py --config ./exp_configs/cub200/config_submodular.py --submod_function graph-cut --select_every 20 --fraction 0.3 --lr 0.01 --kappa 0.03 --epochs 500 # ok
 # python3 run_experiment.py --config ./exp_configs/cub200/config_submodular.py --submod_function facility-location --select_every 20 --fraction 0.3 --lr 0.01 --kappa 0.03 --epochs 500 # ok
+
+## 21-9, EL2N pruning
+python3 run_experiment.py --config ./exp_configs/cifar10/config_el2n.py --fraction 0.5 
+python3 run_experiment.py --config ./exp_configs/cifar10/config_el2n.py --fraction 0.8 
+python3 run_experiment.py --config ./exp_configs/cub200/config_el2n.py --fraction 0.8
+python3 run_experiment.py --config ./exp_configs/cub200/config_el2n.py --fraction 0.8 --selection_type PerClass
+python3 run_experiment.py --config ./exp_configs/papilion/config_el2n.py --fraction 0.8
+python3 run_experiment.py --config ./exp_configs/papilion/config_el2n.py --fraction 0.8 --selection_type PerClass
+python3 run_experiment.py --config ./exp_configs/papilion/config_el2n.py --fraction 0.6
+python3 run_experiment.py --config ./exp_configs/papilion/config_el2n.py --fraction 0.6 --selection_type PerClass
