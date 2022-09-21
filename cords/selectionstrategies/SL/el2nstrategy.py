@@ -37,6 +37,7 @@ class EL2NStrategy(DataSelectionStrategy):
         self.criterion.__init__()
         self.selection_type = selection_type
         self.repeats = repeats
+        self.train_epochs = train_epochs
 
     def select(self, budget, model_params):
         # for 10 runs do:
@@ -53,7 +54,7 @@ class EL2NStrategy(DataSelectionStrategy):
         self.fraction = budget / self.N_trn
 
 
-        dataloader = DataLoader(self.trainset, batch_size=self.trainloader.batch_size, shuffle=False)
+        dataloader = DataLoader(self.trainloader.dataset, batch_size=self.trainloader.batch_size, shuffle=False)
         
         for run in range(self.repeats):
             self.logger.debug('EL2N: model run {}/{}'.format(run+1, self.repeats))
@@ -74,18 +75,19 @@ class EL2NStrategy(DataSelectionStrategy):
             model.eval()
 
             # calculate the EL2n scores for all samples
-            for batch_idx, (inputs, targets) in enumerate(dataloader):
-                optimizer.zero_grad()
-                inputs, targets = inputs.to(self.device), targets.to(self.device)
-                outputs = model(inputs)
-                outputs = F.softmax(outputs, dim=1)
-                # make sure y (targets) is one-hot encoded
-                y = torch.zeros(outputs.shape).to(self.device)
-                y[torch.arange(y.shape[0]), targets] = 1
-                # calculate the L2 norm
-                l2_norm = torch.norm(outputs - y, p=2, dim=1)
-                cur_batch_size = inputs.shape[0]
-                norm_matrix[batch_idx * self.trainloader.batch_size : batch_idx * self.trainloader.batch_size + cur_batch_size, run] = l2_norm
+            with torch.no_grad():
+                for batch_idx, (inputs, targets) in enumerate(dataloader):
+                    optimizer.zero_grad()
+                    inputs, targets = inputs.to(self.device), targets.to(self.device)
+                    outputs = model(inputs)
+                    outputs = F.softmax(outputs, dim=1)
+                    # make sure y (targets) is one-hot encoded
+                    y = torch.zeros(outputs.shape).to(self.device)
+                    y[torch.arange(y.shape[0]), targets] = 1
+                    # calculate the L2 norm
+                    l2_norm = torch.norm(outputs - y, p=2, dim=1)
+                    cur_batch_size = inputs.shape[0]
+                    norm_matrix[batch_idx * self.trainloader.batch_size : batch_idx * self.trainloader.batch_size + cur_batch_size, run] = l2_norm
 
         # average the scores over the runs
         norm_matrix = torch.mean(norm_matrix, dim=1).cpu().detach().numpy()
