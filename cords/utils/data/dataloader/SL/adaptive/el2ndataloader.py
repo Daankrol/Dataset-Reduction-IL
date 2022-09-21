@@ -54,7 +54,7 @@ class EL2NDataLoader(AdaptiveDSSDataLoader):
         subset_indices, subset_weights = self.strategy.select(self.budget, None)
         end = time.time()
         self.logger.info(
-            "Epoch: {0:d}, GrEL2Nand subset selection finished, takes {1:.4f}. ".format(
+            "Epoch: {0:d}, EL2N subset selection finished, takes {1:.4f}. ".format(
                 self.cur_epoch, (end - start)
             )
         )
