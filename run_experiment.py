@@ -133,7 +133,6 @@ parser.add_argument(
 )
 
 
-
 args = parser.parse_args()
 if args.config is None:
     parser.print_help()
@@ -166,6 +165,7 @@ if args.select_every is not None:
     cfg.dss_args.select_every = args.select_every
 if args.epochs is not None:
     cfg.train_args.num_epochs = args.epochs
+    cfg.scheduler.T_max = args.epochs
 if args.disable_scheduler:
     cfg.scheduler.type = None
 if args.early_stopping:
