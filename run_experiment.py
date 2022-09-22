@@ -64,7 +64,18 @@ parser.add_argument(
     required=True,
     help="Path of the experiment config file",
 )
-parser.add_argument("--dataset", type=str, choices=["cifar10", "cifar100", "cub200"])
+parser.add_argument(
+    "--config",
+    type=str,
+    required=True,
+    help="Path of the experiment config file",
+)
+
+parser.add_argument(
+    "--name",
+    type=str,
+    help="Name of the W&B run",
+)
 
 parser.add_argument(
     "--fraction", type=float, help="Fraction of data to select with DSS"
@@ -132,6 +143,16 @@ parser.add_argument(
     help='Enable data dependent scheduling of LR'
 )
 
+parser.add_argument(
+    '--num_workers',
+    type=int,
+    help="Number of workers for dataloader"
+)
+parser.add_argument(
+    '--batch_size',
+    type=int,
+    help="Batch size for dataloader"
+)
 
 args = parser.parse_args()
 if args.config is None:
@@ -140,9 +161,9 @@ if args.config is None:
 
 cfg = load_config_data(args.config)
 
+if args.name is not None:
+    cfg.name = args.name
 
-if args.dataset is not None:
-    cfg.dataset.name = args.dataset
 if args.lr is not None:
     cfg.optimizer.lr = args.lr
 if args.model is not None:
@@ -180,6 +201,11 @@ if args.nonadaptive:
     cfg.dss_args.online = False
 elif cfg.dss_args.online is None or cfg.dss_args.online == DotMap():
     cfg.dss_args.online = True
+
+if args.num_workers is not None:
+    cfg.num_workers = args.num_workers
+if args.batch_size is not None:
+    cfg.dataloader.batch_size = args.batch_size
 
 clf = TrainClassifier(cfg)
 clf.train()

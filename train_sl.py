@@ -115,8 +115,12 @@ class TrainClassifier:
                 name += '_dataScheduler'
             if self.cfg.dss_args.kappa != DotMap() and self.cfg.dss_args.kappa > 0:
                 name += f"_k-{str(self.cfg.dss_args.kappa)}"
-            if self.cfg.dss_args.lam != DotMap() and self.cfg.dss_args.lam > 0:
-                name += f"_lam-{str(self.cfg.dss_args.lam)}"
+            # if self.cfg.dss_args.lam != DotMap() and self.cfg.dss_args.lam > 0:
+                # name += f"_lam-{str(self.cfg.dss_args.lam)}"
+
+            if self.cfg.name is not None and self.cfg.name != DotMap():
+                name = self.cfg.name
+
             wandb.init(
                 project="Dataset Reduction for IL",
                 entity="daankrol",
