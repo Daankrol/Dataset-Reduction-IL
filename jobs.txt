@@ -339,3 +339,24 @@ python3 run_experiment.py --config ./exp_configs/papilion/config_el2n.py --fract
 python3 run_experiment.py --config ./exp_configs/papilion/config_el2n.py --fraction 0.8 --selection_type PerClass
 python3 run_experiment.py --config ./exp_configs/papilion/config_el2n.py --fraction 0.6
 python3 run_experiment.py --config ./exp_configs/papilion/config_el2n.py --fraction 0.6 --selection_type PerClass
+
+## 22-9 longer exps with 20x10 and warm up 
+python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --select_every 10 --fraction 0.2 --lr 0.01 --kappa 0.03 --epochs 500
+python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatch.py --select_every 10 --fraction 0.2 --lr 0.01 --kappa 0.03 --epochs 500
+python3 run_experiment.py --config ./exp_configs/papilion/config_glister.py --select_every 10 --fraction 0.2 --lr 0.01 --kappa 0.03 --epochs 500 --selection_type Supervised
+python3 run_experiment.py --config ./exp_configs/papilion/config_glister.py --select_every 10 --fraction 0.2 --lr 0.01 --kappa 0.03 --epochs 500 --selection_type PerBatch
+python3 run_experiment.py --config ./exp_configs/papilion/config_glister.py --select_every 10 --fraction 0.2 --lr 0.01 --kappa 0.03 --epochs 500 --selection_type PerClass
+python3 run_experiment.py --config ./exp_configs/papilion/config_craig.py --select_every 10 --fraction 0.2 --lr 0.01 --kappa 0.03 --epochs 500
+python3 run_experiment.py --config ./exp_configs/papilion/config_craigpb.py --select_every 10 --fraction 0.2 --lr 0.01 --kappa 0.03 --epochs 500
+python3 run_experiment.py --config ./exp_configs/papilion/config_submodular.py --submod_function graph-cut --select_every 10 --fraction 0.2 --lr 0.01 --kappa 0.03 --epochs 500
+python3 run_experiment.py --config ./exp_configs/papilion/config_submodular.py --submod_function facility-location --select_every 10 --fraction 0.2 --lr 0.01 --kappa 0.03 --epochs 500
+
+python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --select_every 10 --fraction 0.2 --lr 0.01 --kappa 0.03 --epochs 500
+python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatch.py --select_every 10 --fraction 0.2 --lr 0.01 --kappa 0.03 --epochs 500
+python3 run_experiment.py --config ./exp_configs/cub200/config_glister.py --select_every 10 --fraction 0.2 --lr 0.01 --kappa 0.03 --epochs 500 --selection_type Supervised
+python3 run_experiment.py --config ./exp_configs/cub200/config_glister.py --select_every 10 --fraction 0.2 --lr 0.01 --kappa 0.03 --epochs 500 --selection_type PerBatch
+python3 run_experiment.py --config ./exp_configs/cub200/config_glister.py --select_every 10 --fraction 0.2 --lr 0.01 --kappa 0.03 --epochs 500 --selection_type PerClass
+python3 run_experiment.py --config ./exp_configs/cub200/config_craig.py --select_every 10 --fraction 0.2 --kappa 0.03 --epochs 500
+python3 run_experiment.py --config ./exp_configs/cub200/config_craigpb.py --select_every 10 --fraction 0.2 --kappa 0.03 --epochs 500
+python3 run_experiment.py --config ./exp_configs/cub200/config_submodular.py --submod_function graph-cut --select_every 10 --fraction 0.2 --lr 0.01 --kappa 0.03 --epochs 500
+python3 run_experiment.py --config ./exp_configs/cub200/config_submodular.py --submod_function facility-location --select_every 10 --fraction 0.2 --lr 0.01 --kappa 0.03 --epochs 500
