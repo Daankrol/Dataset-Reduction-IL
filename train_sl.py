@@ -142,7 +142,7 @@ class TrainClassifier:
                     "dss_args": self.cfg.dss_args,
                 },
             )
-
+        self.logger.debug('Using {} workers for dataloading with batch size of {}'.format(self.cfg.num_workers, self.cfg.dss_args.batch_size))
         if self.cfg.measure_energy:
             domains = [NvidiaGPUDomain(0)]
             devices = DeviceFactory.create_devices(domains)
@@ -413,6 +413,7 @@ class TrainClassifier:
             shuffle=False,
             pin_memory=True,
             collate_fn=collate_fn,
+            num_workers=self.cfg.num_workers,
             drop_last=drop_last,
         )
 
@@ -423,6 +424,7 @@ class TrainClassifier:
             shuffle=False,
             pin_memory=True,
             collate_fn=collate_fn,
+            num_workers=self.cfg.num_workers,
             drop_last=drop_last,
         )
 
@@ -433,6 +435,7 @@ class TrainClassifier:
             shuffle=False,
             pin_memory=True,
             collate_fn=collate_fn,
+            num_workers=self.cfg.num_workers,
             drop_last=drop_last,
         )
 
@@ -1125,6 +1128,7 @@ class TrainClassifier:
                 shuffle=self.cfg.dataloader.shuffle,
                 pin_memory=self.cfg.dataloader.pin_memory,
                 collate_fn=self.cfg.dss_args.collate_fn,
+                num_workers=self.cfg.num_workers
             )
 
         elif self.cfg.dss_args.type in [
@@ -1146,6 +1150,7 @@ class TrainClassifier:
                 shuffle=self.cfg.dataloader.shuffle,
                 pin_memory=self.cfg.dataloader.pin_memory,
                 collate_fn=self.cfg.dss_args.collate_fn,
+                num_workers=self.cfg.num_workers
             )
 
         elif self.cfg.dss_args.type in [
@@ -1163,6 +1168,7 @@ class TrainClassifier:
                 shuffle=self.cfg.dataloader.shuffle,
                 pin_memory=self.cfg.dataloader.pin_memory,
                 collate_fn=self.cfg.dss_args.collate_fn,
+                num_workers=self.cfg.num_workers
             )
 
         elif self.cfg.dss_args.type in ["Random", "Random-Warm"]:
@@ -1174,6 +1180,7 @@ class TrainClassifier:
                 shuffle=self.cfg.dataloader.shuffle,
                 pin_memory=self.cfg.dataloader.pin_memory,
                 collate_fn=self.cfg.dss_args.collate_fn,
+                num_workers=self.cfg.num_workers
             )
 
         elif self.cfg.dss_args.type == ["OLRandom", "OLRandom-Warm"]:
@@ -1185,6 +1192,7 @@ class TrainClassifier:
                 shuffle=self.cfg.dataloader.shuffle,
                 pin_memory=self.cfg.dataloader.pin_memory,
                 collate_fn=self.cfg.dss_args.collate_fn,
+                num_workers=self.cfg.num_workers
             )
         elif self.cfg.dss_args.type == "Submodular":
             dataloader = SubmodularDataLoader(
@@ -1196,11 +1204,17 @@ class TrainClassifier:
                 shuffle=self.cfg.dataloader.shuffle,
                 pin_memory=self.cfg.dataloader.pin_memory,
                 collate_fn=self.cfg.dss_args.collate_fn,
+                num_workers=self.cfg.num_workers
             )
 
         elif self.cfg.dss_args.type == "CAL":
             dataloader = ContrastiveDataLoader(
-                trainloader, valloader, self.cfg.dss_args, logger
+                trainloader, valloader, self.cfg.dss_args, logger,
+                batch_size=self.cfg.dataloader.batch_size,
+                shuffle=self.cfg.dataloader.shuffle,
+                pin_memory=self.cfg.dataloader.pin_memory,
+                collate_fn=self.cfg.dss_args.collate_fn,
+                num_workers=self.cfg.num_workers
             )
         elif self.cfg.dss_args.type == "FacLoc":
             self.cfg.dss_args.data_type = self.cfg.dataset.type
@@ -1213,6 +1227,7 @@ class TrainClassifier:
                 shuffle=self.cfg.dataloader.shuffle,
                 pin_memory=self.cfg.dataloader.pin_memory,
                 collate_fn=self.cfg.dss_args.collate_fn,
+                num_workers=self.cfg.num_workers
             )
             if (
                     self.cfg.dataset.name == "sst2_facloc"
@@ -1237,6 +1252,7 @@ class TrainClassifier:
                 shuffle=self.cfg.dataloader.shuffle,
                 pin_memory=self.cfg.dataloader.pin_memory,
                 collate_fn=self.cfg.dss_args.collate_fn,
+                num_workers=self.cfg.num_workers
             )
 
         elif self.cfg.dss_args.type in ["SELCON"]:
@@ -1260,6 +1276,7 @@ class TrainClassifier:
                 batch_size=self.cfg.dataloader.batch_size,
                 shuffle=self.cfg.dataloader.shuffle,
                 pin_memory=self.cfg.dataloader.pin_memory,
+                num_workers=self.cfg.num_workers
             )
 
         elif self.cfg.dss_args.type in ["Uncertainty"]:
@@ -1268,13 +1285,15 @@ class TrainClassifier:
                 batch_size=self.cfg.dataloader.batch_size,
                 shuffle=self.cfg.dataloader.shuffle,
                 pin_memory=self.cfg.dataloader.pin_memory,
+                num_workers=self.cfg.num_workers
             )
         elif self.cfg.dss_args.type in ["Prototypical"]:
             dataloader = PrototypicalDataLoader(
                 trainloader, valloader, self.cfg.dss_args, logger,
                 batch_size=self.cfg.dataloader.batch_size,
                 shuffle=self.cfg.dataloader.shuffle,
-                pin_memory=self.cfg.dataloader.pin_memory
+                pin_memory=self.cfg.dataloader.pin_memory,
+                num_workers=self.cfg.num_workers
             )
         elif self.cfg.dss_args.type in ["Grand"]:
             dataloader = GrandDataLoader(
@@ -1282,6 +1301,7 @@ class TrainClassifier:
                 batch_size=self.cfg.dataloader.batch_size,
                 shuffle=self.cfg.dataloader.shuffle,
                 pin_memory=self.cfg.dataloader.pin_memory,
+                num_workers=self.cfg.num_workers
             )
         elif self.cfg.dss_args.type in ["EL2N"]:
             dataloader = EL2NDataLoader(
@@ -1289,6 +1309,7 @@ class TrainClassifier:
                 batch_size=self.cfg.dataloader.batch_size,
                 shuffle=self.cfg.dataloader.shuffle,
                 pin_memory=self.cfg.dataloader.pin_memory,
+                num_workers=self.cfg.num_workers
             )
         else:
             raise NotImplementedError
