@@ -17,11 +17,12 @@ config = dict(
     scheduler=dict(type="cosine_annealing", T_max=300),
     # early_stopping=True,
     dss_args=dict(
-        type="Grand",
-        fraction=0.9,
-        selection_type="Supervised",
-        online=False,
-        # select_every=1,
+        type="CAL",
+        fraction=0.8,
+        selection_type="PerClass",
+        metric='cossim',
+        online=True,
+        select_every=1,
         kappa=0
     ),
     # dss_args=dict(

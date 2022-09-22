@@ -34,7 +34,7 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
 
     def __init__(self, trainloader, valloader, model, loss,
                  device, num_classes, selection_type, logger, metric='euclidean', k=10):
-        super().__init__(trainloader, valloader, model, num_classes, loss, device, logger)
+        super().__init__(trainloader, valloader, model, num_classes,None, loss, device, logger)
         self.selection_type = selection_type
         self.k = k
         self.pretrained_model = EfficientNetB0_PyTorch(num_classes=self.num_classes, pretrained=True, fine_tune=False).to(self.device)
@@ -99,7 +99,8 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
                                                         batch_size=self.trainloader.batch_size)
                 for i, (inputs, _) in enumerate(loader):
                     inputs = inputs.to(self.device)
-                    _, embedding = self.pretrained_model(inputs, last=True, freeze=True).detach()
+                    _, embedding = self.pretrained_model(inputs, last=True, freeze=True)
+                    embedding = embedding.detach()
                     embeddings[i * self.trainloader.batch_size: i * (self.trainloader.batch_size + inputs.shape[0])] = embedding
                 dist = self.metric(embeddings.cpu().numpy())
                 knn.append(np.argsort(dist, axis=1)[:, 1:self.k + 1])
@@ -110,7 +111,8 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
             loader = torch.utils.data.DataLoader(self.trainloader.dataset, batch_size=self.trainloader.batch_size)
             for i, (inputs, _) in enumerate(loader):
                 inputs = inputs.to(self.device)
-                _, embedding = self.pretrained_model(inputs, last=True, freeze=True).detach()
+                _, embedding = self.pretrained_model(inputs, last=True, freeze=True)
+                embedding = embedding.detach()
                 embeddings[i*self.trainloader.batch_size:(i*self.trainloader.batch_size + inputs.shape[0]) ] = embedding
                 if i % 20 == 0:
                     self.logger.debug('Computed embedding for {}/{}'.format(i, len(loader)))

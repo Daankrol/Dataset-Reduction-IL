@@ -64,12 +64,6 @@ parser.add_argument(
     required=True,
     help="Path of the experiment config file",
 )
-parser.add_argument(
-    "--config",
-    type=str,
-    required=True,
-    help="Path of the experiment config file",
-)
 
 parser.add_argument(
     "--name",
