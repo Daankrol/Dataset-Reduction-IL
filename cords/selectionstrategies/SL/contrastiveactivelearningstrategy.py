@@ -81,6 +81,7 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
         x2 = torch.sum(torch.mul(x, x), dim=1).reshape(-1, 1)
         return torch.sqrt(torch.clamp(x2 + x2.t() - 2. * xy, min=1e-12))
 
+
     @torch.no_grad()
     def find_knn(self):
         "Find k-nearest-neighbour datapoints based on feature embedding by a pretrained network"
@@ -102,18 +103,13 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
                     _, embedding = self.pretrained_model(inputs, last=True, freeze=True)
                     embedding = embedding.detach().cpu().numpy()
                     # Embedding is of shape (batch_size, embDim)                    
-                    embeddings[i * self.trainloader.batch_size: i * (self.trainloader.batch_size + inputs.shape[0])] = embedding
-                    # the row above will fail since the embedding is of size (batch_size, embDim)
-                    # error = the expanded size of the tensor (0) must match the existing size (32) at non-singleton dimension 0
-                    # target size = (0, 1280)
-                    # actual tensor size = (32, 1280)
-
-                    # embeddings[i*self.trainloader.batch_size: i*(self.trainloader.batch_size+inputs.shape[0])] = 
-
-
+                    embeddings[i * self.trainloader.batch_size: (i * self.trainloader.batch_size + inputs.shape[0])] = embedding
+         
+                # calculate pairwise distance matrix
                 dist = self.metric(embeddings.cpu().numpy())
+                # for each sample add the k nearest neighbours
                 knn.append(np.argsort(dist, axis=1)[:, 1:self.k + 1])
-            self.logger.info('Finished with computing embeddings')
+            self.logger.info('Finished with computing embeddings and distances')
             return knn
         else:
             embeddings = torch.zeros((self.N_trn, self.pretrained_model.embDim)).to(self.device)
@@ -153,18 +149,15 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
             probs[i* batch_size: i*batch_size + cur_batch_size] = torch.nn.functional.softmax(self.model(inputs, freeze=True), dim=1).detach()
 
         kl = torch.zeros(batch_num).to(self.device)
-        print(f'starting with KL divergence. Total num batches {batch_num} with batch size {batch_size}')
+        print(f'started KL divergence computation. Total num batches {batch_num} with batch size {batch_size}')
         for i in range(0, batch_num, batch_size):
             # the last batch might be smaller than batch_size
             batch_size = batch_size if i < batch_num - batch_size else last_batch_size
             print(f'kl-for batch {i}')
             aa = probs[i*batch_size: i*batch_size + batch_size].unsqueeze(1)
             bb = probs[knn[i*batch_size: i*batch_size + batch_size]].unsqueeze(0)
+            # use the Jensen-Shannon divergence such that JS(P|Q) == JS(Q|P), i.e. symmetric. JS(P||Q) = 0.5 * (JS(P|Q) + JS(Q|P))
             kl[i:(i+batch_size)] = torch.sum(0.5 * aa * torch.log(aa / bb) + 0.5 * bb * torch.log(bb/aa), dim=2).mean(dim=1)
-        
-            # aa = np.expand_dims(probs[i:(i+batch_size)], 1).repeat(self.k, 1)
-            # bb = probs[knn[i:(i+batch_size)], :]
-            # kl[i:(i+batch_size)] = np.mean(np.sum( 0.5 * aa * np.log(aa/bb) + 0.5 * bb * np.log(bb/aa), axis=2), axis=1)
         
         self.model.train()
         return kl.cpu().numpy()
