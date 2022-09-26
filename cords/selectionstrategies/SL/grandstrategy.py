@@ -37,6 +37,7 @@ class GrandStrategy(DataSelectionStrategy):
         self.criterion.__init__()
         self.selection_type = selection_type
         self.repeats = repeats
+        self.train_epochs = train_epochs
 
     def select(self, budget, model_params):
         # for 10 runs do:
