@@ -88,7 +88,7 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
         # NOTE: this is done since in normal Active Learning we don't have the label information. 
         # TODO: Could use distance to mean feature embedding since we have label info. 
         self.logger.info('Finding k-nearest-neighbours')
-        self.logger.info('Computing feature embedding')
+        self.logger.debug('Computing feature embedding')
 
         if self.selection_type == 'PerClass':
             self.get_labels()
@@ -97,7 +97,7 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
                 class_indices = np.arange(self.N_trn)[self.trn_lbls == c]
                 embeddings = torch.zeros((len(class_indices), self.pretrained_model.embDim)).to(self.device)
                 loader = torch.utils.data.DataLoader(torch.utils.data.Subset(self.trainloader.dataset, class_indices),
-                                                        batch_size=self.trainloader.batch_size)
+                                                        batch_size=self.trainloader.batch_size, num_workers=self.trainloader.num_workers)
                 for i, (inputs, _) in enumerate(loader):
                     inputs = inputs.to(self.device)
                     _, embedding = self.pretrained_model(inputs, last=True, freeze=True)
@@ -109,11 +109,11 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
                 dist = self.metric(embeddings.cpu().numpy())
                 # for each sample add the k nearest neighbours
                 knn.append(np.argsort(dist, axis=1)[:, 1:self.k + 1])
-            self.logger.info('Finished with computing embeddings and distances')
+            self.logger.debug('Finished with computing embeddings and distances')
             return knn
         else:
             embeddings = torch.zeros((self.N_trn, self.pretrained_model.embDim)).to(self.device)
-            loader = torch.utils.data.DataLoader(self.trainloader.dataset, batch_size=self.trainloader.batch_size)
+            loader = torch.utils.data.DataLoader(self.trainloader.dataset, batch_size=self.trainloader.batch_size, num_workers=self.trainloader.num_workers)
             for i, (inputs, _) in enumerate(loader):
                 inputs = inputs.to(self.device)
                 _, embedding = self.pretrained_model(inputs, last=True, freeze=True)
@@ -132,10 +132,10 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
         self.model.eval()
 
         if index is None:
-            loader = torch.utils.data.DataLoader(self.trainloader.dataset, batch_size=self.trainloader.batch_size)
+            loader = torch.utils.data.DataLoader(self.trainloader.dataset, batch_size=self.trainloader.batch_size, num_workers=self.trainloader.num_workers)
         else:
             loader = torch.utils.data.DataLoader(torch.utils.data.Subset(self.trainloader.dataset, index),
-                                                    batch_size=self.trainloader.batch_size)
+                                                    batch_size=self.trainloader.batch_size, num_workers=self.trainloader.num_workers)
         probs = torch.zeros([len(loader.dataset), self.num_classes]).to(self.device)
         batch_num = len(loader)
         batch_size = loader.batch_size
@@ -146,7 +146,7 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
             # save last batch size 
             if i == batch_num - 1:
                 last_batch_size = cur_batch_size
-            probs[i* batch_size: i*batch_size + cur_batch_size] = torch.nn.functional.softmax(self.model(inputs, freeze=True), dim=1).detach()
+            probs[i* batch_size: i*batch_size + cur_batch_size] = torch.nn.functional.softmax(self.model(inputs, freeze=True), dim=1).detach().cpu()
 
         kl = torch.zeros(batch_num).to(self.device)
         print(f'started KL divergence computation. Total num batches {batch_num} with batch size {batch_size}')
@@ -154,10 +154,11 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
             # the last batch might be smaller than batch_size
             batch_size = batch_size if i < batch_num - batch_size else last_batch_size
             print(f'kl-for batch {i}')
-            aa = probs[i*batch_size: i*batch_size + batch_size].unsqueeze(1)
-            bb = probs[knn[i*batch_size: i*batch_size + batch_size]].unsqueeze(0)
+            aa = probs[i : i + batch_size].unsqueeze(1).repeat(self.k, 1)
+            bb = probs[knn[i : i + batch_size], :].unsqueeze(1).repeat(self.k, 1)
+            # kl[i : i + batch_size] = torch.sum(torch.nn.functional.kl_div(aa, bb, reduction='none'), dim=2).mean(dim=1)
             # use the Jensen-Shannon divergence such that JS(P|Q) == JS(Q|P), i.e. symmetric. JS(P||Q) = 0.5 * (JS(P|Q) + JS(Q|P))
-            kl[i:(i+batch_size)] = torch.sum(0.5 * aa * torch.log(aa / bb) + 0.5 * bb * torch.log(bb/aa), dim=2).mean(dim=1)
+            kl[i: i+batch_size] = torch.sum(0.5 * aa * torch.log(aa / bb) + 0.5 * bb * torch.log(bb/aa), dim=2).mean(dim=1)
         
         self.model.train()
         return kl.cpu().numpy()
