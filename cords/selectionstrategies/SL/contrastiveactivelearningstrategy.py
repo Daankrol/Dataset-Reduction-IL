@@ -101,7 +101,7 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
                 for i, (inputs, _) in enumerate(loader):
                     inputs = inputs.to(self.device)
                     _, embedding = self.pretrained_model(inputs, last=True, freeze=True)
-                    embedding = embedding.detach().cpu().numpy()
+                    embedding = embedding.detach()
                     # Embedding is of shape (batch_size, embDim)                    
                     embeddings[i * self.trainloader.batch_size: (i * self.trainloader.batch_size + inputs.shape[0])] = embedding
          
