@@ -119,16 +119,15 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
                 _, embedding = self.pretrained_model(inputs, last=True, freeze=True)
                 embedding = embedding.detach()
                 embeddings[i*self.trainloader.batch_size:(i*self.trainloader.batch_size + inputs.shape[0]) ] = embedding
-                if i % 20 == 0:
-                    self.logger.debug('Computed embedding for {}/{}'.format(i, len(loader)))
             self.logger.info('Finished with computing embeddings')
+            # torch based distance matrix
             dist = self.metric(embeddings.cpu().numpy())
             return np.argsort(dist, axis=1)[:, 1:self.k+1]
 
     @torch.no_grad()
-    def calculate_KL_divergence(self, knn, index=None):
+    def calculate_divergence(self, knn, index=None):
         # We use the current training model to determine the probabilities of the k-nearest-neighbours
-        self.logger.info('Calculating KL divergence')
+        self.logger.info('Calculating divergence')
         self.model.eval()
 
         if index is None:
@@ -153,11 +152,11 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
         for i in range(0, batch_num, batch_size):
             # the last batch might be smaller than batch_size
             batch_size = batch_size if i < batch_num - batch_size else last_batch_size
-            print(f'kl-for batch {i}')
-            aa = probs[i : i + batch_size].unsqueeze(1).repeat(self.k, 1)
-            bb = probs[knn[i : i + batch_size], :].unsqueeze(1).repeat(self.k, 1)
-            # kl[i : i + batch_size] = torch.sum(torch.nn.functional.kl_div(aa, bb, reduction='none'), dim=2).mean(dim=1)
+
+            # get the Jensen-Shannon divergence of point Xi with its k nearest neighbours
             # use the Jensen-Shannon divergence such that JS(P|Q) == JS(Q|P), i.e. symmetric. JS(P||Q) = 0.5 * (JS(P|Q) + JS(Q|P))
+            aa = probs[i : i + batch_size].unsqueeze(1).repeat(self.k, 1)
+            bb = probs[knn[i : i + batch_size], :]
             kl[i: i+batch_size] = torch.sum(0.5 * aa * torch.log(aa / bb) + 0.5 * bb * torch.log(bb/aa), dim=2).mean(dim=1)
         
         self.model.train()
@@ -176,11 +175,11 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
         if self.selection_type == 'PerClass':
             for c in range(self.num_classes):
                 class_indices = torch.arange(self.N_trn)[self.trn_lbls == c]
-                scores = self.calculate_KL_divergence(self.knn, index=class_indices)
+                scores = self.calculate_divergence(self.knn, index=class_indices)
                 # add the indices of the selected samples that have the highest KL divergence
                 indices = np.concatenate((indices, class_indices[np.argsort(scores)[-int(self.fraction * len(class_indices)):]]))
         else:
-            scores = self.calculate_KL_divergence(self.knn)
+            scores = self.calculate_divergence(self.knn)
             indices = np.argsort(scores)[-int(self.fraction * self.N_trn):]
 
         end_time = time.time()
