@@ -100,8 +100,17 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
                 for i, (inputs, _) in enumerate(loader):
                     inputs = inputs.to(self.device)
                     _, embedding = self.pretrained_model(inputs, last=True, freeze=True)
-                    embedding = embedding.detach()
+                    embedding = embedding.detach().cpu().numpy()
+                    # Embedding is of shape (batch_size, embDim)                    
                     embeddings[i * self.trainloader.batch_size: i * (self.trainloader.batch_size + inputs.shape[0])] = embedding
+                    # the row above will fail since the embedding is of size (batch_size, embDim)
+                    # error = the expanded size of the tensor (0) must match the existing size (32) at non-singleton dimension 0
+                    # target size = (0, 1280)
+                    # actual tensor size = (32, 1280)
+
+                    # embeddings[i*self.trainloader.batch_size: i*(self.trainloader.batch_size+inputs.shape[0])] = 
+
+
                 dist = self.metric(embeddings.cpu().numpy())
                 knn.append(np.argsort(dist, axis=1)[:, 1:self.k + 1])
             self.logger.info('Finished with computing embeddings')

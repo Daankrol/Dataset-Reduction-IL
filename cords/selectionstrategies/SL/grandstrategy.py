@@ -49,7 +49,7 @@ class GrandStrategy(DataSelectionStrategy):
         self.fraction = budget / self.N_trn
         
         # use a trainloader without shuffling such that the indices for PerClass selection are correct
-        dataloader = DataLoader(self.trainset, batch_size=self.trainloader.batch_size, shuffle=False)
+        dataloader = DataLoader(self.trainloader.dataset, batch_size=self.trainloader.batch_size, shuffle=False)
         
         for run in range(self.repeats):
             self.logger.debug('GRAND: model run {}/{}'.format(run+1, self.repeats))
