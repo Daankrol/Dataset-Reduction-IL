@@ -48,12 +48,13 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
         if self.knn is not None:
             return
         self.logger.info('Finding k-nearest-neighbours')
+        self.get_labels()
 
         # for each sample in a class, compute distance in feature space to all other sample in the same class
         # and find the k-nearest-neighbours
         knn = torch.zeros((self.N_trn, self.k), dtype=torch.int32)
         for c in range(self.num_classes):
-            class_indices = np.where(self.train_labels == c)[0]
+            class_indices = np.where(self.trn_lbls == c)[0]
             embeddings = torch.zeros((len(class_indices), self.pretrained_model.embDim)).to(self.device)
             loader = torch.utils.data.DataLoader(
                 torch.utils.data.Subset(self.trainset, class_indices),
