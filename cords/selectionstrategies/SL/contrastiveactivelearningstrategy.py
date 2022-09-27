@@ -1,6 +1,7 @@
 from random import sample
 import apricot
 import numpy as np
+import os
 import torch
 import torch.nn.functional as F
 from scipy.sparse import csr_matrix
@@ -87,48 +88,73 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
         x2 = torch.sum(torch.mul(x, x), dim=1).reshape(-1, 1)
         return torch.sqrt(torch.clamp(x2 + x2.t() - 2. * xy, min=1e-12))
 
+    def save_embeddings(self, embeddings, filename):
+        with open(filename, 'wb') as f:
+            pickle.dump(embeddings, f)
+    
+    def load_embeddings(self, filename):
+        with open(filename, 'rb') as f:
+            embeddings = pickle.load(f)
+        return embeddings
+    
+    def file_exists(self, filename):
+        return os.path.isfile(filename)
 
     @torch.no_grad()
     def find_knn(self):
         "Find k-nearest-neighbour datapoints based on feature embedding by a pretrained network"
         # NOTE: this is done since in normal Active Learning we don't have the label information. 
         # TODO: Could use distance to mean feature embedding (prototype) since we have label info. 
+        if self.knn is not None:
+            return
         self.logger.info('Finding k-nearest-neighbours')
         self.logger.debug('Computing feature embedding')
 
         if self.selection_type == 'PerClass':
-            self.get_labels()
-            knn = []
-            for c in range(self.num_classes):
-                class_indices = np.arange(self.N_trn)[self.trn_lbls == c]
-                embeddings = torch.zeros((len(class_indices), self.pretrained_model.embDim)).to(self.device)
-                loader = torch.utils.data.DataLoader(torch.utils.data.Subset(self.trainloader.dataset, class_indices),
-                                                        batch_size=self.trainloader.batch_size, num_workers=self.trainloader.num_workers)
+            if self.file_exists('knn_perclass.pkl'):
+                self.logger.info('Loading knn from file')
+                knn = self.load_embeddings('knn_perclass.pkl')
+            else:
+                self.get_labels()
+                knn = []
+                for c in range(self.num_classes):
+                    class_indices = np.arange(self.N_trn)[self.trn_lbls == c]
+                    embeddings = torch.zeros((len(class_indices), self.pretrained_model.embDim)).to(self.device)
+                    loader = torch.utils.data.DataLoader(torch.utils.data.Subset(self.trainloader.dataset, class_indices),
+                                                            batch_size=self.trainloader.batch_size, num_workers=self.trainloader.num_workers)
+                    for i, (inputs, _) in enumerate(loader):
+                        inputs = inputs.to(self.device)
+                        _, embedding = self.pretrained_model(inputs, last=True, freeze=True)
+                        embedding = embedding.detach()
+                        # Embedding is of shape (batch_size, embDim)                    
+                        embeddings[i * self.trainloader.batch_size: (i * self.trainloader.batch_size + inputs.shape[0])] = embedding
+            
+                    # calculate pairwise distance matrix
+                    dist = self.metric(embeddings.cpu().numpy())
+                    # for each sample add the k nearest neighbours
+                    knn.append(np.argsort(dist, axis=1)[:, 1:self.k + 1])
+                self.save_embeddings(knn, 'knn_perclass.pkl')
+                self.logger.debug('Finished with computing embeddings and distances')
+
+        else:
+            if self.file_exists('knn_perbatch.pkl'):
+                self.logger.info('Loading knn from file')
+                return self.load_embeddings('knn_perbatch.pkl')
+            else:
+                embeddings = torch.zeros((self.N_trn, self.pretrained_model.embDim)).to(self.device)
+                loader = torch.utils.data.DataLoader(self.trainloader.dataset, batch_size=self.trainloader.batch_size, num_workers=self.trainloader.num_workers)
                 for i, (inputs, _) in enumerate(loader):
                     inputs = inputs.to(self.device)
                     _, embedding = self.pretrained_model(inputs, last=True, freeze=True)
                     embedding = embedding.detach()
-                    # Embedding is of shape (batch_size, embDim)                    
-                    embeddings[i * self.trainloader.batch_size: (i * self.trainloader.batch_size + inputs.shape[0])] = embedding
-         
-                # calculate pairwise distance matrix
+                    embeddings[i*self.trainloader.batch_size:(i*self.trainloader.batch_size + inputs.shape[0]) ] = embedding
+                self.logger.info('Finished computing embeddings, starting distance calculation')
                 dist = self.metric(embeddings.cpu().numpy())
-                # for each sample add the k nearest neighbours
-                knn.append(np.argsort(dist, axis=1)[:, 1:self.k + 1])
-            self.logger.debug('Finished with computing embeddings and distances')
-            return knn
-        else:
-            embeddings = torch.zeros((self.N_trn, self.pretrained_model.embDim)).to(self.device)
-            loader = torch.utils.data.DataLoader(self.trainloader.dataset, batch_size=self.trainloader.batch_size, num_workers=self.trainloader.num_workers)
-            for i, (inputs, _) in enumerate(loader):
-                inputs = inputs.to(self.device)
-                _, embedding = self.pretrained_model(inputs, last=True, freeze=True)
-                embedding = embedding.detach()
-                embeddings[i*self.trainloader.batch_size:(i*self.trainloader.batch_size + inputs.shape[0]) ] = embedding
-            self.logger.info('Finished with computing embeddings')
-            # torch based distance matrix
-            dist = self.metric(embeddings.cpu().numpy())
-            return np.argsort(dist, axis=1)[:, 1:self.k+1]
+                knn = np.argsort(dist, axis=1)[:, 1:self.k+1]
+                self.save_embeddings(knn, 'knn_perbatch.pkl')
+                self.logger.debug('Finished with computing embeddings and distances')
+
+        self.knn = knn
 
     @torch.no_grad()
     def calculate_divergence(self, knn, index=None):
@@ -186,7 +212,7 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
         start_time = time.time()
         self.logger.info(f'Started {self.selection_type} CAL selection.')
         self.update_model(model_params)
-        self.knn = self.find_knn()
+        self.find_knn()
         self.fraction = budget / self.N_trn
         indices = np.array([], dtype=np.int32)
 
