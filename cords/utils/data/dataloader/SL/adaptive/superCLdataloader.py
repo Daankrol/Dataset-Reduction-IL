@@ -1,5 +1,7 @@
 import copy
 from dotmap import DotMap
+
+from cords.selectionstrategies.SL.superCLstrategy import SupervisedContrastiveLearningStrategy
 from .adaptivedataloader import AdaptiveDSSDataLoader
 from cords.selectionstrategies.SL import ContrastiveActiveLearningStrategy
 import time
@@ -25,18 +27,20 @@ class SupervisedContrastiveLearningDataLoader(AdaptiveDSSDataLoader):
         """
         assert (
             "model" in dss_args.keys()
-        ), "'model' is a compulsory argument for CALSampling. Please provide the model to be used for CAL sampling."
-        assert "selection_type" in dss_args.keys(), "'selection_type' is a compulsory argument for CAL. Include it as a key in dss_args"
-        assert dss_args.selection_type in ['PerBatch', 'PerClass']
-        assert "metric" in dss_args.keys(), "'metric' is a compulsory argument for CAL. Include it as a key in dss_args"
-        assert dss_args.metric in ['euclidean', 'cossim'], "'metric' must be either 'euclidean' or 'cossim'"
+        ), "'model' is a compulsory argument for CALSampling. Please provide the model to be used for Super-CL sampling."
+        assert "selection_type" in dss_args.keys(), "'selection_type' is a compulsory argument for Super-CL. Include it as a key in dss_args"
+        assert dss_args.selection_type in ['PerBatch', 'PerClass'], "selection_type should be either PerBatch or PerClass"
+        if "k" not in dss_args.keys():
+            dss_args.k = 10
+        if "weighted" not in dss_args.keys():
+            dss_args.weighted = True
         super(SupervisedContrastiveLearningDataLoader, self).__init__(
             train_loader, val_loader, dss_args, logger, *args, **kwargs
         )
         self.train_model = dss_args.model
-        self.strategy = ContrastiveActiveLearningStrategy(train_loader, val_loader, copy.deepcopy(dss_args.model),
+        self.strategy = SupervisedContrastiveLearningStrategy(train_loader, val_loader, copy.deepcopy(dss_args.model),
                                                           dss_args.loss, dss_args.device, dss_args.num_classes,
-                                                          dss_args.selection_type, logger, dss_args.metric)
+                                                          dss_args.selection_type, logger,dss_args.k, dss_args.weighted)
 
         self.logger.debug("Supervised Contrastive Learning dataloader initialized.")
 

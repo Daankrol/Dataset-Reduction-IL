@@ -1,16 +1,9 @@
-from random import sample
-import apricot
 import numpy as np
-import os
 import torch
 import torch.nn.functional as F
-from scipy.sparse import csr_matrix
 from .dataselectionstrategy import DataSelectionStrategy
-from torch.utils.data import Subset
-from sklearn.metrics import pairwise_distances
 import time
 from cords.utils.models.efficientnet import EfficientNetB0_PyTorch
-import pickle
 
 class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
     """
@@ -36,7 +29,7 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
     """
 
     def __init__(self, trainloader, valloader, model, loss,
-                 device, num_classes, selection_type, logger, metric='euclidean', k=10, weighted=False):
+                 device, num_classes, selection_type, logger, k=10, weighted=True):
         super().__init__(trainloader, valloader, model, num_classes,None, loss, device, logger)
         self.selection_type = selection_type
         self.weighted = weighted
@@ -47,19 +40,7 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
         for param in self.pretrained_model.parameters():
             param.requires_grad = False
         self.pretrained_model.eval()
-
-
-    def save_embeddings(self, embeddings, filename):
-        with open(filename, 'wb') as f:
-            pickle.dump(embeddings, f)
     
-    def load_embeddings(self, filename):
-        with open(filename, 'rb') as f:
-            embeddings = pickle.load(f)
-        return embeddings
-    
-    def file_exists(self, filename):
-        return os.path.isfile(filename)
 
     @torch.no_grad()
     def find_knn(self):
@@ -87,6 +68,8 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
             dist = dist.cpu().numpy()
             for i in range(len(class_indices)):
                 knn[class_indices[i]] = torch.from_numpy(np.argsort(dist[i])[1:self.k+1])
+
+        del self.pretrained_model  # only need this at the start. 
         self.knn = knn
 
     @torch.no_grad()
