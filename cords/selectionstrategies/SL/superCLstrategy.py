@@ -57,7 +57,7 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
             class_indices = np.where(self.trn_lbls == c)[0]
             embeddings = torch.zeros((len(class_indices), self.pretrained_model.embDim)).to(self.device)
             loader = torch.utils.data.DataLoader(
-                torch.utils.data.Subset(self.trainset, class_indices),
+                torch.utils.data.Subset(self.trainloader.dataset, class_indices),
                 batch_size=self.trainloader.batch_size, 
                 shuffle=False, num_workers=self.trainloader.num_workers)
             for i, (inputs, _) in enumerate(loader):
