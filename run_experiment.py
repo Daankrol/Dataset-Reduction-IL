@@ -78,6 +78,12 @@ parser.add_argument(
     "--kappa", type=float, help="Fraction of epochs to use for warm up."
 )
 parser.add_argument(
+    "--weighted", action='store_true', help="To use weighted loss for Super-CL sampling"
+)
+parser.add_argument(
+    "--not_weighted", action='store_false', dest='weighted',  help="To use weighted loss for Super-CL sampling"
+)
+parser.add_argument(
     "--select_every", type=int, help="Select a new subset every X epochs."
 )
 parser.add_argument("--epochs", type=int, help="number of epochs to train")
@@ -186,6 +192,9 @@ if args.disable_scheduler:
 if args.early_stopping:
     cfg.early_stopping = True
     cfg.scheduler.type = None
+if args.weighted is not None:
+    cfg.dss_args.weighted = args.weighted
+print(f'Weighted: {cfg.dss_args.weighted}')
 if args.kappa is not None:
     cfg.dss_args.kappa = args.kappa
 if args.lam is not None:

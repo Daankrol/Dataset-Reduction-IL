@@ -9,6 +9,7 @@ config = dict(
     dataset=dict(
         name="cifar10", datadir="../data", feature="dss", type="image", img_size=32
     ),
+    # dataset=dict(name="cub200", datadir="../data", feature="dss", type="image", img_size=224),
     dataloader=dict(shuffle=True, batch_size=32, pin_memory=True),
     model=dict(architecture="ResNet18", type="pre-defined"),
     ckpt=dict(is_load=False, is_save=False, dir="results/", save_every=20),
@@ -17,16 +18,23 @@ config = dict(
     scheduler=dict(type="cosine_annealing", T_max=300),
     # early_stopping=True,
     dss_args=dict(
-        type="Grand",
+        type="Super-CL",
         fraction=0.8,
-        selection_type="Supervised",
-        # metric='cossim',
-        online=False,
-        train_epochs=0,
-        repeats=2,
+        selection_type="PerClass",  #  PerClass or PerBatch
+        weighted=True,
+        online=True,
         select_every=1,
         kappa=0
     ),
+    # dss_args=dict(
+    #     type="CAL",
+    #     fraction=0.8,
+    #     selection_type="PerBatch",
+    #     metric='euclidean',
+    #     online=True,
+    #     select_every=1,
+    #     kappa=0
+    # ),
     # dss_args=dict(
     #     type="Submodular",
     #     fraction=0.01,

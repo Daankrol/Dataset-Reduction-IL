@@ -43,6 +43,7 @@ class SupervisedContrastiveLearningDataLoader(AdaptiveDSSDataLoader):
                                                           dss_args.selection_type, logger,dss_args.k, dss_args.weighted)
 
         self.logger.debug("Supervised Contrastive Learning dataloader initialized.")
+        self.logger.debug(f"Using {dss_args.selection_type}, weights based on divergence: {dss_args.weighted}")
 
     def _resample_subset_indices(self):
         """

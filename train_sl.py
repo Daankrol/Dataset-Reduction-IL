@@ -3,16 +3,13 @@ import os
 import os.path as osp
 import sys
 import time
-import torch
 import numpy as np
 import torch.nn as nn
 import torch.optim as optim
 from dotmap import DotMap
 from ray import tune
 from torch.utils.data import Subset
-from cords.utils.config_utils import load_config_data
 from cords.utils.data.data_utils import WeightedSubset
-from cords.utils.data.data_utils import collate
 from cords.utils.data.dataloader.SL.adaptive import (
     GLISTERDataLoader,
     OLRandomDataLoader,
@@ -116,8 +113,7 @@ class TrainClassifier:
                 name += '_dataScheduler'
             if self.cfg.dss_args.kappa != DotMap() and self.cfg.dss_args.kappa > 0:
                 name += f"_k-{str(self.cfg.dss_args.kappa)}"
-            # if self.cfg.dss_args.lam != DotMap() and self.cfg.dss_args.lam > 0:
-                # name += f"_lam-{str(self.cfg.dss_args.lam)}"
+
 
             if self.cfg.name is not None and self.cfg.name != DotMap():
                 name = self.cfg.name

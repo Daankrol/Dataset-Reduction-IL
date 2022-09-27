@@ -36,8 +36,8 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
     """
 
     def __init__(self, trainloader, valloader, model, loss,
-                 device, num_classes, selection_type, logger, metric='euclidean', k=10, weighted=False):
-        super().__init__(trainloader, valloader, model, num_classes,None, loss, device, logger)
+                 device, num_classes, selection_type, logger, k=10, weighted=False):
+        super().__init__(trainloader, valloader, model, num_classes, None, loss, device, logger)
         self.selection_type = selection_type
         self.weighted = weighted
         self.k = k
@@ -47,12 +47,8 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
         for param in self.pretrained_model.parameters():
             param.requires_grad = False
         self.pretrained_model.eval()
-        if metric == 'euclidean':
-            self.metric = self.euclidean_distance_scipy
-        elif metric == 'cossim':
-            self.metric = lambda a, b: -1. * self.cossim_pair_np(a, b)
-        else:
-            raise ValueError('Invalid metric')
+        self.metric = self.euclidean_distance_scipy
+
 
     def cossim_pair_np(self, v1):
         num = np.dot(v1, v1.T)
@@ -80,81 +76,47 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
         return np.sqrt(np.clip(x2 + x2.T - 2. * xy, 1e-12, None))
 
 
-    def euclidean_dist_pair_torch(self, x):
-        # if x is a numpy array, convert it to torch tensor
-        if isinstance(x, np.ndarray):
-            x = torch.from_numpy(x)
-        (rowx, colx) = x.shape
-        xy = torch.mm(x, x.t())
-        x2 = torch.sum(torch.mul(x, x), dim=1).reshape(-1, 1)
-        return torch.sqrt(torch.clamp(x2 + x2.t() - 2. * xy, min=1e-12))
-
-    def save_embeddings(self, embeddings, filename):
-        with open(filename, 'wb') as f:
-            pickle.dump(embeddings, f)
-    
-    def load_embeddings(self, filename):
-        with open(filename, 'rb') as f:
-            embeddings = pickle.load(f)
-        return embeddings
-    
-    def file_exists(self, filename):
-        return os.path.isfile(filename)
-
     @torch.no_grad()
     def find_knn(self):
         "Find k-nearest-neighbour datapoints based on feature embedding by a pretrained network"
-        # NOTE: this is done since in normal Active Learning we don't have the label information. 
-        # TODO: Could use distance to mean feature embedding (prototype) since we have label info. 
+        # NOTE: this is done since in normal Active Learning we don't have the label information.
         if self.knn is not None:
             return
         self.logger.info('Finding k-nearest-neighbours')
         self.logger.debug('Computing feature embedding')
 
         if self.selection_type == 'PerClass':
-            if self.file_exists('knn_perclass.pkl'):
-                self.logger.info('Loading knn from file')
-                knn = self.load_embeddings('knn_perclass.pkl')
-            else:
-                self.get_labels()
-                knn = []
-                for c in range(self.num_classes):
-                    class_indices = np.arange(self.N_trn)[self.trn_lbls == c]
-                    embeddings = torch.zeros((len(class_indices), self.pretrained_model.embDim)).to(self.device)
-                    loader = torch.utils.data.DataLoader(torch.utils.data.Subset(self.trainloader.dataset, class_indices),
-                                                            batch_size=self.trainloader.batch_size, num_workers=self.trainloader.num_workers)
-                    for i, (inputs, _) in enumerate(loader):
-                        inputs = inputs.to(self.device)
-                        _, embedding = self.pretrained_model(inputs, last=True, freeze=True)
-                        embedding = embedding.detach()
-                        # Embedding is of shape (batch_size, embDim)                    
-                        embeddings[i * self.trainloader.batch_size: (i * self.trainloader.batch_size + inputs.shape[0])] = embedding
-            
-                    # calculate pairwise distance matrix
-                    dist = self.metric(embeddings.cpu().numpy())
-                    # for each sample add the k nearest neighbours
-                    knn.append(np.argsort(dist, axis=1)[:, 1:self.k + 1])
-                self.save_embeddings(knn, 'knn_perclass.pkl')
-                self.logger.debug('Finished with computing embeddings and distances')
-
-        else:
-            if self.file_exists('knn_perbatch.pkl'):
-                self.logger.info('Loading knn from file')
-                return self.load_embeddings('knn_perbatch.pkl')
-            else:
-                embeddings = torch.zeros((self.N_trn, self.pretrained_model.embDim)).to(self.device)
-                loader = torch.utils.data.DataLoader(self.trainloader.dataset, batch_size=self.trainloader.batch_size, num_workers=self.trainloader.num_workers)
+            self.get_labels()
+            knn = []
+            for c in range(self.num_classes):
+                class_indices = np.arange(self.N_trn)[self.trn_lbls == c]
+                embeddings = torch.zeros((len(class_indices), self.pretrained_model.embDim)).to(self.device)
+                loader = torch.utils.data.DataLoader(torch.utils.data.Subset(self.trainloader.dataset, class_indices),
+                                                        batch_size=self.trainloader.batch_size, num_workers=self.trainloader.num_workers)
                 for i, (inputs, _) in enumerate(loader):
                     inputs = inputs.to(self.device)
                     _, embedding = self.pretrained_model(inputs, last=True, freeze=True)
                     embedding = embedding.detach()
-                    embeddings[i*self.trainloader.batch_size:(i*self.trainloader.batch_size + inputs.shape[0]) ] = embedding
-                self.logger.info('Finished computing embeddings, starting distance calculation')
-                dist = self.metric(embeddings.cpu().numpy())
-                knn = np.argsort(dist, axis=1)[:, 1:self.k+1]
-                self.save_embeddings(knn, 'knn_perbatch.pkl')
-                self.logger.debug('Finished with computing embeddings and distances')
+                    # Embedding is of shape (batch_size, embDim)
+                    embeddings[i * self.trainloader.batch_size: (i * self.trainloader.batch_size + inputs.shape[0])] = embedding
 
+                # calculate pairwise distance matrix
+                dist = self.metric(embeddings.cpu().numpy())
+                # for each sample add the k nearest neighbours
+                knn.append(np.argsort(dist, axis=1)[:, 1:self.k + 1])
+            self.logger.debug('Finished with computing embeddings and distances')
+        else:
+            embeddings = torch.zeros((self.N_trn, self.pretrained_model.embDim)).to(self.device)
+            loader = torch.utils.data.DataLoader(self.trainloader.dataset, batch_size=self.trainloader.batch_size, num_workers=self.trainloader.num_workers)
+            for i, (inputs, _) in enumerate(loader):
+                inputs = inputs.to(self.device)
+                _, embedding = self.pretrained_model(inputs, last=True, freeze=True)
+                embedding = embedding.detach()
+                embeddings[i*self.trainloader.batch_size:(i*self.trainloader.batch_size + inputs.shape[0]) ] = embedding
+            self.logger.info('Finished computing embeddings, starting distance calculation')
+            dist = self.metric(embeddings.cpu().numpy())
+            knn = np.argsort(dist, axis=1)[:, 1:self.k+1]
+            self.logger.debug('Finished with computing embeddings and distances')
         self.knn = knn
 
     @torch.no_grad()
@@ -207,6 +169,7 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
             aa = np.expand_dims(probs[i : (i + loader.batch_size)], 1).repeat(self.k, 1)
             bb = probs[knn[i : (i + loader.batch_size)], :]
             kl[i: (i + loader.batch_size)] = np.mean(np.sum(0.5 * aa * np.log(aa / bb) + 0.5 * bb * np.log(bb/aa), axis=2), axis=1)
+        self.model.train()
         return kl
 
     def select(self, budget, model_params):

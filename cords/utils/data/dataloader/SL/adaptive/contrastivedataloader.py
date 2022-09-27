@@ -28,15 +28,15 @@ class ContrastiveDataLoader(AdaptiveDSSDataLoader):
         ), "'model' is a compulsory argument for CALSampling. Please provide the model to be used for CAL sampling."
         assert "selection_type" in dss_args.keys(), "'selection_type' is a compulsory argument for CAL. Include it as a key in dss_args"
         assert dss_args.selection_type in ['PerBatch', 'PerClass']
-        assert "metric" in dss_args.keys(), "'metric' is a compulsory argument for CAL. Include it as a key in dss_args"
-        assert dss_args.metric in ['euclidean', 'cossim'], "'metric' must be either 'euclidean' or 'cossim'"
+        if "weighted" not in dss_args.keys():
+            dss_args.weighted = True
         super(ContrastiveDataLoader, self).__init__(
             train_loader, val_loader, dss_args, logger, *args, **kwargs
         )
         self.train_model = dss_args.model
         self.strategy = ContrastiveActiveLearningStrategy(train_loader, val_loader, copy.deepcopy(dss_args.model),
                                                           dss_args.loss, dss_args.device, dss_args.num_classes,
-                                                          dss_args.selection_type, logger, dss_args.metric)
+                                                          dss_args.selection_type, logger, dss_args.weighted)
 
         self.logger.debug("Contrastive dataloader initialized.")
 

@@ -2,6 +2,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from .dataselectionstrategy import DataSelectionStrategy
+from sklearn.metrics import pairwise_distances
 import time
 from cords.utils.models.efficientnet import EfficientNetB0_PyTorch
 
@@ -66,13 +67,19 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
                 embeddings[i * self.trainloader.batch_size:(i + 1) * self.trainloader.batch_size] = e.detach()
             
             # calculate pairwise distances and for each sample, find the k-nearest-neighbours, add their indices sorted by their distance
-            dist = torch.nn.PairwiseDistance(p=2)(embeddings, embeddings)
-            dist = dist.cpu().numpy()
+            dist = pairwise_distances(embeddings.cpu().numpy())
+
+            # dist = torch.nn.PairwiseDistance(p=2)(embeddings, embeddings)
+            # dist = dist.cpu().numpy()
+            # print(dist.shape)
             for i in range(len(class_indices)):
-                knn[class_indices[i]] = torch.from_numpy(np.argsort(dist[i])[1:self.k+1])
+                # print(knn[class_indices[i]].shape)
+                # print(dist[i])
+                # knn[class_indices[i]] = torch.from_numpy(np.argsort(dist[i])[1:self.k+1])
+                knn[class_indices[i]] = torch.from_numpy(np.argsort(dist[i])[1: self.k+1])
 
         del self.pretrained_model  # only need this at the start. 
-        self.knn = knn
+        self.knn = knn.cpu().numpy()
 
     @torch.no_grad()
     def calculate_divergence(self):
@@ -84,28 +91,27 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
         probs = torch.zeros([self.N_trn, self.num_classes]).to(self.device)
         for i, (inputs, labels) in enumerate(loader):
             inputs = inputs.to(self.device)
-            labels = labels.to(self.device)
             outputs = self.model(inputs, freeze=True)
             probs[i * self.trainloader.batch_size:(i + 1) * self.trainloader.batch_size] = F.softmax(outputs, dim=1)
-
+        probs = probs.cpu().numpy()
         # Calculate KL-divergence between sample PDF and all neighbours of the same class.
         # Average the divergence scores over all neighbours.
         divergence_scores = torch.zeros(self.N_trn).to(self.device)
         for i in range(0, self.N_trn, loader.batch_size):
             # calculate divergence for a batch of samples
-            sample_probs = probs[i:i+loader.batch_size]
-            sample_probs = sample_probs.unsqueeze(1).repeat(1, self.k, 1)
-            sample_probs = sample_probs.reshape(-1, self.num_classes)
-            sample_neigbour_probs = probs[self.knn[i:i+loader.batch_size].reshape(-1)]
-            divergence = F.kl_div(sample_probs.log(), sample_neigbour_probs, reduction='none').sum(dim=1)
-            divergence = divergence.reshape(loader.batch_size, self.k)
-            divergence_scores[i:i+loader.batch_size] = divergence.mean(dim=1)
-        self.divergence_scores = divergence_scores.cpu().numpy()
+            batch_probs = probs[i:i + loader.batch_size]
+            batch_knn = self.knn[i:i + loader.batch_size]
+            aa = torch.from_numpy(np.expand_dims(batch_probs, axis=1).repeat(self.k, axis=1))
+            bb = torch.from_numpy(probs[batch_knn])  # shape: (batch_size, k, num_classes)
+            # calculate divergence for each sample in the batch
+            batch_divergence = (aa * torch.log(aa/bb)).sum(dim=2).mean(dim=1)
+            divergence_scores[i:i + loader.batch_size] = batch_divergence
+        self.divergence_scores = divergence_scores.cpu()
 
 
     def select(self, budget, model_params):
         start_time = time.time()
-        self.logger.info(f'Started {self.selection_type} CAL selection.')
+        self.logger.info(f'Started {self.selection_type} Super-CL selection.')
         self.update_model(model_params)
         self.find_knn()
         self.fraction = budget / self.N_trn
@@ -121,7 +127,7 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
                 # add the indices of the selected samples that have the highest KL divergence
                 indices = np.concatenate((indices, class_indices[torch.argsort(scores, descending=True)[:num_samples]].cpu().numpy()))
         else:
-            indices = torch.argsort(self.divergence_scores, descending=True)[:int(self.fraction * self.N_trn)].cpu().numpy()
+            indices = torch.argsort(self.divergence_scores, descending=True)[:budget].cpu().numpy()
 
         end_time = time.time()
         self.logger.info(f'Super-CL algorithm took {end_time - start_time} seconds.')
