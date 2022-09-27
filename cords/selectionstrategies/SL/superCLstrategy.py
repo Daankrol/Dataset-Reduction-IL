@@ -62,7 +62,8 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
                 shuffle=False, num_workers=self.trainloader.num_workers)
             for i, (inputs, _) in enumerate(loader):
                 inputs = inputs.to(self.device)
-                embeddings[i * self.trainloader.batch_size:(i + 1) * self.trainloader.batch_size] = self.pretrained_model(inputs, last=True, freeze=True).detach()
+                _, e = self.pretrained_model(inputs, last=True, freeze=True)
+                embeddings[i * self.trainloader.batch_size:(i + 1) * self.trainloader.batch_size] = e.detach()
             
             # calculate pairwise distances and for each sample, find the k-nearest-neighbours, add their indices sorted by their distance
             dist = torch.nn.PairwiseDistance(p=2)(embeddings, embeddings)
