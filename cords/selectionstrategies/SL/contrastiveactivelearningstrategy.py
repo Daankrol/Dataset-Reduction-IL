@@ -41,6 +41,7 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
         self.selection_type = selection_type
         self.weighted = weighted
         self.k = k
+        self.knn = None
         self.pretrained_model = EfficientNetB0_PyTorch(num_classes=self.num_classes, pretrained=True, fine_tune=False).to(self.device)
         # disable gradients for the pretrained model
         for param in self.pretrained_model.parameters():
