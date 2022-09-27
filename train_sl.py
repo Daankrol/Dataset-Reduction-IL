@@ -10,6 +10,7 @@ import torch.optim as optim
 from dotmap import DotMap
 from ray import tune
 from torch.utils.data import Subset
+from cords.selectionstrategies.SL.superCLstrategy import SupervisedContrastiveLearningStrategy
 from cords.utils.config_utils import load_config_data
 from cords.utils.data.data_utils import WeightedSubset
 from cords.utils.data.data_utils import collate
@@ -1203,7 +1204,7 @@ class TrainClassifier:
             )
 
         elif self.cfg.dss_args.type == "CAL":
-            dataloader = ContrastiveDataLoader(
+            dataloader = SupervisedContrastiveLearningStrategy(
                 trainloader, valloader, self.cfg.dss_args, logger,
                 batch_size=self.cfg.dataloader.batch_size,
                 shuffle=self.cfg.dataloader.shuffle,
