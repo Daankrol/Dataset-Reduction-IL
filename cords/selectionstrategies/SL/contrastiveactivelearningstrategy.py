@@ -1,3 +1,4 @@
+from random import sample
 import apricot
 import numpy as np
 import torch
@@ -8,6 +9,7 @@ from torch.utils.data.sampler import SubsetRandomSampler
 from sklearn.metrics import pairwise_distances
 import time
 from cords.utils.models.efficientnet import EfficientNetB0_PyTorch
+import pickle
 
 class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
     """
@@ -33,11 +35,15 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
     """
 
     def __init__(self, trainloader, valloader, model, loss,
-                 device, num_classes, selection_type, logger, metric='euclidean', k=10):
+                 device, num_classes, selection_type, logger, metric='euclidean', k=10, weighted=False):
         super().__init__(trainloader, valloader, model, num_classes,None, loss, device, logger)
         self.selection_type = selection_type
+        self.weighted = weighted
         self.k = k
         self.pretrained_model = EfficientNetB0_PyTorch(num_classes=self.num_classes, pretrained=True, fine_tune=False).to(self.device)
+        # disable gradients for the pretrained model
+        for param in self.pretrained_model.parameters():
+            param.requires_grad = False
         self.pretrained_model.eval()
         if metric == 'euclidean':
             self.metric = self.euclidean_distance_scipy
@@ -86,7 +92,7 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
     def find_knn(self):
         "Find k-nearest-neighbour datapoints based on feature embedding by a pretrained network"
         # NOTE: this is done since in normal Active Learning we don't have the label information. 
-        # TODO: Could use distance to mean feature embedding since we have label info. 
+        # TODO: Could use distance to mean feature embedding (prototype) since we have label info. 
         self.logger.info('Finding k-nearest-neighbours')
         self.logger.debug('Computing feature embedding')
 
@@ -135,33 +141,46 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
         else:
             loader = torch.utils.data.DataLoader(torch.utils.data.Subset(self.trainloader.dataset, index),
                                                     batch_size=self.trainloader.batch_size, num_workers=self.trainloader.num_workers)
-        probs = torch.zeros([len(loader.dataset), self.num_classes]).to(self.device)
-        batch_num = len(loader)
-        batch_size = loader.batch_size
-        for i, (inputs, labels) in enumerate(loader):
-            inputs = inputs.to(self.device)
-            # last batch can have different size
-            cur_batch_size = labels.shape[0]
-            # save last batch size 
-            if i == batch_num - 1:
-                last_batch_size = cur_batch_size
-            probs[i* batch_size: i*batch_size + cur_batch_size] = torch.nn.functional.softmax(self.model(inputs, freeze=True), dim=1).detach().cpu()
+        # probs = torch.zeros([len(loader.dataset), self.num_classes]).to(self.device)
+        # batch_num = len(loader)
+        # batch_size = loader.batch_size
+        # for i, (inputs, labels) in enumerate(loader):
+        #     inputs = inputs.to(self.device)
+        #     # last batch can have different size
+        #     cur_batch_size = labels.shape[0]
+        #     # save last batch size 
+        #     if i == batch_num - 1:
+        #         last_batch_size = cur_batch_size
+        #     probs[i* batch_size: i*batch_size + cur_batch_size] = torch.nn.functional.softmax(self.model(inputs, freeze=True), dim=1).detach().cpu()
 
-        kl = torch.zeros(batch_num).to(self.device)
-        print(f'started KL divergence computation. Total num batches {batch_num} with batch size {batch_size}')
-        for i in range(0, batch_num, batch_size):
-            # the last batch might be smaller than batch_size
-            batch_size = batch_size if i < batch_num - batch_size else last_batch_size
+        # kl = torch.zeros(batch_num).to(self.device)
+        # print(f'started KL divergence computation. Total num batches {batch_num} with batch size {batch_size}')
+        # for i in range(0, batch_num, batch_size):
+        #     # the last batch might be smaller than batch_size
+        #     batch_size = batch_size if i < batch_num - batch_size else last_batch_size
 
-            # get the Jensen-Shannon divergence of point Xi with its k nearest neighbours
-            # use the Jensen-Shannon divergence such that JS(P|Q) == JS(Q|P), i.e. symmetric. JS(P||Q) = 0.5 * (JS(P|Q) + JS(Q|P))
-            aa = probs[i : i + batch_size].unsqueeze(1).repeat(self.k, 1)
-            bb = probs[knn[i : i + batch_size], :]
-            kl[i: i+batch_size] = torch.sum(0.5 * aa * torch.log(aa / bb) + 0.5 * bb * torch.log(bb/aa), dim=2).mean(dim=1)
+        #     # get the Jensen-Shannon divergence of point Xi with its k nearest neighbours
+        #     # use the Jensen-Shannon divergence such that JS(P|Q) == JS(Q|P), i.e. symmetric. JS(P||Q) = 0.5 * (JS(P|Q) + JS(Q|P))
+        #     aa = probs[i : i + batch_size].unsqueeze(1).repeat(1,self.k, 1)
+        #     # aa is now of shape (batch_size, k, num_classes), so for each sample we have k times the probabilities
+        #     # bb is of shape (batch_size, k, num_classes), we don't need repeat here since we have the probabilities for each of the k nearest neighbours
+        #     bb = probs[knn[i : i + batch_size]]
+        #     bb = probs[knn[i : i + batch_size], :]
+        #     kl[i: i+batch_size] = torch.sum(0.5 * aa * torch.log(aa / bb) + 0.5 * bb * torch.log(bb/aa), dim=2).mean(dim=1)
         
-        self.model.train()
-        return kl.cpu().numpy()
+        # self.model.train()
+        # return kl.cpu().numpy()
+        sample_num = len(loader.dataset)
+        probs = np.zeros([sample_num, self.num_classes])
+        for i, (inputs, labels) in enumerate(loader):
+            probs[i*loader.batch_size: (i+1)*loader.batch_size] = (torch.nn.functional.softmax(self.model(inputs.to(self.device), freeze=True), dim=1).detach().cpu())
 
+        kl = np.zeros(sample_num)
+        for i in range(0, sample_num, loader.batch_size):
+            aa = np.expand_dims(probs[i : (i + loader.batch_size)], 1).repeat(self.k, 1)
+            bb = probs[knn[i : (i + loader.batch_size)], :]
+            kl[i: (i + loader.batch_size)] = np.mean(np.sum(0.5 * aa * np.log(aa / bb) + 0.5 * bb * np.log(bb/aa), axis=2), axis=1)
+        return kl
 
     def select(self, budget, model_params):
         start_time = time.time()
@@ -185,4 +204,9 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
         end_time = time.time()
         self.logger.info(f'CAL algorithm took {end_time - start_time} seconds.')
         self.logger.info('Selected {}  samples with a budget of {}'.format(len(indices), budget))
+
+        if self.weighted:
+            weights = scores[indices]
+            return indices, weights
+
         return indices, torch.ones(len(indices))
