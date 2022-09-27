@@ -11,3 +11,4 @@ from .contrastivedataloader import ContrastiveDataLoader
 from .prototypicaldataloader import PrototypicalDataLoader
 from .granddataloader import GrandDataLoader
 from .el2ndataloader import EL2NDataLoader
+from .superCLdataloader import SupervisedContrastiveLearningDataLoader

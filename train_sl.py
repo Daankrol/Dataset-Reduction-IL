@@ -10,7 +10,6 @@ import torch.optim as optim
 from dotmap import DotMap
 from ray import tune
 from torch.utils.data import Subset
-from cords.selectionstrategies.SL.superCLstrategy import SupervisedContrastiveLearningStrategy
 from cords.utils.config_utils import load_config_data
 from cords.utils.data.data_utils import WeightedSubset
 from cords.utils.data.data_utils import collate
@@ -28,6 +27,7 @@ from cords.utils.data.dataloader.SL.adaptive import (
     GrandDataLoader
 )
 from cords.utils.data.dataloader.SL.adaptive.el2ndataloader import EL2NDataLoader
+from cords.utils.data.dataloader.SL.adaptive.superCLdataloader import SupervisedContrastiveLearningDataLoader
 
 from cords.utils.data.dataloader.SL.nonadaptive import FacLocDataLoader
 from cords.utils.data.datasets.SL import gen_dataset
@@ -1204,13 +1204,25 @@ class TrainClassifier:
             )
 
         elif self.cfg.dss_args.type == "CAL":
-            dataloader = SupervisedContrastiveLearningStrategy(
+            dataloader = ContrastiveDataLoader(
                 trainloader, valloader, self.cfg.dss_args, logger,
                 batch_size=self.cfg.dataloader.batch_size,
                 shuffle=self.cfg.dataloader.shuffle,
                 pin_memory=self.cfg.dataloader.pin_memory,
                 collate_fn=self.cfg.dss_args.collate_fn,
             )
+        elif self.cfg.dss_args.type == "Super-CL":
+            dataloader = SupervisedContrastiveLearningDataLoader(
+                trainloader,
+                valloader,
+                self.cfg.dss_args,
+                logger,
+                batch_size=self.cfg.dataloader.batch_size,
+                shuffle=self.cfg.dataloader.shuffle,
+                pin_memory=self.cfg.dataloader.pin_memory,
+                collate_fn=self.cfg.dss_args.collate_fn,
+            )
+
         elif self.cfg.dss_args.type == "FacLoc":
             self.cfg.dss_args.data_type = self.cfg.dataset.type
             dataloader = FacLocDataLoader(
