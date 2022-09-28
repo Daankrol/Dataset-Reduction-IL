@@ -24,6 +24,9 @@ class TSNEPlotter:
     ):
         # use pretrained imagenet efficientnet b0 model as feature extractor
         self.model = torchvision.models.efficientnet_b0(pretrained=True)
+        #  disabled gradient calculation
+        for param in self.model.parameters():
+            param.requires_grad = False
         self.model.to(device)
         self.model.eval()
         self.device = device
@@ -72,6 +75,7 @@ class TSNEPlotter:
         )
         cols = [f"out_{i}" for i in range(self.train_embeddings.shape[1])]
         self.train_labels = [y for x, y in self.full_trainloader.dataset]
+        self.num_classes = len(np.unique(self.train_labels))
 
         # create tSNE plot with pca embeddings
         time_start = time.time()
@@ -102,7 +106,7 @@ class TSNEPlotter:
             hue="LABEL",
             palette=sns.color_palette("hls", len(self.df["LABEL"].unique())),
             data=self.df,
-            legend="full",
+            legend="full" if self.num_classes <= 20 else False,
             alpha=0.7,
         )
 
@@ -115,7 +119,7 @@ class TSNEPlotter:
                 color="black",
                 s=80,
             )
-        plt.title("t-SNE plot")
+        plt.title("t-SNE")
 
         # random file name to save the plot
         file_name = f"tSNE_plot_{time.time()}.png"
