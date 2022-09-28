@@ -97,7 +97,7 @@ class TrainClassifier:
                 name = self.cfg.dss_args.type + "_" + self.cfg.dataset.name
             if self.cfg.dss_args.fraction != DotMap():
                 name += f"_{str(self.cfg.dss_args.fraction)}"
-            if self.cfg.dss_args.select_every != DotMap():
+            if self.cfg.dss_args.select_every != DotMap() and self.cfg.dss_args.online:
                 name += f"_{str(self.cfg.dss_args.select_every)}"
             if self.cfg.model.type == "pre-trained":
                 name += "_PT"
