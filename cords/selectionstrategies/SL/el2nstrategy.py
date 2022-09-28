@@ -7,20 +7,21 @@ import torchvision.models as models
 from cords.utils.models.efficientnet import EfficientNetB0_PyTorch
 from torch.utils.data import DataLoader
 
+
 class EL2NStrategy(DataSelectionStrategy):
     def __init__(
-        self,
-        trainloader,
-        valloader,
-        model,
-        num_classes,
-        linear_layer,
-        loss,
-        device,
-        selection_type,
-        logger,
-        repeats=10,
-        train_epochs=20,
+            self,
+            trainloader,
+            valloader,
+            model,
+            num_classes,
+            linear_layer,
+            loss,
+            device,
+            selection_type,
+            logger,
+            repeats=10,
+            train_epochs=20,
     ):
         super().__init__(
             trainloader,
@@ -53,17 +54,19 @@ class EL2NStrategy(DataSelectionStrategy):
         norm_matrix = torch.zeros((self.N_trn, self.repeats), requires_grad=False).to(self.device)
         self.fraction = budget / self.N_trn
 
+        dataloader = DataLoader(self.trainloader.dataset, batch_size=self.trainloader.batch_size,
+                                shuffle=False, pin_memory=self.trainloader.pin_memory,
+                                num_workers=self.trainloader.num_workers)
 
-        dataloader = DataLoader(self.trainloader.dataset, batch_size=self.trainloader.batch_size, shuffle=False)
-        
         for run in range(self.repeats):
-            self.logger.debug('EL2N: model run {}/{}'.format(run+1, self.repeats))
+            self.logger.debug('EL2N: model run {}/{}'.format(run + 1, self.repeats))
             random_seed = int(time.time() * 1000) % 100000
             torch.manual_seed(random_seed)
             np.random.seed(random_seed)
 
             # initialize a non-pretrained model with random weights
-            model = EfficientNetB0_PyTorch(num_classes=self.num_classes, pretrained=False, fine_tune=True).to(self.device)
+            model = EfficientNetB0_PyTorch(num_classes=self.num_classes, pretrained=False, fine_tune=True).to(
+                self.device)
             model.embedding_recorder.record_embedding = True
 
             optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
@@ -71,7 +74,7 @@ class EL2NStrategy(DataSelectionStrategy):
             # get metric at initialization time or train for some epochs first
             if self.train_epochs > 0:
                 self.train(model, optimizer, self.train_epochs)
-        
+
             model.eval()
 
             # calculate the EL2n scores for all samples
@@ -87,7 +90,9 @@ class EL2NStrategy(DataSelectionStrategy):
                     # calculate the L2 norm
                     l2_norm = torch.norm(outputs - y, p=2, dim=1)
                     cur_batch_size = inputs.shape[0]
-                    norm_matrix[batch_idx * self.trainloader.batch_size : batch_idx * self.trainloader.batch_size + cur_batch_size, run] = l2_norm
+                    norm_matrix[
+                    batch_idx * self.trainloader.batch_size: batch_idx * self.trainloader.batch_size + cur_batch_size,
+                    run] = l2_norm
 
         # average the scores over the runs
         norm_matrix = torch.mean(norm_matrix, dim=1).cpu().detach().numpy()
@@ -100,8 +105,9 @@ class EL2NStrategy(DataSelectionStrategy):
             for i in range(self.num_classes):
                 class_idxs = np.arange(self.N_trn)[labels == i]
                 class_budget = round(self.fraction * len(class_idxs))
-                selected_idxs = np.concatenate((selected_idxs, class_idxs[np.argsort(norm_matrix[class_idxs])[-class_budget:]]))
-            
+                selected_idxs = np.concatenate(
+                    (selected_idxs, class_idxs[np.argsort(norm_matrix[class_idxs])[-class_budget:]]))
+
         return selected_idxs, torch.ones(len(selected_idxs))
 
     def train(self, model, optimizer, epochs=10):
@@ -109,7 +115,7 @@ class EL2NStrategy(DataSelectionStrategy):
         model.train()
         self.logger.info('Training EL2N model for {} epochs'.format(epochs))
         for epoch in range(epochs):
-            self.logger.debug('EL2N: epoch {}/{}'.format(epoch+1, epochs))
+            self.logger.debug('EL2N: epoch {}/{}'.format(epoch + 1, epochs))
             for batch_idx, (inputs, targets) in enumerate(self.trainloader):
                 optimizer.zero_grad()
                 inputs, targets = inputs.to(self.device), targets.to(self.device)
@@ -117,6 +123,3 @@ class EL2NStrategy(DataSelectionStrategy):
                 loss = self.criterion(outputs, targets)
                 loss.backward()
                 optimizer.step()
-
-
-

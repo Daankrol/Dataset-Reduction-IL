@@ -129,7 +129,7 @@ class DataSelectionStrategy(object):
             trainloader = self.trainloader
             if valid:
                 valloader = self.valloader
-            
+
         for batch_idx, (inputs, targets) in enumerate(trainloader):
             inputs, targets = inputs.to(self.device), targets.to(self.device, non_blocking=True)
             if batch_idx == 0:

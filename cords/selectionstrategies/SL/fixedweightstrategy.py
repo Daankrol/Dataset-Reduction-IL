@@ -93,12 +93,14 @@ class FixedWeightStrategy(DataSelectionStrategy):
                 trn_subset_idx = torch.where(self.trn_lbls == i)[0].tolist()
                 trn_data_sub = Subset(self.trainloader.dataset, trn_subset_idx)
                 self.pctrainloader = DataLoader(trn_data_sub, batch_size=self.trainloader.batch_size,
-                                                shuffle=False, pin_memory=True)
+                                                shuffle=False, pin_memory=self.trainloader.pin_memory,
+                                                num_workers=self.trainloader.num_workers)
                 if self.valid:
                     val_subset_idx = torch.where(self.val_lbls == i)[0].tolist()
                     val_data_sub = Subset(self.valloader.dataset, val_subset_idx)
                     self.pcvalloader = DataLoader(val_data_sub, batch_size=self.trainloader.batch_size,
-                                                  shuffle=False, pin_memory=True)
+                                                  shuffle=False, pin_memory=self.trainloader.pin_memory,
+                                                  num_workers=self.trainloader.num_workers)
 
                 self.compute_gradients(self.valid, perBatch=False, perClass=True)
                 trn_gradients = self.grads_per_elem
@@ -138,12 +140,14 @@ class FixedWeightStrategy(DataSelectionStrategy):
                 trn_subset_idx = torch.where(self.trn_lbls == i)[0].tolist()
                 trn_data_sub = Subset(self.trainloader.dataset, trn_subset_idx)
                 self.pctrainloader = DataLoader(trn_data_sub, batch_size=self.trainloader.batch_size,
-                                                shuffle=False, pin_memory=True)
+                                                shuffle=False, pin_memory=self.trainloader.pin_memory,
+                                                num_workers=self.trainloader.num_workers)
                 if self.valid:
                     val_subset_idx = torch.where(self.val_lbls == i)[0].tolist()
                     val_data_sub = Subset(self.valloader.dataset, val_subset_idx)
                     self.pcvalloader = DataLoader(val_data_sub, batch_size=self.trainloader.batch_size,
-                                                  shuffle=False, pin_memory=True)
+                                                  shuffle=False, pin_memory=self.trainloader.pin_memory,
+                                                  num_workers=self.trainloader.num_workers)
                 self.compute_gradients(self.valid, perBatch=False, perClass=True)
                 trn_gradients = self.grads_per_elem
                 tmp_gradients = trn_gradients[:, i].view(-1, 1)

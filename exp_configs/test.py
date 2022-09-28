@@ -18,14 +18,23 @@ config = dict(
     scheduler=dict(type="cosine_annealing", T_max=300),
     # early_stopping=True,
     dss_args=dict(
-        type="Super-CL",
+        type="Grand",
         fraction=0.8,
-        selection_type="PerClass",  #  PerClass or PerBatch
-        weighted=True,
-        online=True,
+        selection_type="Supervised",  #  PerClass or PerBatch
+        online=False,
         select_every=1,
+        repeats=10,
         kappa=0
     ),
+    # dss_args=dict(
+    #     type="Super-CL",
+    #     fraction=0.8,
+    #     selection_type="PerClass",  #  PerClass or PerBatch
+    #     weighted=True,
+    #     online=True,
+    #     select_every=1,
+    #     kappa=0
+    # ),
     # dss_args=dict(
     #     type="CAL",
     #     fraction=0.8,

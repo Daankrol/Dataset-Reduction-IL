@@ -6,6 +6,7 @@ from sklearn.metrics import pairwise_distances
 import time
 from cords.utils.models.efficientnet import EfficientNetB0_PyTorch
 
+
 class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
     """
     This class extends :class:`selectionstrategises.supervisedlearning.dataselectionstrategy.DataSelectionStrategy`
@@ -31,17 +32,17 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
 
     def __init__(self, trainloader, valloader, model, loss,
                  device, num_classes, selection_type, logger, k=10, weighted=True):
-        super().__init__(trainloader, valloader, model, num_classes,None, loss, device, logger)
+        super().__init__(trainloader, valloader, model, num_classes, None, loss, device, logger)
         self.selection_type = selection_type
         self.weighted = weighted
         self.k = k
         self.knn = None
-        self.pretrained_model = EfficientNetB0_PyTorch(num_classes=self.num_classes, pretrained=True, fine_tune=False).to(self.device)
+        self.pretrained_model = EfficientNetB0_PyTorch(num_classes=self.num_classes, pretrained=True,
+                                                       fine_tune=False).to(self.device)
         # disable gradients for the pretrained model
         for param in self.pretrained_model.parameters():
             param.requires_grad = False
         self.pretrained_model.eval()
-    
 
     @torch.no_grad()
     def find_knn(self):
@@ -59,13 +60,13 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
             embeddings = torch.zeros((len(class_indices), self.pretrained_model.embDim)).to(self.device)
             loader = torch.utils.data.DataLoader(
                 torch.utils.data.Subset(self.trainloader.dataset, class_indices),
-                batch_size=self.trainloader.batch_size, 
-                shuffle=False, num_workers=self.trainloader.num_workers)
+                batch_size=self.trainloader.batch_size,
+                pin_memory=self.trainloader.pin_memory, num_workers=self.trainloader.num_workers)
             for i, (inputs, _) in enumerate(loader):
                 inputs = inputs.to(self.device)
                 _, e = self.pretrained_model(inputs, last=True, freeze=True)
                 embeddings[i * self.trainloader.batch_size:(i + 1) * self.trainloader.batch_size] = e.detach()
-            
+
             # calculate pairwise distances and for each sample, find the k-nearest-neighbours, add their indices sorted by their distance
             dist = pairwise_distances(embeddings.cpu().numpy())
 
@@ -76,7 +77,7 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
                 # print(knn[class_indices[i]].shape)
                 # print(dist[i])
                 # knn[class_indices[i]] = torch.from_numpy(np.argsort(dist[i])[1:self.k+1])
-                knn[class_indices[i]] = torch.from_numpy(np.argsort(dist[i])[1: self.k+1])
+                knn[class_indices[i]] = torch.from_numpy(np.argsort(dist[i])[1: self.k + 1])
 
         del self.pretrained_model  # only need this at the start. 
         self.knn = knn.cpu().numpy()
@@ -87,7 +88,9 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
         self.logger.info('Calculating divergence')
         self.model.eval()
 
-        loader = torch.utils.data.DataLoader(self.trainloader.dataset, batch_size=self.trainloader.batch_size, num_workers=self.trainloader.num_workers)
+        loader = torch.utils.data.DataLoader(self.trainloader.dataset, batch_size=self.trainloader.batch_size,
+                                             pin_memory=self.trainloader.pin_memory,
+                                             num_workers=self.trainloader.num_workers)
         probs = torch.zeros([self.N_trn, self.num_classes]).to(self.device)
         for i, (inputs, labels) in enumerate(loader):
             inputs = inputs.to(self.device)
@@ -104,10 +107,9 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
             aa = torch.from_numpy(np.expand_dims(batch_probs, axis=1).repeat(self.k, axis=1))
             bb = torch.from_numpy(probs[batch_knn])  # shape: (batch_size, k, num_classes)
             # calculate divergence for each sample in the batch
-            batch_divergence = (aa * torch.log(aa/bb)).sum(dim=2).mean(dim=1)
+            batch_divergence = (aa * torch.log(aa / bb)).sum(dim=2).mean(dim=1)
             divergence_scores[i:i + loader.batch_size] = batch_divergence
         self.divergence_scores = divergence_scores.cpu()
-
 
     def select(self, budget, model_params):
         start_time = time.time()
@@ -125,7 +127,8 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
                 scores = self.divergence_scores[class_indices]
                 num_samples = int(self.fraction * len(class_indices))
                 # add the indices of the selected samples that have the highest KL divergence
-                indices = np.concatenate((indices, class_indices[torch.argsort(scores, descending=True)[:num_samples]].cpu().numpy()))
+                indices = np.concatenate(
+                    (indices, class_indices[torch.argsort(scores, descending=True)[:num_samples]].cpu().numpy()))
         else:
             indices = torch.argsort(self.divergence_scores, descending=True)[:budget].cpu().numpy()
 

@@ -80,10 +80,10 @@ class GLISTERStrategy(DataSelectionStrategy):
         Number of greedy selection rounds when selection method is RGreedy (default: 15)
     """
 
-    def __init__(self, trainloader, valloader, model, 
-                loss_func, eta, device, num_classes, 
-                linear_layer, selection_type, greedy,
-                logger, r=15):
+    def __init__(self, trainloader, valloader, model,
+                 loss_func, eta, device, num_classes,
+                 linear_layer, selection_type, greedy,
+                 logger, r=15):
         """
         Constructor method
         """
@@ -113,12 +113,12 @@ class GLISTERStrategy(DataSelectionStrategy):
         #     raise ValueError("perBatch and perClass are mutually exclusive. Only one of them can be true at a time")
         self.model.zero_grad()
         embDim = self.model.get_embedding_dim()
-        
+
         if self.selection_type == 'PerClass':
             valloader = self.pcvalloader
         else:
             valloader = self.valloader
-        
+
         if first_init:
             for batch_idx, (inputs, targets) in enumerate(valloader):
                 inputs, targets = inputs.to(self.device), targets.to(self.device, non_blocking=True)
@@ -168,7 +168,7 @@ class GLISTERStrategy(DataSelectionStrategy):
                 l0_expand = torch.repeat_interleave(l0_grads, embDim, dim=1)
                 l1_grads = l0_expand * self.init_l1.repeat(1, self.num_classes)
             if self.selection_type == 'PerBatch':
-                b = int(self.y_val.shape[0]/self.valloader.batch_size)
+                b = int(self.y_val.shape[0] / self.valloader.batch_size)
                 l0_grads = torch.chunk(l0_grads, b, dim=0)
                 new_t = []
                 for i in range(len(l0_grads)):
@@ -293,7 +293,6 @@ class GLISTERStrategy(DataSelectionStrategy):
             self.logger.debug("Naive Greedy GLISTER total time: %.4f", time.time() - t_ng_start)
         return list(greedySet), [1] * budget
 
-
     def select(self, budget, model_params):
         """
         Apply naive greedy method for data selection
@@ -322,11 +321,13 @@ class GLISTERStrategy(DataSelectionStrategy):
                 trn_subset_idx = torch.where(self.trn_lbls == i)[0].tolist()
                 trn_data_sub = Subset(self.trainloader.dataset, trn_subset_idx)
                 self.pctrainloader = DataLoader(trn_data_sub, batch_size=self.trainloader.batch_size,
-                                                shuffle=False, pin_memory=True)
+                                                shuffle=False, pin_memory=self.trainloader.pin_memory,
+                                                num_workers=self.trainloader.num_workers)
                 val_subset_idx = torch.where(self.val_lbls == i)[0].tolist()
                 val_data_sub = Subset(self.valloader.dataset, val_subset_idx)
                 self.pcvalloader = DataLoader(val_data_sub, batch_size=self.trainloader.batch_size,
-                                                shuffle=False, pin_memory=True)
+                                              shuffle=False, pin_memory=self.trainloader.pin_memory,
+                                              num_workers=self.trainloader.num_workers)
                 self.compute_gradients(perClass=True)
                 self._update_grads_val(first_init=True)
                 idxs_temp, gammas_temp = self.greedy_algo(math.ceil(budget * len(trn_subset_idx) / self.N_trn))
@@ -337,7 +338,7 @@ class GLISTERStrategy(DataSelectionStrategy):
             gammas = []
             self.compute_gradients(perBatch=True)
             self._update_grads_val(first_init=True)
-            idxs_temp, gammas_temp = self.greedy_algo(math.ceil(budget/self.trainloader.batch_size))
+            idxs_temp, gammas_temp = self.greedy_algo(math.ceil(budget / self.trainloader.batch_size))
             batch_wise_indices = list(self.trainloader.batch_sampler)
             for i in range(len(idxs_temp)):
                 tmp = batch_wise_indices[idxs_temp[i]]
@@ -350,4 +351,3 @@ class GLISTERStrategy(DataSelectionStrategy):
         glister_end_time = time.time()
         self.logger.debug("GLISTER algorithm Subset Selection time is: %.4f", glister_end_time - glister_start_time)
         return idxs, torch.FloatTensor(gammas)
-        

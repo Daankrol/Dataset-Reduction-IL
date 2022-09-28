@@ -5,18 +5,19 @@ import torch.nn.functional as F
 import numpy as np
 from cords.utils.models.efficientnet import EfficientNetB0_PyTorch
 
+
 class PrototypicalStrategy(DataSelectionStrategy):
     def __init__(
-        self,
-        trainloader,
-        valloader,
-        model,
-        num_classes,
-        linear_layer,
-        loss,
-        device,
-        selection_type,
-        logger
+            self,
+            trainloader,
+            valloader,
+            model,
+            num_classes,
+            linear_layer,
+            loss,
+            device,
+            selection_type,
+            logger
     ):
         super().__init__(
             trainloader,
@@ -29,9 +30,9 @@ class PrototypicalStrategy(DataSelectionStrategy):
             logger,
         )
 
-
     def select(self, budget, model_params):
-        self.pretrained_model = EfficientNetB0_PyTorch(num_classes=self.num_classes, pretrained=True, fine_tune=False).to(self.device)
+        self.pretrained_model = EfficientNetB0_PyTorch(num_classes=self.num_classes, pretrained=True,
+                                                       fine_tune=False).to(self.device)
         self.pretrained_model.eval()
         start_time = time.time()
         self.logger.info(f"Started Prototypical selection.")
@@ -39,7 +40,7 @@ class PrototypicalStrategy(DataSelectionStrategy):
         self.fraction = budget / self.N_trn
         # self.update_model(model_params)
         # self.pretrained_model.eval()
-        
+
         # per-class sampling
         self.get_labels()
         indices = np.array([], dtype=np.int64)
@@ -50,7 +51,8 @@ class PrototypicalStrategy(DataSelectionStrategy):
             class_index = np.arange(self.N_trn)[self.trn_lbls == c]
             budget_for_class = int(self.fraction * len(class_index))
             indices = np.append(indices, self.select_from_class(class_index, budget_for_class))
-            self.logger.debug(f'Selected {len(indices)} samples for class {c} with a class-budget of {budget_for_class}')
+            self.logger.debug(
+                f'Selected {len(indices)} samples for class {c} with a class-budget of {budget_for_class}')
 
         end_time = time.time()
         self.logger.info(
@@ -68,7 +70,10 @@ class PrototypicalStrategy(DataSelectionStrategy):
     @torch.no_grad()
     def select_from_class(self, class_indices, budget_for_class):
         # compute the mean feature vector for this class
-        loader = torch.utils.data.DataLoader(torch.utils.data.Subset(self.trainloader.dataset, class_indices), batch_size=self.trainloader.batch_size, shuffle=False, pin_memory=True)
+        loader = torch.utils.data.DataLoader(torch.utils.data.Subset(self.trainloader.dataset, class_indices),
+                                             batch_size=self.trainloader.batch_size, shuffle=False,
+                                             pin_memory=self.trainloader.pin_memory,
+                                             num_workers=self.trainloader.num_workers)
         mean_feature = torch.zeros(self.pretrained_model.embDim, requires_grad=False).to(self.device)
         for batch_idx, (inputs, targets) in enumerate(loader):
             # print('Data shape:', data.shape)
@@ -78,7 +83,6 @@ class PrototypicalStrategy(DataSelectionStrategy):
             mean_feature += torch.sum(features, dim=0)
         # divide by the number of samples (in all batches) to get the mean feature vector
         mean_feature /= len(class_indices)
-
 
         # for all samples of this class, compute the (euclidian) distance to the mean feature vector
         # select the top 'budget_for_class' samples with the highest distance
@@ -92,4 +96,3 @@ class PrototypicalStrategy(DataSelectionStrategy):
         # select the top 'budget_for_class' samples with the highest distance
         _, selected_indices = torch.topk(distances, budget_for_class)
         return class_indices[selected_indices.cpu()]
-

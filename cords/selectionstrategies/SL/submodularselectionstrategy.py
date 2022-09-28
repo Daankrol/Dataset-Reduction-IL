@@ -95,7 +95,8 @@ class SubmodularSelectionStrategy(DataSelectionStrategy):
         trainset = self.trainloader.sampler.data_source
         subset_loader = torch.utils.data.DataLoader(trainset, batch_size=self.trainloader.batch_size, shuffle=False,
                                                     sampler=SubsetRandomSampler(idxs),
-                                                    pin_memory=True)
+                                                    pin_memory=self.trainloader.pin_memory,
+                                                    num_workers=self.trainloader.num_workers)
         self.model.load_state_dict(model_params)
         self.N = 0
         g_is = []

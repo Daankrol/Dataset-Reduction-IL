@@ -9,17 +9,17 @@ import numpy as np
 
 class UncertaintyStrategy(DataSelectionStrategy):
     def __init__(
-        self,
-        trainloader,
-        valloader,
-        model,
-        num_classes,
-        linear_layer,
-        loss,
-        device,
-        selection_type,
-        logger,
-        balance=False
+            self,
+            trainloader,
+            valloader,
+            model,
+            num_classes,
+            linear_layer,
+            loss,
+            device,
+            selection_type,
+            logger,
+            balance=False
     ):
         super().__init__(
             trainloader,
@@ -50,12 +50,13 @@ class UncertaintyStrategy(DataSelectionStrategy):
     def select(self, budget, model_params):
         start_time = time.time()
         self.model.load_state_dict(model_params)
-        self.logger.info(f"Started {self.selection_type} uncertainty selection." + " With per class balancing" if self.balance else "")
+        self.logger.info(
+            f"Started {self.selection_type} uncertainty selection." + " With per class balancing" if self.balance else "")
         self.logger.info("Budget: {0:d}".format(budget))
         self.fraction = budget / self.N_trn
         if self.balance:
             self.logger.info('Uncertainty balancing with fraction: {0:.2f}'.format(self.fraction))
-        
+
         if self.balance:
             # per-class sampling
             self.get_labels()
@@ -66,11 +67,10 @@ class UncertaintyStrategy(DataSelectionStrategy):
                 class_index = np.arange(self.N_trn)[self.trn_lbls == c]
                 scores.append(self.rank_uncertainty(class_index))
                 indices = np.append(indices, class_index[np.argsort(scores[-1])[
-                                                               :round(len(class_index) * self.fraction)]])
+                                                         :round(len(class_index) * self.fraction)]])
         else:
             scores = self.method(budget)
             indices = np.argsort(scores)[::-1][:budget]
-
 
         end_time = time.time()
         self.logger.info(
@@ -90,13 +90,14 @@ class UncertaintyStrategy(DataSelectionStrategy):
             else:
                 loader = torch.utils.data.DataLoader(
                     torch.utils.data.Subset(self.trainloader.dataset, index),
-                    batch_size=self.trainloader.batch_size, pin_memory=True)
-            
+                    batch_size=self.trainloader.batch_size,  pin_memory=self.trainloader.pin_memory, num_workers=self.trainloader.num_workers)
+
             scores = np.array([])
 
             for i, (input, _) in enumerate(loader):
                 if self.selection_type == "LeastConfidence":
-                    scores = np.append(scores, self.model(input.to(self.device), freeze=True).max(axis=1).values.cpu().numpy())
+                    scores = np.append(scores,
+                                       self.model(input.to(self.device), freeze=True).max(axis=1).values.cpu().numpy())
                 elif self.selection_type == "MarginOfConfidence":
                     preds = torch.nn.functional.softmax(self.model(input.to(self.device)), dim=1)
                     preds_argmax = torch.argmax(preds, dim=1)
@@ -111,15 +112,14 @@ class UncertaintyStrategy(DataSelectionStrategy):
         self.model.train()
         return scores
 
-
-
     def leastConfidenceSelection(self, index=None):
         self.model.eval()
         with torch.no_grad():
             scores = np.array([])
             batch_num = len(self.trainloader)
             for i, (inputs, _) in enumerate(self.trainloader):
-                scores = np.append(scores, self.model(inputs.to(self.device), freeze=True).max(axis=1).values.cpu().numpy())
+                scores = np.append(scores,
+                                   self.model(inputs.to(self.device), freeze=True).max(axis=1).values.cpu().numpy())
         return scores
         # indices = np.argsort(scores)[::-1][:budget]
         # return indices, torch.ones(len(indices))
@@ -150,7 +150,6 @@ class UncertaintyStrategy(DataSelectionStrategy):
                 preds = torch.nn.functional.softmax(self.model(input.to(self.device)), dim=1).cpu().numpy()
                 scores = np.append(scores, (np.log(preds + 1e-6) * preds).sum(axis=1))
         return scores
-
 
     def _marginOfConfidenceSelectionOld(self, budget):
         # Margin of confidence is defined by the difference between the top two confidence values
