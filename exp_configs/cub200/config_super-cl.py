@@ -2,15 +2,16 @@
 config = dict(
     setting="SL",
     measure_energy=True,
-    logging='DEBUG',
     wandb=True,
     is_reg=False,
-    dataset=dict(name="cifar10", datadir="../data", feature="dss", type="image", img_size=32),
+    dataset=dict(
+        name="cub200", datadir="../data", feature="dss", type="image", img_size=224
+    ),
     dataloader=dict(shuffle=True, batch_size=32, pin_memory=True),
-    model=dict(architecture="ResNet18", type="pre-defined"),
+    model=dict(architecture="EfficientNet", type="pre-defined"),
     ckpt=dict(is_load=False, is_save=False, dir="results/", save_every=20),
     loss=dict(type="CrossEntropyLoss", use_sigmoid=False),
-    optimizer=dict(type="sgd", momentum=0.9, lr=0.01, weight_decay=5e-4, nesterov=False),
+    optimizer=dict(type="sgd", momentum=0.9, lr=0.005, weight_decay=5e-4, nesterov=False),
     scheduler=dict(type="cosine_annealing", T_max=300),
     dss_args=dict(
         type="Super-CL",

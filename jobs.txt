@@ -360,3 +360,14 @@
 # python3 run_experiment.py --config ./exp_configs/cub200/config_craigpb.py --select_every 10 --fraction 0.2 --kappa 0.03 --epochs 500 # ok
 # python3 run_experiment.py --config ./exp_configs/cub200/config_submodular.py --submod_function graph-cut --select_every 10 --fraction 0.2 --lr 0.01 --kappa 0.03 --epochs 500 # ok
 # python3 run_experiment.py --config ./exp_configs/cub200/config_submodular.py --submod_function facility-location --select_every 10 --fraction 0.2 --lr 0.01 --kappa 0.03 --epochs 500 # ok
+
+## 28-9 grand tests
+python3 run_experiment.py --config ./exp_configs/cifar10/config_grand.py --fraction 0.5 --nonadaptive
+python3 run_experiment.py --config ./exp_configs/cifar10/config_grand.py --fraction 0.8 --nonadaptive
+python3 run_experiment.py --config ./exp_configs/cub200/config_grand.py --fraction 0.5 --nonadaptive
+python3 run_experiment.py --config ./exp_configs/cub200/config_grand.py --fraction 0.8 --nonadaptive
+python3 run_experiment.py --config ./exp_configs/papilion/config_grand.py --fraction 0.9 --nonadaptive
+python3 run_experiment.py --config ./exp_configs/papilion/config_grand.py --fraction 0.8 --nonadaptive
+python3 run_experiment.py --config ./exp_configs/papilion/config_grand.py --fraction 0.5 --nonadaptive
+
+## 28-9 super-cl

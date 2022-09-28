@@ -78,12 +78,6 @@ parser.add_argument(
     "--kappa", type=float, help="Fraction of epochs to use for warm up."
 )
 parser.add_argument(
-    "--weighted", action='store_true', help="To use weighted loss for Super-CL sampling"
-)
-parser.add_argument(
-    "--not_weighted", action='store_false', dest='weighted',  help="To use weighted loss for Super-CL sampling"
-)
-parser.add_argument(
     "--select_every", type=int, help="Select a new subset every X epochs."
 )
 parser.add_argument("--epochs", type=int, help="number of epochs to train")
@@ -153,6 +147,9 @@ parser.add_argument(
     type=int,
     help="Batch size for dataloader"
 )
+parser.add_argument(
+    "--weighted", action='store_true', help="To use weighted loss for Super-CL sampling"
+)
 
 args = parser.parse_args()
 if args.config is None:
@@ -193,8 +190,9 @@ if args.early_stopping:
     cfg.early_stopping = True
     cfg.scheduler.type = None
 if args.weighted is not None:
-    cfg.dss_args.weighted = args.weighted
-print(f'Weighted: {cfg.dss_args.weighted}')
+    if cfg.dss_args.weighted is not None and not cfg.dss_args.weighted:
+        cfg.dss_args.weighted = args.weighted
+
 if args.kappa is not None:
     cfg.dss_args.kappa = args.kappa
 if args.lam is not None:
@@ -213,7 +211,6 @@ if cfg.dataloader.num_workers is None or cfg.dataloader.num_workers == DotMap():
     cfg.dataloader.num_workers = 0
 if cfg.dataloader.batch_size is None or cfg.dataloader.batch_size == DotMap():
     cfg.dataloader.batch_size = 32
-    
 
 clf = TrainClassifier(cfg)
 clf.train()
