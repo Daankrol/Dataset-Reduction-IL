@@ -206,9 +206,14 @@ elif cfg.dss_args.online is None or cfg.dss_args.online == DotMap():
     cfg.dss_args.online = True
 
 if args.num_workers is not None:
-    cfg.num_workers = args.num_workers
+    cfg.dataloader.num_workers = args.num_workers
 if args.batch_size is not None:
     cfg.dataloader.batch_size = args.batch_size
+if cfg.dataloader.num_workers is None or cfg.dataloader.num_workers == DotMap():
+    cfg.dataloader.num_workers = 0
+if cfg.dataloader.batch_size is None or cfg.dataloader.batch_size == DotMap():
+    cfg.dataloader.batch_size = 32
+    
 
 clf = TrainClassifier(cfg)
 clf.train()

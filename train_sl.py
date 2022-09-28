@@ -141,6 +141,7 @@ class TrainClassifier:
                     "measure_energy": self.cfg.measure_energy,
                     "optimizer": self.cfg.optimizer,
                     "dss_args": self.cfg.dss_args,
+                    "num_workers": self.cfg.num_workers,
                 },
             )
 
@@ -415,6 +416,7 @@ class TrainClassifier:
             pin_memory=True,
             collate_fn=collate_fn,
             drop_last=drop_last,
+            num_workers=self.cfg.dataloader.num_workers,
         )
 
         valloader = torch.utils.data.DataLoader(
@@ -425,6 +427,7 @@ class TrainClassifier:
             pin_memory=True,
             collate_fn=collate_fn,
             drop_last=drop_last,
+            num_workers=self.cfg.dataloader.num_workers,
         )
 
         testloader = torch.utils.data.DataLoader(
@@ -435,6 +438,7 @@ class TrainClassifier:
             pin_memory=True,
             collate_fn=collate_fn,
             drop_last=drop_last,
+            num_workers=self.cfg.dataloader.num_workers,
         )
 
         substrn_losses = list()  # np.zeros(cfg['train_args']['num_epochs'])
@@ -630,9 +634,10 @@ class TrainClassifier:
             print_args = self.cfg.train_args.print_args
 
             # construct t-SNE plots if data has been resampled
-            if self.cfg.dss_args.type != "Full" and dataloader.resampled and self.embedding_plotter is not None and self.cfg.dss_args.online:
-                self.logger.info(f'EMBEDDING - dataloader is resampled. Epoch: {epoch}')
-                self.embedding_plotter.make_plot(epoch, selected_indices=dataloader.subset_indices)
+            if self.cfg.dss_args.type != "Full" and dataloader.resampled and self.embedding_plotter is not None:
+                if self.cfg.dss_args.online or (not self.cfg.dss_args.online and not self.embedding_plotter.has_plotted):
+                    self.logger.info(f'EMBEDDING - dataloader is resampled. Epoch: {epoch}')
+                    self.embedding_plotter.make_plot(epoch, selected_indices=dataloader.subset_indices)
 
             """
             ################################################# Evaluation Loop #################################################
@@ -1126,6 +1131,7 @@ class TrainClassifier:
                 shuffle=self.cfg.dataloader.shuffle,
                 pin_memory=self.cfg.dataloader.pin_memory,
                 collate_fn=self.cfg.dss_args.collate_fn,
+                num_workers=self.cfg.dataloader.num_workers,
             )
 
         elif self.cfg.dss_args.type in [
@@ -1147,6 +1153,7 @@ class TrainClassifier:
                 shuffle=self.cfg.dataloader.shuffle,
                 pin_memory=self.cfg.dataloader.pin_memory,
                 collate_fn=self.cfg.dss_args.collate_fn,
+                num_workers=self.cfg.dataloader.num_workers,
             )
 
         elif self.cfg.dss_args.type in [
@@ -1164,6 +1171,7 @@ class TrainClassifier:
                 shuffle=self.cfg.dataloader.shuffle,
                 pin_memory=self.cfg.dataloader.pin_memory,
                 collate_fn=self.cfg.dss_args.collate_fn,
+                num_workers=self.cfg.dataloader.num_workers,
             )
 
         elif self.cfg.dss_args.type in ["Random", "Random-Warm"]:
@@ -1175,6 +1183,7 @@ class TrainClassifier:
                 shuffle=self.cfg.dataloader.shuffle,
                 pin_memory=self.cfg.dataloader.pin_memory,
                 collate_fn=self.cfg.dss_args.collate_fn,
+                num_workers=self.cfg.dataloader.num_workers,
             )
 
         elif self.cfg.dss_args.type == ["OLRandom", "OLRandom-Warm"]:
@@ -1186,6 +1195,7 @@ class TrainClassifier:
                 shuffle=self.cfg.dataloader.shuffle,
                 pin_memory=self.cfg.dataloader.pin_memory,
                 collate_fn=self.cfg.dss_args.collate_fn,
+                num_workers=self.cfg.dataloader.num_workers,
             )
         elif self.cfg.dss_args.type == "Submodular":
             dataloader = SubmodularDataLoader(
@@ -1197,6 +1207,7 @@ class TrainClassifier:
                 shuffle=self.cfg.dataloader.shuffle,
                 pin_memory=self.cfg.dataloader.pin_memory,
                 collate_fn=self.cfg.dss_args.collate_fn,
+                num_workers=self.cfg.dataloader.num_workers,
             )
 
         elif self.cfg.dss_args.type == "CAL":
@@ -1206,6 +1217,7 @@ class TrainClassifier:
                 shuffle=self.cfg.dataloader.shuffle,
                 pin_memory=self.cfg.dataloader.pin_memory,
                 collate_fn=self.cfg.dss_args.collate_fn,
+                num_workers=self.cfg.dataloader.num_workers,
             )
         elif self.cfg.dss_args.type == "Super-CL":
             dataloader = SupervisedContrastiveLearningDataLoader(
@@ -1217,6 +1229,7 @@ class TrainClassifier:
                 shuffle=self.cfg.dataloader.shuffle,
                 pin_memory=self.cfg.dataloader.pin_memory,
                 collate_fn=self.cfg.dss_args.collate_fn,
+                num_workers=self.cfg.dataloader.num_workers,
             )
 
         elif self.cfg.dss_args.type == "FacLoc":
@@ -1230,6 +1243,7 @@ class TrainClassifier:
                 shuffle=self.cfg.dataloader.shuffle,
                 pin_memory=self.cfg.dataloader.pin_memory,
                 collate_fn=self.cfg.dss_args.collate_fn,
+                num_workers=self.cfg.dataloader.num_workers,
             )
             if (
                     self.cfg.dataset.name == "sst2_facloc"
@@ -1254,6 +1268,7 @@ class TrainClassifier:
                 shuffle=self.cfg.dataloader.shuffle,
                 pin_memory=self.cfg.dataloader.pin_memory,
                 collate_fn=self.cfg.dss_args.collate_fn,
+                num_workers=self.cfg.dataloader.num_workers,
             )
 
         elif self.cfg.dss_args.type in ["SELCON"]:
@@ -1277,6 +1292,7 @@ class TrainClassifier:
                 batch_size=self.cfg.dataloader.batch_size,
                 shuffle=self.cfg.dataloader.shuffle,
                 pin_memory=self.cfg.dataloader.pin_memory,
+                num_workers=self.cfg.dataloader.num_workers,
             )
 
         elif self.cfg.dss_args.type in ["Uncertainty"]:
@@ -1285,13 +1301,17 @@ class TrainClassifier:
                 batch_size=self.cfg.dataloader.batch_size,
                 shuffle=self.cfg.dataloader.shuffle,
                 pin_memory=self.cfg.dataloader.pin_memory,
+                collate_fn=self.cfg.dss_args.collate_fn,
+                num_workers=self.cfg.dataloader.num_workers,
             )
         elif self.cfg.dss_args.type in ["Prototypical"]:
             dataloader = PrototypicalDataLoader(
                 trainloader, valloader, self.cfg.dss_args, logger,
                 batch_size=self.cfg.dataloader.batch_size,
                 shuffle=self.cfg.dataloader.shuffle,
-                pin_memory=self.cfg.dataloader.pin_memory
+                pin_memory=self.cfg.dataloader.pin_memory,
+                collate_fn=self.cfg.dss_args.collate_fn,
+                num_workers=self.cfg.dataloader.num_workers,
             )
         elif self.cfg.dss_args.type in ["Grand"]:
             dataloader = GrandDataLoader(
@@ -1299,6 +1319,8 @@ class TrainClassifier:
                 batch_size=self.cfg.dataloader.batch_size,
                 shuffle=self.cfg.dataloader.shuffle,
                 pin_memory=self.cfg.dataloader.pin_memory,
+                collate_fn=self.cfg.dss_args.collate_fn,
+                num_workers=self.cfg.dataloader.num_workers,
             )
         elif self.cfg.dss_args.type in ["EL2N"]:
             dataloader = EL2NDataLoader(
@@ -1306,6 +1328,8 @@ class TrainClassifier:
                 batch_size=self.cfg.dataloader.batch_size,
                 shuffle=self.cfg.dataloader.shuffle,
                 pin_memory=self.cfg.dataloader.pin_memory,
+                collate_fn=self.cfg.dss_args.collate_fn,
+                num_workers=self.cfg.dataloader.num_workers,
             )
         else:
             raise NotImplementedError

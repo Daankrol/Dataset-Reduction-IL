@@ -39,6 +39,7 @@ class TSNEPlotter:
         self.val_embeddings = None
         self.test_embeddings = None
         self.df = None
+        self.has_plotted = False
         self.tsne = TSNE(
             n_components=2, perplexity=30, init="pca", learning_rate="auto", n_jobs=-1
         )
@@ -129,6 +130,8 @@ class TSNEPlotter:
         # if file is already there, delete it
         if os.path.exists(file_name):
             os.remove(file_name)
+            
+        self.has_plotted = True
 
     def _make_embedding_for_dataloader(self, dataloader):
         # Create embeddings for the given batched dataloader
