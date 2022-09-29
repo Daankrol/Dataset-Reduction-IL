@@ -54,14 +54,8 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
 
         # for each sample in a class, compute distance in feature space to all other sample in the same class
         # and find the k-nearest-neighbours
-
-        # knn like: knn[class][sample] = [k-nearest-neighbours]
-
-
-        knn = np.array([], dtype=object) ## object dtype to store variable length arrays
-        # knn[i] where i is ordered by the class labels, so first class first. Then second class, etc.
+        knn = torch.zeros((self.N_trn, self.k), dtype=torch.int32)
         for c in range(self.num_classes):
-            knn = np.append(knn, np.array([], dtype=object))
             class_indices = np.where(self.trn_lbls == c)[0]
             embeddings = torch.zeros((len(class_indices), self.pretrained_model.embDim)).to(self.device)
             loader = torch.utils.data.DataLoader(
@@ -76,11 +70,16 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
             # calculate pairwise distances and for each sample, find the k-nearest-neighbours, add their indices sorted by their distance
             dist = pairwise_distances(embeddings.cpu().numpy())
 
-
             for i in range(len(class_indices)):
-                # this only works if neighbors always has length of k, if not we need to pad with nan values or just vectors of variable length.
-                neighbours = np.argsort(dist[i])[1:self.k + 1]
-                knn[c] = np.append(knn[c], neighbours)
+                neigbours = np.argsort(dist[i])[1:self.k + 1]
+                # if neighbours has not a length of k, pad it with nan values 
+                if len(neigbours) < self.k:
+                    print('Warning: k-nearest-neighbours has not a length of k')
+                    print(f'padding with nan values. old: {neigbours}')
+                    neigbours = np.pad(neigbours, (0, self.k - len(neigbours)), 'constant', constant_values=np.nan)
+                    print(f'new: {neigbours}')
+                    print(f'Loaded as torch tensor: {torch.tensor(neigbours, dtype=torch.int32)}')
+                knn[class_indices[i]] = torch.tensor(neigbours, dtype=torch.int32)
 
         del self.pretrained_model  # only need this at the start. 
         self.knn = knn.cpu().numpy()
@@ -90,31 +89,29 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
         # We use the current training model to determine the probabilities 
         self.logger.info('Calculating divergence')
         self.model.eval()
-        probs = []
-        for c in range(self.num_classes):
-            probs = np.append(probs, np.array([], dtype=object))
-            class_indices = np.where(self.trn_lbls == c)[0]
-            loader = torch.utils.data.DataLoader(
-                torch.utils.data.Subset(self.trainloader.dataset, class_indices),
-                batch_size=self.trainloader.batch_size,
-                pin_memory=self.trainloader.pin_memory, num_workers=self.trainloader.num_workers)
-            for i, (inputs, _) in enumerate(loader):
-                inputs = inputs.to(self.device)
-                outputs = self.model(inputs)
-                probs[c] = np.append(probs[c], F.softmax(outputs, dim=1).detach().cpu().numpy())
-        
-        # calculate divergence
-        divergence = np.zeros(len(self.trn_lbls))
-        for c in range(self.num_classes):
-            # Calculate KL-divergence between sample PDF and all neighbours of the same class.
-            # Average the divergence scores over all neighbours.
-            class_indices = np.where(self.trn_lbls == c)[0]
-            for i in range(len(class_indices)):
-                aa = probs[c][i]
-                neighbour_probs = probs[c][self.knn[c][i]]
-                divergence[class_indices[i]] = np.mean(np.sum(neighbour_probs * np.log(neighbour_probs / aa), axis=1))
-        self.model.train()
-        return divergence
+
+        loader = torch.utils.data.DataLoader(self.trainloader.dataset, batch_size=self.trainloader.batch_size,
+                                             pin_memory=self.trainloader.pin_memory,
+                                             num_workers=self.trainloader.num_workers)
+        probs = torch.zeros([self.N_trn, self.num_classes]).to(self.device)
+        for i, (inputs, labels) in enumerate(loader):
+            inputs = inputs.to(self.device)
+            outputs = self.model(inputs, freeze=True)
+            probs[i * self.trainloader.batch_size:(i + 1) * self.trainloader.batch_size] = F.softmax(outputs, dim=1)
+        probs = probs.cpu().numpy()
+        # Calculate KL-divergence between sample PDF and all neighbours of the same class.
+        # Average the divergence scores over all neighbours.
+        divergence_scores = torch.zeros(self.N_trn).to(self.device)
+        for i in range(0, self.N_trn, loader.batch_size):
+            # calculate divergence for a batch of samples
+            batch_probs = probs[i:i + loader.batch_size]
+            batch_knn = self.knn[i:i + loader.batch_size]
+            aa = torch.from_numpy(np.expand_dims(batch_probs, axis=1).repeat(self.k, axis=1))
+            bb = torch.from_numpy(probs[batch_knn])  # shape: (batch_size, k, num_classes)
+            # calculate divergence for each sample in the batch
+            batch_divergence = (aa * torch.log(aa / bb)).sum(dim=2).mean(dim=1)
+            divergence_scores[i:i + loader.batch_size] = batch_divergence
+        self.divergence_scores = divergence_scores.cpu()
 
     def select(self, budget, model_params):
         start_time = time.time()
@@ -122,25 +119,27 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
         self.update_model(model_params)
         self.find_knn()
         self.fraction = budget / self.N_trn
-        divergence =  self.calculate_divergence()
+        self.calculate_divergence()
 
         # Higher score means closer to decision boundary and thus more important
         if self.selection_type == 'PerClass':
             indices = np.array([], dtype=np.int32)
             for c in range(self.num_classes):
                 class_indices = torch.arange(self.N_trn)[self.trn_lbls == c]
-                num_samples = max(1, int(self.fraction * len(class_indices)))
+                scores = self.divergence_scores[class_indices]
+                num_samples = int(self.fraction * len(class_indices))
                 # add the indices of the selected samples that have the highest KL divergence
-                indices = np.append(indices, class_indices[np.argsort(divergence[class_indices])[-num_samples:]].cpu().numpy())
+                indices = np.concatenate(
+                    (indices, class_indices[torch.argsort(scores, descending=True)[:num_samples]].cpu().numpy()))
         else:
-            # add the indices of the selected samples that have the highest KL divergence
-            indices = np.argsort(divergence)[-int(self.fraction * self.N_trn):]
+            indices = torch.argsort(self.divergence_scores, descending=True)[:budget].cpu().numpy()
 
         end_time = time.time()
         self.logger.info(f'Super-CL algorithm took {end_time - start_time} seconds.')
         self.logger.info('Selected {}  samples with a budget of {}'.format(len(indices), budget))
 
         if self.weighted:
-            return indices, divergence[indices]
+            weights = self.divergence_scores[indices]
+            return indices, weights
 
         return indices, torch.ones(len(indices))
