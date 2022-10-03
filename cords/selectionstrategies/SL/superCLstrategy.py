@@ -55,11 +55,11 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
         # for each sample in a class, compute distance in feature space to all other sample in the same class
         # and find the k-nearest-neighbours
 
-        # knn like: knn[class][sample] = [k-nearest-neighbours]
+        # knn like: knn[class][sample] = [k-nearest-neighbours], which can be variable length vector of indices in the original dataset
 
-        knn = []  ## object dtype to store variable length arrays
-        # knn[i] where i is ordered by the class labels, so first class first. Then second class, etc.
+        knn = []
         for c in range(self.num_classes):
+            # add new empty list to knn for the current class 
             knn.append([])
             class_indices = np.where(self.trn_lbls == c)[0]
             embeddings = torch.zeros((len(class_indices), self.pretrained_model.embDim)).to(self.device)
@@ -76,8 +76,14 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
             dist = pairwise_distances(embeddings.cpu().numpy())
 
             for i in range(len(class_indices)):
-                # this only works if neighbors always has length of k, if not we need to pad with nan values or just vectors of variable length.
-                neighbours = np.argsort(dist[i], dtype=np.int)[1:self.k + 1]
+                # can happen that we have less than k samples in a class, then we just take all samples and 
+
+                # dist[i]. Here i is the same as class_indices[i]
+                # TODO: sentence above is not true. 
+                neighbours = np.argsort(dist[i])[1:self.k + 1].astype(np.int32)
+                # show length of neigbours if length < k and print data 
+                # if len(neighbours) < self.k:
+                print( f'{i}' , len(neighbours), neighbours)
                 knn[c] = np.append(knn[c], neighbours)
 
         del self.pretrained_model  # only need this at the start.
@@ -89,8 +95,10 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
         self.logger.info('Calculating probabilities for divergence')
         self.model.eval()
         probs = []
+        # probs[c][i] where i is sample of the class. 
+
         for c in range(self.num_classes):
-            probs.append(np.array([], dtype=object))
+            probs.append([])
             class_indices = np.where(self.trn_lbls == c)[0]
             loader = torch.utils.data.DataLoader(
                 torch.utils.data.Subset(self.trainloader.dataset, class_indices),
@@ -101,6 +109,8 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
                 inputs = inputs.to(self.device)
                 outputs = self.model(inputs, freeze=True)
                 probs[c] = np.append(probs[c], F.softmax(outputs, dim=1).detach().cpu().numpy())
+
+        
         self.logger.debug('Calculated probabilities, now computing divergence')
         # calculate divergence
         divergence = np.zeros(len(self.trn_lbls))
@@ -110,7 +120,9 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
             class_indices = np.where(self.trn_lbls == c)[0]
             for i in range(len(class_indices)):
                 aa = probs[c][i]
-                print(self.knn[c][i])
+                # neighbour indexes = knn[c][i]. These can be used in the whole dataset, not in class dataset. 
+                neighour_probs = 
+
                 neighbour_probs = probs[c][self.knn[c][i]]
                 divergence[class_indices[i]] = np.mean(np.sum(neighbour_probs * np.log(neighbour_probs / aa), axis=1))
         self.model.train()
