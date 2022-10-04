@@ -861,7 +861,7 @@ def get_labels_of_dataloader(dataloader):
 
 def calculate_imbalance_ratio(dataloader):
     # Balance is calculated as H / log k.
-    # Here H is the entropy of the dataset and k is the number of classes.
+    # Here H is the Shannon entropy of the dataset and k is the number of classes.
     # H is defined by H = - sum_{i to k} [(ci / n) * log (ci / n)]
     labels = get_labels_of_dataloader(dataloader)
     num_cls = len(np.unique(labels))
