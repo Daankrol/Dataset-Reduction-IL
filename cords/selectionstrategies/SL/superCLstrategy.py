@@ -52,10 +52,14 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
         if self.knn is not None:
             return
         # load with pickle if file is present
-        if os.path.exists('knn.pkl'):
-            with open('knn.pkl', 'rb') as f:
-                self.knn = pickle.load(f)
-            return
+        # loc = '/home/daankrol/Dataset-Reduction-IL/knn.pickle'
+        # if os.path.isfile(loc):
+        #     with open(loc, 'rb') as f:
+        #         print('Loading pickle file.')
+        #         self.knn = pickle.load(f)
+        #     return
+        # else:
+        #     print('cannot find knn pickel file.')
         self.logger.info('Finding k-nearest-neighbours')
         self.get_labels()
 
@@ -85,13 +89,11 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
             for i in range(len(class_indices)):
                 # can happen that we have less than k samples in a class, then we just take all samples and 
                 neighbours = np.argsort(dist[i])[1:self.k + 1].astype(np.int32)
-                knn[c] = np.append(knn[c], neighbours)
+                knn[c] += list(neighbours)
+                    # np.append(knn[c], neighbours)
 
         del self.pretrained_model  # only need this at the start.
         self.knn = knn
-        # save with pickle 
-        with open('knn.pickle', 'wb') as f:
-            pickle.dump(self.knn, f)
 
 
     @torch.no_grad()
@@ -102,7 +104,7 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
         probs = []
         # probs[c][class_indexed sample] = [prob vector] 
         # knn[c][class_indexed sample] = [class_indexed k-nearest-neighbours]
-
+        cnt = 0
         for c in range(self.num_classes):
             probs.append([])
             class_indices = np.where(self.trn_lbls == c)[0]
@@ -111,19 +113,14 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
                 batch_size=self.trainloader.batch_size,
                 pin_memory=self.trainloader.pin_memory, num_workers=self.trainloader.num_workers)
             for i, (inputs, _) in enumerate(loader):
-                print(f'{c}: {i}')
                 inputs = inputs.to(self.device)
                 outputs = self.model(inputs, freeze=True)
+                outputs = F.softmax(outputs, dim=1).detach().cpu().numpy()
 
                 # calculate probs for this batch. Add all vectors in dim 0 to probs without flattening
-                print(probs[c])
-                probs[c] = np.append(probs[c], F.softmax(outputs, dim=1).detach().cpu().numpy())
-                print(probs[c])
-        exit()
+                # have to use python lists as they have variable length.
+                probs[c] += list(outputs)
 
-        
-
-        
         self.logger.debug('Calculated probabilities, now computing divergence')
         # calculate divergence
         divergence = np.zeros(len(self.trn_lbls))
@@ -132,9 +129,23 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
             # Average the divergence scores over all neighbours.
             class_indices = np.where(self.trn_lbls == c)[0]
             for i in range(len(class_indices)):
-                aa = probs[c][i]
-                neighbour_probs = probs[c][self.knn[c][i]]
-                divergence[class_indices[i]] = np.mean(np.sum(neighbour_probs * np.log(neighbour_probs / aa), axis=1))
+                aa = np.array(probs[c][i])
+
+                try:
+                    # Some samples have no neighbours since the classes can be heavily imbalanced.
+                    # Use a very low (0) divergence score for those.
+                    neighbours = self.knn[c][i]
+                    neighbour_probs = np.array(probs[c][neighbours])
+                except Exception as e:
+                    # print(c, i)
+                    # print(len(self.knn[c]), self.knn[c])
+                    neighbour_probs = aa
+                divergence[class_indices[i]] = np.mean(np.sum(neighbour_probs * np.log(neighbour_probs / aa), axis= 1 if neighbour_probs.ndim>1 else 0 ))
+                # if divergence[class_indices[i]] == 0:
+                #     l = np.log(neighbour_probs / aa)
+                #     nl = neighbour_probs * l
+                #     su = np.sum(nl, axis=1 if neighbour_probs.ndim > 1 else 0)
+                #     print('\n', c,i,  l, nl, su, aa, neighbour_probs)
         self.model.train()
         self.logger.debug('Divergence calculated.')
         return divergence
@@ -151,11 +162,11 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
         if self.selection_type == 'PerClass':
             indices = np.array([], dtype=np.int32)
             for c in range(self.num_classes):
-                class_indices = torch.arange(self.N_trn)[self.trn_lbls == c]
-                num_samples = max(1, int(self.fraction * len(class_indices)))
+                class_indices = np.where(self.trn_lbls == c)[0]
+                num_samples = int(self.fraction * len(class_indices))
                 # add the indices of the selected samples that have the highest KL divergence
                 indices = np.append(indices,
-                                    class_indices[np.argsort(divergence[class_indices])[-num_samples:]].cpu().numpy())
+                                    class_indices[np.argsort(divergence[class_indices])[-num_samples:]])
         else:
             # add the indices of the selected samples that have the highest KL divergence
             indices = np.argsort(divergence)[-int(self.fraction * self.N_trn):]
@@ -163,8 +174,10 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
         end_time = time.time()
         self.logger.info(f'Super-CL algorithm took {end_time - start_time} seconds.')
         self.logger.info('Selected {}  samples with a budget of {}'.format(len(indices), budget))
-
-        if self.weighted:
-            return indices, divergence[indices]
+        print(indices)
+        print(divergence[indices])
+        print(np.count_nonzero(divergence[indices] == 0), '/', len(divergence[indices]))
+        # if self.weighted:
+        #     return indices, divergence[indices].astype(np.float32)
 
         return indices, torch.ones(len(indices))
