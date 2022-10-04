@@ -850,6 +850,28 @@ def create_noisy(y_trn, num_cls, noise_ratio=0.8):
     return y_trn
 
 
+def get_labels_of_dataloader(dataloader):
+    for batch_idx, (inputs, targets) in enumerate(dataloader):
+        if batch_idx == 0:
+            labels = targets.view(-1, 1)
+        else:
+            labels = torch.cat((labels, targets.view(-1, 1)), dim=0)
+        labels = labels.view(-1)
+    return labels
+
+def calculate_imbalance_ratio(dataloader):
+    # Balance is calculated as H / log k.
+    # Here H is the entropy of the dataset and k is the number of classes.
+    # H is defined by H = - sum_{i to k} [(ci / n) * log (ci / n)]
+    labels = get_labels_of_dataloader(dataloader)
+    num_cls = len(np.unique(labels))
+    samples_per_class = np.zeros(num_cls)
+    for i in range(num_cls):
+        samples_per_class[i] = len(np.where(labels == i)[0])
+    samples_per_class = samples_per_class / np.sum(samples_per_class)
+    entropy = -np.sum(samples_per_class * np.log(samples_per_class))
+    return entropy / np.log(num_cls)
+
 def gen_dataset(datadir, dset_name, feature, isnumpy=False, **kwargs):
     """
     Generate train, val, and test datasets for supervised learning setting.

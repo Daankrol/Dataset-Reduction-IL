@@ -52,7 +52,7 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
         if self.knn is not None:
             return
         # load with pickle if file is present
-        if os.path.exists('knn.pkl'):
+        if os.path.isfile('knn.pkl'):
             with open('knn.pkl', 'rb') as f:
                 self.knn = pickle.load(f)
             return
@@ -111,9 +111,16 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
                 batch_size=self.trainloader.batch_size,
                 pin_memory=self.trainloader.pin_memory, num_workers=self.trainloader.num_workers)
             for i, (inputs, _) in enumerate(loader):
-                print(f'{c}: {i}')
+                print(f'{c}: {i}, num classes: {self.num_classes}')
                 inputs = inputs.to(self.device)
-                outputs = self.model(inputs, freeze=True)
+                outputs = F.softmax(self.model(inputs, freeze=True), dim=1).detach().cpu().numpy()
+
+                # add this batch of probabilities to the list of probabilities for the current class
+                # make sure that the vector is not flattened and appended.
+                # We want probs[c] to be of shape (num_samples_in_class, num_classes)
+                # numpy does not allow appending of lists of different shapes, so we have to do it with python lists
+                probs[c].append(outputs, axis=0)
+                # probs[c] = np.append(probs[c], outputs, axis=0)
 
                 # calculate probs for this batch. Add all vectors in dim 0 to probs without flattening
                 print(probs[c])
