@@ -60,6 +60,7 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
         #     return
         # else:
         #     print('cannot find knn pickel file.')
+
         self.logger.info('Finding k-nearest-neighbours')
         self.get_labels()
 
@@ -116,6 +117,7 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
                 inputs = inputs.to(self.device)
                 outputs = self.model(inputs, freeze=True)
                 outputs = F.softmax(outputs, dim=1).detach().cpu().numpy()
+
 
                 # calculate probs for this batch. Add all vectors in dim 0 to probs without flattening
                 # have to use python lists as they have variable length.
