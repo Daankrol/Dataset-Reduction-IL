@@ -5,6 +5,8 @@ from .dataselectionstrategy import DataSelectionStrategy
 from sklearn.metrics import pairwise_distances
 import time
 from cords.utils.models.efficientnet import EfficientNetB0_PyTorch
+import pickle 
+import os
 
 
 class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
@@ -49,6 +51,11 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
         "Find k-nearest-neighbour datapoints based on label info and feature embedding by a pretrained network"
         if self.knn is not None:
             return
+        # load with pickle if file is present
+        if os.path.exists('knn.pkl'):
+            with open('knn.pkl', 'rb') as f:
+                self.knn = pickle.load(f)
+            return
         self.logger.info('Finding k-nearest-neighbours')
         self.get_labels()
 
@@ -77,17 +84,15 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
 
             for i in range(len(class_indices)):
                 # can happen that we have less than k samples in a class, then we just take all samples and 
-
-                # dist[i]. Here i is the same as class_indices[i]
-                # TODO: sentence above is not true. 
                 neighbours = np.argsort(dist[i])[1:self.k + 1].astype(np.int32)
-                # show length of neigbours if length < k and print data 
-                # if len(neighbours) < self.k:
-                print( f'{i}' , len(neighbours), neighbours)
                 knn[c] = np.append(knn[c], neighbours)
 
         del self.pretrained_model  # only need this at the start.
         self.knn = knn
+        # save with pickle 
+        with open('knn.pickle', 'wb') as f:
+            pickle.dump(self.knn, f)
+
 
     @torch.no_grad()
     def calculate_divergence(self):
@@ -95,7 +100,8 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
         self.logger.info('Calculating probabilities for divergence')
         self.model.eval()
         probs = []
-        # probs[c][i] where i is sample of the class. 
+        # probs[c][class_indexed sample] = [prob vector] 
+        # knn[c][class_indexed sample] = [class_indexed k-nearest-neighbours]
 
         for c in range(self.num_classes):
             probs.append([])
@@ -108,7 +114,14 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
                 print(f'{c}: {i}')
                 inputs = inputs.to(self.device)
                 outputs = self.model(inputs, freeze=True)
+
+                # calculate probs for this batch. Add all vectors in dim 0 to probs without flattening
+                print(probs[c])
                 probs[c] = np.append(probs[c], F.softmax(outputs, dim=1).detach().cpu().numpy())
+                print(probs[c])
+        exit()
+
+        
 
         
         self.logger.debug('Calculated probabilities, now computing divergence')
@@ -120,9 +133,6 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
             class_indices = np.where(self.trn_lbls == c)[0]
             for i in range(len(class_indices)):
                 aa = probs[c][i]
-                # neighbour indexes = knn[c][i]. These can be used in the whole dataset, not in class dataset. 
-                neighour_probs = 
-
                 neighbour_probs = probs[c][self.knn[c][i]]
                 divergence[class_indices[i]] = np.mean(np.sum(neighbour_probs * np.log(neighbour_probs / aa), axis=1))
         self.model.train()
