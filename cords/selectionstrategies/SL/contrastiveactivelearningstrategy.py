@@ -174,13 +174,34 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
         for i, (inputs, labels) in enumerate(loader):
             probs[i * loader.batch_size: (i + 1) * loader.batch_size] = (
                 torch.nn.functional.softmax(self.model(inputs.to(self.device), freeze=True), dim=1).detach().cpu())
-
+        print(probs[0:5])
         kl = np.zeros(sample_num)
         for i in range(0, sample_num, loader.batch_size):
-            aa = np.expand_dims(probs[i: (i + loader.batch_size)], 1).repeat(self.k, 1)
+            aa = np.expand_dims(probs[i: (i + loader.batch_size)], 1)
+            aa = np.repeat(aa, self.k, 1)
             bb = probs[knn[i: (i + loader.batch_size)], :]
-            kl[i: (i + loader.batch_size)] = np.mean(
-                np.sum(0.5 * aa * np.log(aa / bb) + 0.5 * bb * np.log(bb / aa), axis=2), axis=1)
+            print(aa)
+            print(bb)
+            print(i, i + loader.batch_size)
+            print('probs', probs[i: i+loader.batch_size], 'shape:', np.shape(probs[i: i+loader.batch_size])) # k10, (128,10)
+            print('expand dims:', np.expand_dims(probs[i: (i + loader.batch_size)], -2), 'shape:', np.shape(np.expand_dims(probs[i: (i + loader.batch_size)], -2))) #k10, (128, 1, 10)
+            print('expand dims and repeat:', np.expand_dims(probs[i: (i + loader.batch_size)], -2).repeat(self.k, -2), 'shape:',
+                  np.shape(np.expand_dims(probs[i: (i + loader.batch_size)], -2).repeat(self.k, -2))) # k10, (128, 0, 10)
+
+            try:
+                kl[i: (i + loader.batch_size)] = np.mean(
+                    np.sum(0.5 * aa * np.log(aa / bb) + 0.5 * bb * np.log(bb / aa), axis=2), axis=1)
+            except Exception as e:
+                print(e)
+                print(aa)
+                print(bb)
+                print(0.5 * aa * np.log(aa / bb))
+                print(0.5 * bb * np.log(bb / aa))
+                print(np.sum(0.5 * aa * np.log(aa / bb) + 0.5 * bb * np.log(bb / aa), axis=2))
+                print(np.mean(np.sum(0.5 * aa * np.log(aa / bb) + 0.5 * bb * np.log(bb / aa), axis=2), axis=1))
+
+
+
         self.model.train()
         return kl
 
