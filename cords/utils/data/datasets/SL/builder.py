@@ -2055,11 +2055,6 @@ def gen_dataset(datadir, dset_name, feature, isnumpy=False, **kwargs):
             trainset, valset = Subset(fullset, train_index), Subset(fullset, val_index)
             break
 
-        # num_fulltrn = len(fullset)
-        # num_val = int(num_fulltrn * validation_set_fraction)
-        # num_trn = num_fulltrn - num_val
-        # trainset, valset = random_split(fullset, [num_trn, num_val])
-
         return trainset, valset, testset, num_cls
 
     elif dset_name == "cifar100":

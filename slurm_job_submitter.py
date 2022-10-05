@@ -122,7 +122,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    # if jobs_path is empty, show help mesage of argparse and exit
+    # if jobs_path is empty, show help message of argparse and exit
     if args.jobs_path is None:
         parser.print_help()
         exit(1)
