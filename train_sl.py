@@ -74,6 +74,9 @@ class TrainClassifier:
         if self.cfg.logging == "DEBUG":
             log_level = logging.DEBUG
         self.logger = logging.getLogger(__name__)
+        if self.logger.hasHandlers():
+            # Logger is already configured, remove all handlers
+            self.logger.handlers = []
         self.logger.setLevel(log_level)
         s_handler = logging.StreamHandler(stream=sys.stdout)
         s_handler.setFormatter(plain_formatter)
@@ -142,6 +145,7 @@ class TrainClassifier:
                     "optimizer": self.cfg.optimizer,
                     "dss_args": self.cfg.dss_args,
                     "num_workers": self.cfg.num_workers,
+                    "group_id": os.environ["WANDB_RUN_GROUP"]
                 },
             )
 
