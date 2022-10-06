@@ -132,9 +132,14 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
                     continue
                 else:
                     neighbour_probs = np.array(probs[c])[neighbours] # use a np array s.t. we can use multiple indices
+                    # replace zero values to circumvent underflow and zero division errors
+                    neighbour_probs[neighbour_probs == 0] = 1e-6
+                    aa[aa == 0] = 1e-6
                     try:
-                        kl_div = np.mean(np.sum(neighbour_probs * np.log(neighbour_probs / aa),
-                                                                  axis=1 if neighbour_probs.ndim > 1 else 0))
+                        with np.errstate(under='ignore', over='ignore'): # ignore low precision underflow errors
+                            # note that overflows will return inf which is replaced later on. 
+                            kl_div = np.mean(np.sum(neighbour_probs * np.log(neighbour_probs / aa),
+                                                                      axis=1 if neighbour_probs.ndim > 1 else 0))
                     except Exception as e:
                         print(e)
                         print(aa.shape, neighbours.shape, neighbour_probs.shape, '\n')
