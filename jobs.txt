@@ -389,6 +389,10 @@
 # python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --lr 0.01 --epochs 30 --num_workers 8 --batch_size 256 --name 'pap nw 8 bs 256' # ok
 # python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --lr 0.01 --epochs 30 --num_workers 12 --batch_size 256 --name 'pap nw 12 bs 256' # ok
 
+## 6-10 failed cubs jobs rerun
+python3 run_experiment.py --config ./exp_configs/cub200/config_super-cl.py
+python3 run_experiment.py --config ./exp_configs/cub200/config_super-cl.py --weighted
+
 ## 6-10 longer exps, warm up, and transfer learning for Super-CL
 python3 run_experiment.py --config ./exp_configs/cifar10/config_super-cl.py --kappa 0.03 --epochs 500
 python3 run_experiment.py --config ./exp_configs/papilion/config_super-cl.py --kappa 0.05
