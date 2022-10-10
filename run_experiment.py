@@ -83,7 +83,7 @@ parser.add_argument(
 parser.add_argument("--epochs", type=int, help="number of epochs to train")
 parser.add_argument(
     "--disable_scheduler",
-    action='store_true',
+    action="store_true",
     help="Whether to disable Cosine Annealing",
 )
 parser.add_argument(
@@ -91,64 +91,48 @@ parser.add_argument(
 )
 parser.add_argument(
     "--early_stopping",
-    action='store_true',
+    action="store_true",
     help="Enable early stopping. NOTE: has to be used with --disable_scheduler",
 )
-parser.add_argument(
-    "--lr",
-    type=float,
-    help="learning rate"
-)
+parser.add_argument("--lr", type=float, help="learning rate")
 parser.add_argument(
     "--model",
     type=str,
     choices=["ResNet18", "EfficientNet"],
 )
+parser.add_argument("--pretrained", action="store_true", help="use pretrained model")
 parser.add_argument(
-    "--pretrained",
-    action='store_true',
-    help="use pretrained model"
+    "--finetune", action="store_true", help="do finetuning of all layers."
 )
 parser.add_argument(
-    "--finetune",
-    action='store_true',
-    help="do finetuning of all layers."
-)
-parser.add_argument(
-    "--selection_type",
-    type=str,
-    help="Selection type for DSS strategy"
+    "--selection_type", type=str, help="Selection type for DSS strategy"
 )
 parser.add_argument(
     "--nonadaptive",
-    action='store_true',
-    help='Whether to run the DSS nonadaptively. (only once at the start)'
+    action="store_true",
+    help="Whether to run the DSS nonadaptively. (only once at the start)",
 )
 
 parser.add_argument(
     "--submod_function",
     type=str,
-    choices=["facility-location", "graph-cut", "sum-redundancy", "saturated-coverage"]
+    choices=["facility-location", "graph-cut", "sum-redundancy", "saturated-coverage"],
 )
 
 parser.add_argument(
-    '--data_dependent_scheduler',
-    action='store_true',
-    help='Enable data dependent scheduling of LR'
+    "--do_not_pin_memory", action="store_false", help="To disable memory pinning"
 )
 
 parser.add_argument(
-    '--num_workers',
-    type=int,
-    help="Number of workers for dataloader"
+    "--data_dependent_scheduler",
+    action="store_true",
+    help="Enable data dependent scheduling of LR",
 )
+
+parser.add_argument("--num_workers", type=int, help="Number of workers for dataloader")
+parser.add_argument("--batch_size", type=int, help="Batch size for dataloader")
 parser.add_argument(
-    '--batch_size',
-    type=int,
-    help="Batch size for dataloader"
-)
-parser.add_argument(
-    "--weighted", action='store_true', help="To use weighted loss for Super-CL sampling"
+    "--weighted", action="store_true", help="To use weighted loss for Super-CL sampling"
 )
 
 args = parser.parse_args()
@@ -170,7 +154,7 @@ if args.selection_type is not None:
 if args.submod_function is not None:
     cfg.dss_args.submod_func_type = args.submod_function
 if args.pretrained:
-    cfg.model.type = 'pre-trained'
+    cfg.model.type = "pre-trained"
 
 if args.finetune:
     cfg.model.fine_tune = args.finetune
@@ -211,6 +195,10 @@ if cfg.dataloader.num_workers is None or cfg.dataloader.num_workers == DotMap():
     cfg.dataloader.num_workers = 0
 if cfg.dataloader.batch_size is None or cfg.dataloader.batch_size == DotMap():
     cfg.dataloader.batch_size = 32
+if args.do_not_pin_memory:
+    cfg.dataloader.pin_memory = False
+else:
+    cfg.dataloader.pin_memory = True
 
 clf = TrainClassifier(cfg)
 clf.train()
