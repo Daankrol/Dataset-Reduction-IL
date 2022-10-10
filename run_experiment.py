@@ -2,14 +2,36 @@
 from train_sl import TrainClassifier
 from cords.utils.config_utils import load_config_data
 import argparse
+import copy
 import os
 from dotmap import DotMap
-from pyJoules.energy_meter import measure_energy, EnergyMeter, EnergyContext
-from pyJoules.device.rapl_device import RaplPackageDomain
-from pyJoules.device.nvidia_device import NvidiaGPUDomain
-from pyJoules.handler.csv_handler import CSVHandler
-from pyJoules.device.device_factory import DeviceFactory
+import wandb
 
+
+def generate_run_name(cfg):
+    if cfg.dss_args.type == 'Submodular':
+        name = cfg.dss_args.submod_func_type + '_' + cfg.dataset.name
+    else:
+        name = cfg.dss_args.type + "_" + cfg.dataset.name
+    if cfg.dss_args.fraction != DotMap():
+        name += f"_{str(cfg.dss_args.fraction)}"
+    if cfg.dss_args.select_every != DotMap() and cfg.dss_args.online:
+        name += f"_{str(cfg.dss_args.select_every)}"
+    if cfg.model.type == "pre-trained":
+        name += "_PT"
+    if cfg.model.fine_tune != DotMap() and cfg.model.fine_tune:
+        name += "_FT"
+    if cfg.early_stopping:
+        name += "_ES"
+    if not cfg.dss_args.online:
+        name += "_offline"
+    if cfg.scheduler.type is None and not cfg.early_stopping:
+        name += "_NoSched"
+    if cfg.scheduler.data_dependent:
+        name += '_dataScheduler'
+    if cfg.dss_args.kappa != DotMap() and cfg.dss_args.kappa > 0:
+        name += f"_k-{str(cfg.dss_args.kappa)}"
+    return name
 
 def getCPUIDs():
     """Get the IDs of the GPU and CPUs that are assigned to this job.
@@ -135,6 +157,10 @@ parser.add_argument(
     "--weighted", action="store_true", help="To use weighted loss for Super-CL sampling"
 )
 
+parser.add_argument(
+    "--runs", type=int, help="Number of runs to group."
+)
+
 args = parser.parse_args()
 if args.config is None:
     parser.print_help()
@@ -200,5 +226,18 @@ if args.do_not_pin_memory:
 else:
     cfg.dataloader.pin_memory = True
 
-clf = TrainClassifier(cfg)
-clf.train()
+if args.runs is not None:
+    temp_name = generate_run_name(cfg)
+    uid = wandb.util.generate_id()
+    os.environ["WANDB_RUN_GROUP"] = f'{temp_name}-{uid}'
+    for r in range(args.runs):
+        print(f"\n{'='*20} STARTING RUN {r+1}/{args.runs} {'='*20}\n")
+        clf = TrainClassifier(copy.deepcopy(cfg))
+        clf.train()
+else:
+    try:
+        os.environ.pop("WANDB_RUN_GROUP")
+    except Exception as e:
+        pass
+    clf = TrainClassifier(cfg)
+    clf.train()

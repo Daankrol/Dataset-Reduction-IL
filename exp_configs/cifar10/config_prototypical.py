@@ -4,7 +4,7 @@ config = dict(
     measure_energy=True,
     logging='DEBUG',
     wandb=True,
-    no_tsne=True,
+    no_tsne=False,
     is_reg=False,
     dataset=dict(name="cifar10", datadir="../data", feature="dss", type="image", img_size=32),
     dataloader=dict(shuffle=True, batch_size=32, pin_memory=True),

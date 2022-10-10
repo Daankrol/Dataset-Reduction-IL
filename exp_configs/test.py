@@ -6,10 +6,10 @@ config = dict(
     logging='DEBUG',
     no_tsne=True,
     is_reg=False,
-    # dataset=dict(
-    #     name="cifar10", datadir="../data", feature="dss", type="image", img_size=32
-    # ),
-    dataset=dict(name="papilion", datadir="../data", feature="dss", type="image", img_size=224),
+    dataset=dict(
+        name="cifar10", datadir="../data", feature="dss", type="image", img_size=32
+    ),
+    # dataset=dict(name="cub200", datadir="../data", feature="dss", type="image", img_size=224),
     dataloader=dict(shuffle=True, batch_size=64, pin_memory=True, num_workers=8),
     model=dict(architecture="EfficientNet", type="pre-defined"),
     ckpt=dict(is_load=False, is_save=False, dir="results/", save_every=20),
@@ -26,15 +26,15 @@ config = dict(
     #     repeats=10,
     #     kappa=0
     # ),
-    dss_args=dict(
-        type="Super-CL",
-        fraction=0.8,
-        selection_type="PerClass",  #  PerClass or PerBatch
-        weighted=True,
-        online=True,
-        select_every=1,
-        kappa=0
-    ),
+    # dss_args=dict(
+    #     type="Super-CL",
+    #     fraction=0.8,
+    #     selection_type="PerClass",  #  PerClass or PerBatch
+    #     weighted=True,
+    #     online=True,
+    #     select_every=1,
+    #     kappa=0
+    # ),
     # dss_args=dict(
     #     type="CAL",
     #     fraction=0.8,

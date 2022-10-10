@@ -362,30 +362,56 @@
 # python3 run_experiment.py --config ./exp_configs/cub200/config_submodular.py --submod_function facility-location --select_every 10 --fraction 0.2 --lr 0.01 --kappa 0.03 --epochs 500 # ok
 
 ## 5-10 super-cl
-python3 run_experiment.py --config ./exp_configs/cifar10/config_super-cl.py
-python3 run_experiment.py --config ./exp_configs/cifar10/config_super-cl.py --weighted
-python3 run_experiment.py --config ./exp_configs/cub200/config_super-cl.py
-python3 run_experiment.py --config ./exp_configs/cub200/config_super-cl.py --weighted
-python3 run_experiment.py --config ./exp_configs/papilion/config_super-cl.py
-python3 run_experiment.py --config ./exp_configs/papilion/config_super-cl.py --weighted
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_super-cl.py # ok
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_super-cl.py --weighted # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_super-cl.py # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_super-cl.py --weighted # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_super-cl.py # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_super-cl.py --weighted # ok
 
 
 ## 5-10 grand tests
-python3 run_experiment.py --config ./exp_configs/cifar10/config_grand.py --fraction 0.5 --nonadaptive
-python3 run_experiment.py --config ./exp_configs/cifar10/config_grand.py --fraction 0.8 --nonadaptive
-python3 run_experiment.py --config ./exp_configs/cub200/config_grand.py --fraction 0.5 --nonadaptive
-python3 run_experiment.py --config ./exp_configs/cub200/config_grand.py --fraction 0.8 --nonadaptive
-python3 run_experiment.py --config ./exp_configs/papilion/config_grand.py --fraction 0.9 --nonadaptive
-python3 run_experiment.py --config ./exp_configs/papilion/config_grand.py --fraction 0.8 --nonadaptive
-python3 run_experiment.py --config ./exp_configs/papilion/config_grand.py --fraction 0.5 --nonadaptive
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_grand.py --fraction 0.5 --nonadaptive # ok
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_grand.py --fraction 0.8 --nonadaptive # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_grand.py --fraction 0.5 --nonadaptive # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_grand.py --fraction 0.8 --nonadaptive # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_grand.py --fraction 0.9 --nonadaptive # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_grand.py --fraction 0.8 --nonadaptive # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_grand.py --fraction 0.5 --nonadaptive # ok
 
 ## 5-10 batch size and num_workers test
-python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --lr 0.01 --epochs 30 --num_workers 8 --batch_size 128 --name 'cub nw 8 bs 128'
-python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --lr 0.01 --epochs 30 --num_workers 12 --batch_size 128 --name 'cub nw 12 bs 128'
-python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --lr 0.01 --epochs 30 --num_workers 8 --batch_size 128 --name 'pap nw 8 bs 128'
-python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --lr 0.01 --epochs 30 --num_workers 12 --batch_size 128 --name 'pap nw 12 bs 128'
-python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --lr 0.01 --epochs 30 --num_workers 8 --batch_size 256 --name 'cub nw 8 bs 256'
-python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --lr 0.01 --epochs 30 --num_workers 12 --batch_size 256 --name 'cub nw 12 bs 256'
-python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --lr 0.01 --epochs 30 --num_workers 8 --batch_size 256 --name 'pap nw 8 bs 256'
-python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --lr 0.01 --epochs 30 --num_workers 12 --batch_size 256 --name 'pap nw 12 bs 256'
+# python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --lr 0.01 --epochs 30 --num_workers 8 --batch_size 128 --name 'cub nw 8 bs 128' # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --lr 0.01 --epochs 30 --num_workers 12 --batch_size 128 --name 'cub nw 12 bs 128' # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --lr 0.01 --epochs 30 --num_workers 8 --batch_size 128 --name 'pap nw 8 bs 128' # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --lr 0.01 --epochs 30 --num_workers 12 --batch_size 128 --name 'pap nw 12 bs 128' # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --lr 0.01 --epochs 30 --num_workers 8 --batch_size 256 --name 'cub nw 8 bs 256' # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --lr 0.01 --epochs 30 --num_workers 12 --batch_size 256 --name 'cub nw 12 bs 256' # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --lr 0.01 --epochs 30 --num_workers 8 --batch_size 256 --name 'pap nw 8 bs 256' # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --lr 0.01 --epochs 30 --num_workers 12 --batch_size 256 --name 'pap nw 12 bs 256' # ok
 
+## 6-10 failed cubs jobs rerun
+# python3 run_experiment.py --config ./exp_configs/cub200/config_super-cl.py # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_super-cl.py --weighted # ok
+
+## 6-10 longer exps, warm up, and transfer learning for Super-CL
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_super-cl.py --kappa 0.03 --epochs 500 # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_super-cl.py --kappa 0.05 # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_super-cl.py --kappa 0.03 --epochs 500 # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_super-cl.py --kappa 0.03 --epochs 500 --select_every 5 --fraction 0.1 # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_super-cl.py --kappa 0.03 --epochs 500 --select_every 5 --fraction 0.2 # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_super-cl.py --kappa 0.03 --epochs 500 # ok
+
+# python3 run_experiment.py --config ./exp_configs/papilion/config_super-cl.py --pretrained --finetune --lr 0.005 # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_super-cl.py --pretrained --finetune --lr 0.005 # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_super-cl.py --pretrained --finetune --lr 0.005 --select_every 5 --fraction 0.1 # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_super-cl.py --pretrained --finetune --lr 0.005 --select_every 5 --fraction 0.2 # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_super-cl.py --pretrained --finetune --lr 0.005 # ok
+
+## GRAND PER CLASS
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_grand.py --fraction 0.5 --nonadaptive --selection_type PerClass # ok
+# python3 run_experiment.py --config ./exp_configs/cifar10/config_grand.py --fraction 0.8 --nonadaptive --selection_type PerClass # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_grand.py --fraction 0.5 --nonadaptive --selection_type PerClass # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_grand.py --fraction 0.8 --nonadaptive --selection_type PerClass # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_grand.py --fraction 0.5 --nonadaptive --selection_type PerClass # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_grand.py --fraction 0.9 --nonadaptive --selection_type PerClass # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_grand.py --fraction 0.8 --nonadaptive --selection_type PerClass # ok
