@@ -31,6 +31,8 @@ def generate_run_name(cfg):
         name += "_dataScheduler"
     if cfg.dss_args.kappa != DotMap() and cfg.dss_args.kappa > 0:
         name += f"_k-{str(cfg.dss_args.kappa)}"
+    if cfg.dss_args.inverse_warmup:
+        name += "-INV"
     return name
 
 

@@ -415,3 +415,18 @@
 # python3 run_experiment.py --config ./exp_configs/papilion/config_grand.py --fraction 0.5 --nonadaptive --selection_type PerClass # ok
 # python3 run_experiment.py --config ./exp_configs/papilion/config_grand.py --fraction 0.9 --nonadaptive --selection_type PerClass # ok
 # python3 run_experiment.py --config ./exp_configs/papilion/config_grand.py --fraction 0.8 --nonadaptive --selection_type PerClass # ok
+
+## test
+# python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --select_every 10 --fraction 0.2 --lr 0.01 --kappa 0.03 --epochs 500 --num_workers 12 --runs 3 # ok
+# python3 run_experiment.py --config ./exp_configs/inaturalist/config_gradmatchpb.py --select_every 10 --fraction 0.2 --lr 0.01 --kappa 0.03 --epochs 300 --num_workers 12 # ok
+# python3 run_experiment.py --config ./exp_configs/inaturalist/config_gradmatchpb.py --select_every 10 --fraction 0.2 --lr 0.01  --epochs 300 --num_workers 12 # ok
+# python3 run_experiment.py --config ./exp_configs/inaturalist/config_gradmatchpb.py --select_every 10 --fraction 0.2 --lr 0.01  --epochs 300 --num_workers 12 --do_not_pin_memory
+# python3 run_experiment.py --config ./exp_configs/inaturalist/config_gradmatchpb.py --select_every 10 --fraction 0.2 --lr 0.005  --epochs 300 --num_workers 12 --do_not_pin_memory --pretrained --finetune # ok
+
+# python3 run_experiment.py --config ./exp_configs/papilion/config_super-cl.py --pretrained --finetune --lr 0.005 --select_every 10 --fraction 0.2 --kappa 0.03 # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_super-cl.py --pretrained --finetune --lr 0.005 --select_every 10 --fraction 0.4 --kappa 0.03 # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_super-cl.py --pretrained --finetune --lr 0.005 --select_every 10 --fraction 0.3 # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_super-cl.py --pretrained --finetune --lr 0.005 --select_every 10 --fraction 0.4 # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_super-cl.py --pretrained --finetune --lr 0.005 --select_every 10 --fraction 0.5 # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --pretrained --finetune --lr 0.005 --select_every 10 --fractoin 0.2 # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_super-cl.py --pretrained --finetune --lr 0.005 --select_every 10 --fraction 0.2 --kappa 0.14 --inverse_warmup # ok

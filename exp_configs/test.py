@@ -27,6 +27,13 @@ config = dict(
     #     kappa=0
     # ),
     # dss_args=dict(
+    #     type='Full',
+    #     fraction=0.1,
+    #     online=False,
+    #     select_every=1,
+    #     kappa=0
+    # ),
+    # dss_args=dict(
     #     type="Super-CL",
     #     fraction=0.8,
     #     selection_type="PerClass",  #  PerClass or PerBatch
@@ -56,20 +63,20 @@ config = dict(
     #     linear_layer=False,
     #     kappa=0,
     # ),
-    # dss_args=dict(
-    #     type="GradMatch",
-    #     fraction=0.5,
-    #     select_every=1,
-    #     lam=0.5,
-    #     selection_type="PerBatch",
-    #     v1=True,
-    #     valid=False,
-    #     kappa=0,
-    #     eps=1e-100,
-    #     linear_layer=True,
-    # ),
+    dss_args=dict(
+        type="GradMatch",
+        fraction=0.2,
+        select_every=5,
+        lam=0.5,
+        selection_type="PerBatch",
+        v1=True,
+        valid=False,
+        kappa=0,
+        eps=1e-100,
+        linear_layer=True,
+    ),
     train_args=dict(
-        num_epochs=5,
+        num_epochs=10,
         device="cuda",
         print_every=1,
         results_dir="../results/",
