@@ -6,7 +6,7 @@ import time
 import numpy as np
 import torch.nn as nn
 import torch.optim as optim
-from run_experiment import generate_run_name
+from cords.utils.utils import generate_run_name
 from dotmap import DotMap
 from ray import tune
 from torch.utils.data import Subset
@@ -1386,3 +1386,4 @@ class TrainClassifier:
             is_selcon = False
 
         return dataloader, is_selcon
+

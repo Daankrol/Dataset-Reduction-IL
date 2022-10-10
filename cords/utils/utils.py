@@ -2,6 +2,7 @@ import os
 import glob
 import pandas as pd
 import numpy as np
+from dotmap import DotMap
 
 def generate_cumulative_timing(mod_timing):
         tmp = 0
@@ -10,6 +11,33 @@ def generate_cumulative_timing(mod_timing):
             tmp += mod_timing[i]
             mod_cum_timing[i] = tmp
         return mod_cum_timing / 3600
+
+def generate_run_name(cfg):
+    if cfg.dss_args.type == "Submodular":
+        name = cfg.dss_args.submod_func_type + "_" + cfg.dataset.name
+    else:
+        name = cfg.dss_args.type + "_" + cfg.dataset.name
+    if cfg.dss_args.fraction != DotMap():
+        name += f"_{str(cfg.dss_args.fraction)}"
+    if cfg.dss_args.select_every != DotMap() and cfg.dss_args.online:
+        name += f"_{str(cfg.dss_args.select_every)}"
+    if cfg.model.type == "pre-trained":
+        name += "_PT"
+    if cfg.model.fine_tune != DotMap() and cfg.model.fine_tune:
+        name += "_FT"
+    if cfg.early_stopping:
+        name += "_ES"
+    if not cfg.dss_args.online:
+        name += "_offline"
+    if cfg.scheduler.type is None and not cfg.early_stopping:
+        name += "_NoSched"
+    if cfg.scheduler.data_dependent:
+        name += "_dataScheduler"
+    if cfg.dss_args.kappa != DotMap() and cfg.dss_args.kappa > 0:
+        name += f"_k-{str(cfg.dss_args.kappa)}"
+    if cfg.dss_args.inverse_warmup:
+        name += "-INV"
+    return name
         
 
 class EarlyStopping:
