@@ -43,6 +43,10 @@ class AdaptiveDSSDataLoader(DSSDataLoader):
         assert (
             "kappa" in dss_args.keys()
         ), "'kappa' is a compulsory argument. Include it as a key in dss_args"
+        if "inverse_warmup" in dss_args.keys():
+            self.inverse_warmup = dss_args["inverse_warmup"]
+        else:
+            self.inverse_warmup = False
         self.select_every = dss_args.select_every
         self.device = dss_args.device
 
@@ -51,7 +55,11 @@ class AdaptiveDSSDataLoader(DSSDataLoader):
         else:
             self.online = False
 
-        self.logger.info("Running Data Subset Selection in " + ('adaptive' if self.online else 'non-adaptive') + ' mode.' )
+        self.logger.info(
+            "Running Data Subset Selection in "
+            + ("adaptive" if self.online else "non-adaptive")
+            + " mode."
+        )
         self.kappa = dss_args.kappa
         if dss_args.kappa > 0:
             assert (
@@ -77,50 +85,70 @@ class AdaptiveDSSDataLoader(DSSDataLoader):
         warmstart kappa value.
         """
         if self.online:
-            self.initialized = True
-            if self.cur_epoch < self.warmup_epochs + 1:
-                self.logger.debug(
-                    "Epoch: {0:d} using full dataset for warm-start.".format(
-                        self.cur_epoch, self.warmup_epochs
+
+            if not self.inverse_warmup:
+                # Use normal warmup where warmup is training with all data and then switching to subset
+                self.initialized = True
+                if self.cur_epoch < self.warmup_epochs + 1:
+                    self.logger.debug(
+                        "Epoch: {0:d} using full dataset for warm-start.".format(
+                            self.cur_epoch, self.warmup_epochs
+                        )
                     )
-                )
-                loader = self.wtdataloader
-                print(
-                    "Epoch: {0:d} using full dataset for warm-start.".format(
-                        self.cur_epoch, self.warmup_epochs
+                    loader = self.wtdataloader
+                    print(
+                        "Epoch: {0:d} using full dataset for warm-start.".format(
+                            self.cur_epoch, self.warmup_epochs
+                        )
                     )
-                )
-                # print("Size: ", len(loader))
-                self.resampled = False
-            elif self.cur_epoch == self.warmup_epochs + 1:
-                self.logger.debug(
-                    "Epoch: {0:d} finished with warm up so forcing a resample.".format(
-                        self.cur_epoch
-                    )
-                )
-                print(
-                    "Epoch: {0:d} finished with warm up so forcing a resample.".format(
-                        self.cur_epoch
-                    )
-                )
-                self.resample()
-                loader = self.subset_loader
-            else:
-                self.logger.debug(
-                    "Epoch: {0:d}, reading dataloader... ".format(self.cur_epoch)
-                )
-                print("Epoch: {0:d}, reading dataloader... ".format(self.cur_epoch))
-                if ((self.cur_epoch + self.warmup_epochs) % self.select_every == 0) and (
-                    self.cur_epoch > 1
-                ):
-                    self.resample()
-                else:
+                    # print("Size: ", len(loader))
                     self.resampled = False
-                loader = self.subset_loader
-                # print("Size: ", len(loader))
-                self.logger.debug(
-                    "Epoch: {0:d}, finished reading dataloader. ".format(self.cur_epoch)
-                )
+                elif self.cur_epoch == self.warmup_epochs + 1:
+                    self.logger.info(
+                        f"Epoch: {self.cur_epoch} finished with warm up so forcing a resample."
+                    )
+                    self.resample()
+                    loader = self.subset_loader
+                else:
+                    self.logger.info(
+                        "Epoch: {0:d}, reading dataloader... ".format(self.cur_epoch)
+                    )
+                    if (
+                        (self.cur_epoch + self.warmup_epochs) % self.select_every == 0
+                    ) and (self.cur_epoch > 1):
+                        self.resample()
+                    else:
+                        self.resampled = False
+                    loader = self.subset_loader
+                    # print("Size: ", len(loader))
+                    self.logger.debug(
+                        "Epoch: {0:d}, finished reading dataloader. ".format(
+                            self.cur_epoch
+                        )
+                    )
+            else:
+                # Use inverse warmup where warmup is training with subset and then switching to full
+                if self.cur_epoch < self.warmup_epochs + 1:
+                    self.logger.debug(
+                        "Epoch: {0:d}, inverse warm-up, reading dataloader...".format(
+                            self.cur_epoch, self.warmup_epochs
+                        )
+                    )
+                    if self.cur_epoch % self.select_every == 0:
+
+                        self.resample()
+                    else:
+                        self.resampled = False
+                    loader = self.subset_loader
+                else:
+                    self.logger.info(
+                        "Epoch: inverse warm-up done, using full dataset.".format(
+                            self.cur_epoch, self.warmup_epochs
+                        )
+                    )
+                    loader = self.wtdataloader
+                    self.resampled = False
+
         else:
             if not self.initialized:
                 self.resample()

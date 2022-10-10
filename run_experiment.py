@@ -9,8 +9,8 @@ import wandb
 
 
 def generate_run_name(cfg):
-    if cfg.dss_args.type == 'Submodular':
-        name = cfg.dss_args.submod_func_type + '_' + cfg.dataset.name
+    if cfg.dss_args.type == "Submodular":
+        name = cfg.dss_args.submod_func_type + "_" + cfg.dataset.name
     else:
         name = cfg.dss_args.type + "_" + cfg.dataset.name
     if cfg.dss_args.fraction != DotMap():
@@ -28,10 +28,11 @@ def generate_run_name(cfg):
     if cfg.scheduler.type is None and not cfg.early_stopping:
         name += "_NoSched"
     if cfg.scheduler.data_dependent:
-        name += '_dataScheduler'
+        name += "_dataScheduler"
     if cfg.dss_args.kappa != DotMap() and cfg.dss_args.kappa > 0:
         name += f"_k-{str(cfg.dss_args.kappa)}"
     return name
+
 
 def getCPUIDs():
     """Get the IDs of the GPU and CPUs that are assigned to this job.
@@ -158,8 +159,12 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--runs", type=int, help="Number of runs to group."
+    "--inverse_warmup",
+    action="store_true",
+    help="To use inverse warmup. First DSS then training with all data",
 )
+
+parser.add_argument("--runs", type=int, help="Number of runs to group.")
 
 args = parser.parse_args()
 if args.config is None:
@@ -208,6 +213,9 @@ if args.kappa is not None:
 if args.lam is not None:
     cfg.dss_args.lam = args.lam
 
+if args.inverse_warmup:
+    cfg.dss_args.inverse_warmup = True
+
 if args.nonadaptive:
     cfg.dss_args.online = False
 elif cfg.dss_args.online is None or cfg.dss_args.online == DotMap():
@@ -229,7 +237,7 @@ else:
 if args.runs is not None:
     temp_name = generate_run_name(cfg)
     uid = wandb.util.generate_id()
-    os.environ["WANDB_RUN_GROUP"] = f'{temp_name}-{uid}'
+    os.environ["WANDB_RUN_GROUP"] = f"{temp_name}-{uid}"
     for r in range(args.runs):
         print(f"\n{'='*20} STARTING RUN {r+1}/{args.runs} {'='*20}\n")
         clf = TrainClassifier(copy.deepcopy(cfg))
