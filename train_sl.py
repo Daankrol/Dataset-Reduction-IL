@@ -121,6 +121,11 @@ class TrainClassifier:
             if self.cfg.name is not None and self.cfg.name != DotMap():
                 name = self.cfg.name
 
+            try:
+                group_id = os.environ["WANDB_RUN_GROUP"]
+            except Exception:
+                group_id = None
+
             wandb.init(
                 project="Dataset Reduction for IL",
                 entity="daankrol",
@@ -145,7 +150,7 @@ class TrainClassifier:
                     "optimizer": self.cfg.optimizer,
                     "dss_args": self.cfg.dss_args,
                     "num_workers": self.cfg.num_workers,
-                    "group_id": os.environ["WANDB_RUN_GROUP"]
+                    "group_id": group_id
                 },
             )
 
