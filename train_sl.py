@@ -21,10 +21,12 @@ from cords.utils.data.dataloader.SL.adaptive import (
     SubmodularDataLoader,
     ContrastiveDataLoader,
     PrototypicalDataLoader,
-    GrandDataLoader
+    GrandDataLoader,
 )
 from cords.utils.data.dataloader.SL.adaptive.el2ndataloader import EL2NDataLoader
-from cords.utils.data.dataloader.SL.adaptive.superCLdataloader import SupervisedContrastiveLearningDataLoader
+from cords.utils.data.dataloader.SL.adaptive.superCLdataloader import (
+    SupervisedContrastiveLearningDataLoader,
+)
 
 from cords.utils.data.dataloader.SL.nonadaptive import FacLocDataLoader
 from cords.utils.data.datasets.SL import gen_dataset
@@ -91,8 +93,8 @@ class TrainClassifier:
         self.logger.propagate = False
 
         if self.cfg.wandb:
-            if self.cfg.dss_args.type == 'Submodular':
-                name = self.cfg.dss_args.submod_func_type + '_' + self.cfg.dataset.name
+            if self.cfg.dss_args.type == "Submodular":
+                name = self.cfg.dss_args.submod_func_type + "_" + self.cfg.dataset.name
             else:
                 name = self.cfg.dss_args.type + "_" + self.cfg.dataset.name
             if self.cfg.dss_args.fraction != DotMap():
@@ -110,10 +112,9 @@ class TrainClassifier:
             if self.cfg.scheduler.type is None and not self.cfg.early_stopping:
                 name += "_NoSched"
             if self.cfg.scheduler.data_dependent:
-                name += '_dataScheduler'
+                name += "_dataScheduler"
             if self.cfg.dss_args.kappa != DotMap() and self.cfg.dss_args.kappa > 0:
                 name += f"_k-{str(self.cfg.dss_args.kappa)}"
-
 
             if self.cfg.name is not None and self.cfg.name != DotMap():
                 name = self.cfg.name
@@ -389,9 +390,9 @@ class TrainClassifier:
         tst_batch_size = self.cfg.dataloader.batch_size
 
         if (
-                self.cfg.dataset.name == "sst2_facloc"
-                and self.count_pkl(self.cfg.dataset.ss_path) == 1
-                and self.cfg.dss_args.type == "FacLoc"
+            self.cfg.dataset.name == "sst2_facloc"
+            and self.count_pkl(self.cfg.dataset.ss_path) == 1
+            and self.cfg.dss_args.type == "FacLoc"
         ):
             self.cfg.dss_args.type = "Full"
             file_ss = open(self.cfg.dataset.ss_path, "rb")
@@ -413,7 +414,7 @@ class TrainClassifier:
             batch_size=trn_batch_size,
             sampler=batch_sampler(trainset, trn_batch_size),
             shuffle=False,
-            pin_memory=True,
+            pin_memory=self.cfg.dataloader.pin_memory,
             collate_fn=collate_fn,
             drop_last=drop_last,
             num_workers=self.cfg.dataloader.num_workers,
@@ -424,7 +425,7 @@ class TrainClassifier:
             batch_size=val_batch_size,
             sampler=batch_sampler(validset, val_batch_size),
             shuffle=False,
-            pin_memory=True,
+            pin_memory=self.cfg.dataloader.pin_memory,
             collate_fn=collate_fn,
             drop_last=drop_last,
             num_workers=self.cfg.dataloader.num_workers,
@@ -435,7 +436,7 @@ class TrainClassifier:
             batch_size=tst_batch_size,
             sampler=batch_sampler(testset, tst_batch_size),
             shuffle=False,
-            pin_memory=True,
+            pin_memory=self.cfg.dataloader.pin_memory,
             collate_fn=collate_fn,
             drop_last=drop_last,
             num_workers=self.cfg.dataloader.num_workers,
@@ -498,12 +499,24 @@ class TrainClassifier:
             early_stopping = EarlyStopping(patience=15, min_delta=0, logger=logger)
 
         ## Custom dataloaders
-        dataloader, is_selcon = self.create_dataloader(model, criterion_nored, trainloader, valloader, logger, trainset,
-                                                       validset, optimizer, criterion)
+        dataloader, is_selcon = self.create_dataloader(
+            model,
+            criterion_nored,
+            trainloader,
+            valloader,
+            logger,
+            trainset,
+            validset,
+            optimizer,
+            criterion,
+        )
 
         # create embeddings for the train set
-        if self.cfg.dataset.name in ['cifar10', 'cifar100', 'papilion', 'cub200'] and self.cfg.dss_args.type not in [
-            'Full'] and not self.cfg.no_tsne:
+        if (
+            self.cfg.dataset.name in ["cifar10", "cifar100", "papilion", "cub200"]
+            and self.cfg.dss_args.type not in ["Full"]
+            and not self.cfg.no_tsne
+        ):
             self.embedding_plotter = TSNEPlotter(
                 trainloader,
                 valloader,
@@ -618,13 +631,21 @@ class TrainClassifier:
                 if self.cfg.scheduler.data_dependent:
                     total_training_samples = len(trainloader.dataset)
                     self.logger.debug(
-                        'Current data for scheduler: {}/{}'.format(scheduler_total_data_seen, total_training_samples))
+                        "Current data for scheduler: {}/{}".format(
+                            scheduler_total_data_seen, total_training_samples
+                        )
+                    )
                     if scheduler_total_data_seen >= total_training_samples:
-                        self.logger.info('{}% of the training data has been seen. Stepping scheduler.'.format(
-                            100 * scheduler_total_data_seen / total_training_samples))
+                        self.logger.info(
+                            "{}% of the training data has been seen. Stepping scheduler.".format(
+                                100 * scheduler_total_data_seen / total_training_samples
+                            )
+                        )
                         scheduler_total_data_seen -= total_training_samples
                         scheduler.step()
-                        self.logger.info('New learning rate: {}'.format(scheduler.get_last_lr()[0]))
+                        self.logger.info(
+                            "New learning rate: {}".format(scheduler.get_last_lr()[0])
+                        )
                 else:
                     scheduler.step()
             timing.append(epoch_time)
@@ -634,17 +655,28 @@ class TrainClassifier:
             print_args = self.cfg.train_args.print_args
 
             # construct t-SNE plots if data has been resampled
-            if self.cfg.dss_args.type != "Full" and dataloader.resampled and self.embedding_plotter is not None:
-                if self.cfg.dss_args.online or (not self.cfg.dss_args.online and not self.embedding_plotter.has_plotted):
-                    self.logger.info(f'EMBEDDING - dataloader is resampled. Epoch: {epoch}')
-                    self.embedding_plotter.make_plot(epoch, selected_indices=dataloader.subset_indices)
+            if (
+                self.cfg.dss_args.type != "Full"
+                and dataloader.resampled
+                and self.embedding_plotter is not None
+            ):
+                if self.cfg.dss_args.online or (
+                    not self.cfg.dss_args.online
+                    and not self.embedding_plotter.has_plotted
+                ):
+                    self.logger.info(
+                        f"EMBEDDING - dataloader is resampled. Epoch: {epoch}"
+                    )
+                    self.embedding_plotter.make_plot(
+                        epoch, selected_indices=dataloader.subset_indices
+                    )
 
             """
             ################################################# Evaluation Loop #################################################
             """
 
             if ((epoch + 1) % self.cfg.train_args.print_every == 0) or (
-                    epoch == self.cfg.train_args.num_epochs - 1
+                epoch == self.cfg.train_args.num_epochs - 1
             ):
                 trn_loss = 0
                 trn_correct = 0
@@ -896,7 +928,7 @@ class TrainClassifier:
                         metrics["val_acc"] = val_acc[-1]
                     if arg == "val_recall":
                         print_str += (
-                                " , " + "Validation Recall: " + str(val_recalls[-1])
+                            " , " + "Validation Recall: " + str(val_recalls[-1])
                         )
                         metrics["val_recall"] = val_recalls[-1]
 
@@ -948,9 +980,9 @@ class TrainClassifier:
                 metrics["current_lr"] = current_lr
                 # report metric to ray for hyperparameter optimization
                 if (
-                        "report_tune" in self.cfg
-                        and self.cfg.report_tune
-                        and len(dataloader)
+                    "report_tune" in self.cfg
+                    and self.cfg.report_tune
+                    and len(dataloader)
                 ):
                     tune.report(mean_accuracy=val_acc[-1])
 
@@ -1001,7 +1033,7 @@ class TrainClassifier:
         ################################################# Results Summary #################################################
         """
 
-        # confusion matrix on test set 
+        # confusion matrix on test set
         all_predictions = torch.tensor([]).to(self.cfg.train_args.device)
         all_targets = torch.tensor([]).to(self.cfg.train_args.device)
 
@@ -1012,9 +1044,9 @@ class TrainClassifier:
                 else:
                     inputs, targets = data
 
-                inputs, targets = inputs.to(
-                    self.cfg.train_args.device
-                ), targets.to(self.cfg.train_args.device, non_blocking=True)
+                inputs, targets = inputs.to(self.cfg.train_args.device), targets.to(
+                    self.cfg.train_args.device, non_blocking=True
+                )
                 outputs = model(inputs)
                 if is_selcon:
                     predicted = outputs
@@ -1100,8 +1132,18 @@ class TrainClassifier:
         wandb.run.summary["val_ds_size"] = len(valloader.dataset)
         wandb.finish()
 
-
-    def create_dataloader(self, model, criterion_nored, trainloader, valloader, logger, trainset, validset, optimizer, criterion):
+    def create_dataloader(
+        self,
+        model,
+        criterion_nored,
+        trainloader,
+        valloader,
+        logger,
+        trainset,
+        validset,
+        optimizer,
+        criterion,
+    ):
         if "collate_fn" not in self.cfg.dss_args:
             self.cfg.dss_args.collate_fn = None
 
@@ -1212,7 +1254,10 @@ class TrainClassifier:
 
         elif self.cfg.dss_args.type == "CAL":
             dataloader = ContrastiveDataLoader(
-                trainloader, valloader, self.cfg.dss_args, logger,
+                trainloader,
+                valloader,
+                self.cfg.dss_args,
+                logger,
                 batch_size=self.cfg.dataloader.batch_size,
                 shuffle=self.cfg.dataloader.shuffle,
                 pin_memory=self.cfg.dataloader.pin_memory,
@@ -1246,8 +1291,8 @@ class TrainClassifier:
                 num_workers=self.cfg.dataloader.num_workers,
             )
             if (
-                    self.cfg.dataset.name == "sst2_facloc"
-                    and self.count_pkl(self.cfg.dataset.ss_path) < 1
+                self.cfg.dataset.name == "sst2_facloc"
+                and self.count_pkl(self.cfg.dataset.ss_path) < 1
             ):
 
                 ss_indices = dataloader.subset_indices
@@ -1297,7 +1342,10 @@ class TrainClassifier:
 
         elif self.cfg.dss_args.type in ["Uncertainty"]:
             dataloader = UncertaintyDataLoader(
-                trainloader, valloader, self.cfg.dss_args, logger,
+                trainloader,
+                valloader,
+                self.cfg.dss_args,
+                logger,
                 batch_size=self.cfg.dataloader.batch_size,
                 shuffle=self.cfg.dataloader.shuffle,
                 pin_memory=self.cfg.dataloader.pin_memory,
@@ -1306,7 +1354,10 @@ class TrainClassifier:
             )
         elif self.cfg.dss_args.type in ["Prototypical"]:
             dataloader = PrototypicalDataLoader(
-                trainloader, valloader, self.cfg.dss_args, logger,
+                trainloader,
+                valloader,
+                self.cfg.dss_args,
+                logger,
                 batch_size=self.cfg.dataloader.batch_size,
                 shuffle=self.cfg.dataloader.shuffle,
                 pin_memory=self.cfg.dataloader.pin_memory,
@@ -1315,7 +1366,10 @@ class TrainClassifier:
             )
         elif self.cfg.dss_args.type in ["Grand"]:
             dataloader = GrandDataLoader(
-                trainloader, valloader, self.cfg.dss_args, logger,
+                trainloader,
+                valloader,
+                self.cfg.dss_args,
+                logger,
                 batch_size=self.cfg.dataloader.batch_size,
                 shuffle=self.cfg.dataloader.shuffle,
                 pin_memory=self.cfg.dataloader.pin_memory,
@@ -1324,7 +1378,10 @@ class TrainClassifier:
             )
         elif self.cfg.dss_args.type in ["EL2N"]:
             dataloader = EL2NDataLoader(
-                trainloader, valloader, self.cfg.dss_args, logger,
+                trainloader,
+                valloader,
+                self.cfg.dss_args,
+                logger,
                 batch_size=self.cfg.dataloader.batch_size,
                 shuffle=self.cfg.dataloader.shuffle,
                 pin_memory=self.cfg.dataloader.pin_memory,
