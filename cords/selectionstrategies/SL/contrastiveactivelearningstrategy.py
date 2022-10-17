@@ -1,16 +1,13 @@
-from random import sample
-import apricot
+import math
 import numpy as np
-import os
 import torch
 import torch.nn.functional as F
-from scipy.sparse import csr_matrix
 from .dataselectionstrategy import DataSelectionStrategy
 from torch.utils.data.sampler import SubsetRandomSampler
+from torch.utils.data import Subset
 from sklearn.metrics import pairwise_distances
 import time
 from cords.utils.models.efficientnet import EfficientNetB0_PyTorch
-import pickle
 
 
 class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
@@ -90,8 +87,9 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
             knn = []
             for c in range(self.num_classes):
                 class_indices = np.arange(self.N_trn)[self.trn_lbls == c]
-                embeddings = torch.zeros((len(class_indices), self.pretrained_model.embDim)).to(self.device)
-                loader = torch.utils.data.DataLoader(torch.utils.data.Subset(self.trainloader.dataset, class_indices),
+                # embeddings = torch.zeros((len(class_indices), self.pretrained_model.embDim)).to(self.device)
+                embeddings = []
+                loader = torch.utils.data.DataLoader(Subset(self.trainloader.dataset, class_indices),
                                                      batch_size=self.trainloader.batch_size,
                                                      pin_memory=self.trainloader.pin_memory,
                                                      num_workers=self.trainloader.num_workers)
@@ -100,46 +98,63 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
                     _, embedding = self.pretrained_model(inputs, last=True, freeze=True)
                     embedding = embedding.detach()
                     # Embedding is of shape (batch_size, embDim)
-                    embeddings[
-                    i * self.trainloader.batch_size: (i * self.trainloader.batch_size + inputs.shape[0])] = embedding
+                    # embeddings[
+                    # i * self.trainloader.batch_size: (i * self.trainloader.batch_size + inputs.shape[0])] = embedding
+                    embeddings.append(embedding.flatten(1).cpu().numpy())
+                embeddings = np.concatenate(embeddings, axis=0)
 
                 # calculate pairwise distance matrix
-                dist = self.metric(embeddings.cpu().numpy())
+                dist = self.metric(embeddings)
                 # for each sample add the k nearest neighbours
                 knn.append(np.argsort(dist, axis=1)[:, 1:self.k + 1])
             self.logger.debug('Finished with computing embeddings and distances')
         else:
-            embeddings = torch.zeros((self.N_trn, self.pretrained_model.embDim)).to(self.device)
-            loader = torch.utils.data.DataLoader(self.trainloader.dataset, batch_size=self.trainloader.batch_size,
-                                                 pin_memory=self.trainloader.pin_memory,
-                                                 num_workers=self.trainloader.num_workers)
-            for i, (inputs, _) in enumerate(loader):
+            # embeddings = torch.zeros((self.N_trn, self.pretrained_model.embDim)).to(self.device)
+            embeddings = []
+            # self.loader = torch.utils.data.DataLoader(self.trainloader.dataset, batch_size=self.trainloader.batch_size,
+            #                                      pin_memory=self.trainloader.pin_memory,
+            #                                      num_workers=self.trainloader.num_workers)
+            for i, (inputs, _) in enumerate(self.trainloader):
                 inputs = inputs.to(self.device)
                 _, embedding = self.pretrained_model(inputs, last=True, freeze=True)
-                embedding = embedding.detach()
-                embeddings[
-                i * self.trainloader.batch_size:(i * self.trainloader.batch_size + inputs.shape[0])] = embedding
+                embeddings.append(embedding.detach().flatten(1).cpu().numpy())
+            embeddings = np.concatenate(embeddings, axis=0)      # flatten all batches
             self.logger.info('Finished computing embeddings, starting distance calculation')
-            dist = self.metric(embeddings.cpu().numpy())
-            knn = np.argsort(dist, axis=1)[:, 1:self.k + 1]
+            knn = np.argsort(self.metric(embeddings), axis=1)[:, 1:self.k + 1]
             self.logger.debug('Finished with computing embeddings and distances')
+        del embeddings
         self.knn = knn
 
     @torch.no_grad()
-    def calculate_divergence(self, knn, index=None):
+    def calculate_divergence(self, index=None):
         # We use the current training model to determine the probabilities of the k-nearest-neighbours
         self.logger.info('Calculating divergence')
         self.model.eval()
 
-        if index is None:
-            loader = torch.utils.data.DataLoader(self.trainloader.dataset, batch_size=self.trainloader.batch_size,
-                                                 pin_memory=self.trainloader.pin_memory,
-                                                 num_workers=self.trainloader.num_workers)
-        else:
-            loader = torch.utils.data.DataLoader(torch.utils.data.Subset(self.trainloader.dataset, index),
-                                                 batch_size=self.trainloader.batch_size,
-                                                 pin_memory=self.trainloader.pin_memory,
-                                                 num_workers=self.trainloader.num_workers)
+        # loader = torch.utils.data.DataLoader(self.trainloader.dataset if index is None else Subset(self.trainloader.dataset, index), batch_size=self.trainloader.batch_size,
+        #                                          pin_memory=False,
+        #                                          num_workers=self.trainloader.num_workers)
+        probs = np.zeros([self.N_trn,self.num_classes])
+        for i, (inputs, targets) in enumerate(self.trainloader):
+            probs[i * self.trainloader.batch_size: (i+1) * self.trainloader.batch_size] = torch.nn.functional.softmax(
+                self.model(inputs.to(self.device)), dim=1).detach().cpu().numpy()
+
+        s = np.zeros(self.N_trn)
+        bsize = self.loader.batch_size
+        for i in range(0, self.N_trn, bsize):
+            aa = np.expand_dims(probs[i:(i+bsize)], 1).repeat(self.k, 1)
+            n = self.knn[i:(i+bsize)]
+            print(n)
+            bb = probs[n, :]
+            print(bb)
+            # bb = probs[self.knn[i:(i+bsize)], :]
+            s[i:(i+self.bsize)] = np.mean(
+                np.sum(0.5 * aa * np.log(aa / bb) + 0.5 * bb * np.log(bb / aa), axis=2), axis=1)
+
+        self.model.train()
+        return s
+
+
         # probs = torch.zeros([len(loader.dataset), self.num_classes]).to(self.device)
         # batch_num = len(loader)
         # batch_size = loader.batch_size
@@ -169,41 +184,41 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
 
         # self.model.train()
         # return kl.cpu().numpy()
-        sample_num = len(loader.dataset)
-        probs = np.zeros([sample_num, self.num_classes])
-        for i, (inputs, labels) in enumerate(loader):
-            probs[i * loader.batch_size: (i + 1) * loader.batch_size] = (
-                torch.nn.functional.softmax(self.model(inputs.to(self.device), freeze=True), dim=1).detach().cpu())
-        print(probs[0:5])
-        kl = np.zeros(sample_num)
-        for i in range(0, sample_num, loader.batch_size):
-            aa = np.expand_dims(probs[i: (i + loader.batch_size)], 1)
-            aa = np.repeat(aa, self.k, 1)
-            bb = probs[knn[i: (i + loader.batch_size)], :]
-            print(aa)
-            print(bb)
-            print(i, i + loader.batch_size)
-            print('probs', probs[i: i+loader.batch_size], 'shape:', np.shape(probs[i: i+loader.batch_size])) # k10, (128,10)
-            print('expand dims:', np.expand_dims(probs[i: (i + loader.batch_size)], -2), 'shape:', np.shape(np.expand_dims(probs[i: (i + loader.batch_size)], -2))) #k10, (128, 1, 10)
-            print('expand dims and repeat:', np.expand_dims(probs[i: (i + loader.batch_size)], -2).repeat(self.k, -2), 'shape:',
-                  np.shape(np.expand_dims(probs[i: (i + loader.batch_size)], -2).repeat(self.k, -2))) # k10, (128, 0, 10)
-
-            try:
-                kl[i: (i + loader.batch_size)] = np.mean(
-                    np.sum(0.5 * aa * np.log(aa / bb) + 0.5 * bb * np.log(bb / aa), axis=2), axis=1)
-            except Exception as e:
-                print(e)
-                print(aa)
-                print(bb)
-                print(0.5 * aa * np.log(aa / bb))
-                print(0.5 * bb * np.log(bb / aa))
-                print(np.sum(0.5 * aa * np.log(aa / bb) + 0.5 * bb * np.log(bb / aa), axis=2))
-                print(np.mean(np.sum(0.5 * aa * np.log(aa / bb) + 0.5 * bb * np.log(bb / aa), axis=2), axis=1))
-
-
-
-        self.model.train()
-        return kl
+        # sample_num = len(loader.dataset)
+        # probs = np.zeros([sample_num, self.num_classes])
+        # for i, (inputs, labels) in enumerate(loader):
+        #     probs[i * loader.batch_size: (i + 1) * loader.batch_size] = (
+        #         torch.nn.functional.softmax(self.model(inputs.to(self.device), freeze=True), dim=1).detach().cpu())
+        # print(probs[0:5])
+        # kl = np.zeros(sample_num)
+        # for i in range(0, sample_num, loader.batch_size):
+        #     aa = np.expand_dims(probs[i: (i + loader.batch_size)], 1)
+        #     aa = np.repeat(aa, self.k, 1)
+        #     bb = probs[knn[i: (i + loader.batch_size)], :]
+        #     print(aa)
+        #     print(bb)
+        #     print(i, i + loader.batch_size)
+        #     print('probs', probs[i: i+loader.batch_size], 'shape:', np.shape(probs[i: i+loader.batch_size])) # k10, (128,10)
+        #     print('expand dims:', np.expand_dims(probs[i: (i + loader.batch_size)], -2), 'shape:', np.shape(np.expand_dims(probs[i: (i + loader.batch_size)], -2))) #k10, (128, 1, 10)
+        #     print('expand dims and repeat:', np.expand_dims(probs[i: (i + loader.batch_size)], -2).repeat(self.k, -2), 'shape:',
+        #           np.shape(np.expand_dims(probs[i: (i + loader.batch_size)], -2).repeat(self.k, -2))) # k10, (128, 0, 10)
+        #
+        #     try:
+        #         kl[i: (i + loader.batch_size)] = np.mean(
+        #             np.sum(0.5 * aa * np.log(aa / bb) + 0.5 * bb * np.log(bb / aa), axis=2), axis=1)
+        #     except Exception as e:
+        #         print(e)
+        #         print(aa)
+        #         print(bb)
+        #         print(0.5 * aa * np.log(aa / bb))
+        #         print(0.5 * bb * np.log(bb / aa))
+        #         print(np.sum(0.5 * aa * np.log(aa / bb) + 0.5 * bb * np.log(bb / aa), axis=2))
+        #         print(np.mean(np.sum(0.5 * aa * np.log(aa / bb) + 0.5 * bb * np.log(bb / aa), axis=2), axis=1))
+        #
+        #
+        #
+        # self.model.train()
+        # return kl
 
     def select(self, budget, model_params):
         start_time = time.time()
@@ -217,13 +232,13 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
         if self.selection_type == 'PerClass':
             for c in range(self.num_classes):
                 class_indices = torch.arange(self.N_trn)[self.trn_lbls == c]
-                scores = self.calculate_divergence(self.knn, index=class_indices)
+                scores = self.calculate_divergence(index=class_indices)
                 # add the indices of the selected samples that have the highest KL divergence
                 indices = np.concatenate(
                     (indices, class_indices[np.argsort(scores)[-int(self.fraction * len(class_indices)):]]))
         else:
-            scores = self.calculate_divergence(self.knn)
-            indices = np.argsort(scores)[-int(self.fraction * self.N_trn):]
+            scores = self.calculate_divergence()
+            indices = np.argsort(scores)[-math.ceil(self.fraction * self.N_trn):]
 
         end_time = time.time()
         self.logger.info(f'CAL algorithm took {end_time - start_time} seconds.')

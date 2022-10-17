@@ -42,15 +42,16 @@ config = dict(
     #     select_every=1,
     #     kappa=0
     # ),
-    # dss_args=dict(
-    #     type="CAL",
-    #     fraction=0.8,
-    #     selection_type="PerBatch",
-    #     metric='euclidean',
-    #     online=True,
-    #     select_every=1,
-    #     kappa=0
-    # ),
+    dss_args=dict(
+        type="CAL",
+        fraction=0.2,
+        selection_type="PerBatch",
+        metric='euclidean',
+        weighted=False,
+        online=True,
+        select_every=1,
+        kappa=0
+    ),
     # dss_args=dict(
     #     type="Submodular",
     #     fraction=0.01,
@@ -63,18 +64,18 @@ config = dict(
     #     linear_layer=False,
     #     kappa=0,
     # ),
-    dss_args=dict(
-        type="GradMatch",
-        fraction=0.2,
-        select_every=5,
-        lam=0.5,
-        selection_type="PerBatch",
-        v1=True,
-        valid=False,
-        kappa=0,
-        eps=1e-100,
-        linear_layer=True,
-    ),
+    # dss_args=dict(
+    #     type="GradMatch",
+    #     fraction=0.2,
+    #     select_every=5,
+    #     lam=0.5,
+    #     selection_type="PerBatch",
+    #     v1=True,
+    #     valid=False,
+    #     kappa=0,
+    #     eps=1e-100,
+    #     linear_layer=True,
+    # ),
     train_args=dict(
         num_epochs=10,
         device="cuda",

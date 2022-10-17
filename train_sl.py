@@ -108,7 +108,7 @@ class TrainClassifier:
                 group_id = None
 
             wandb.init(
-                project="Dataset Reduction for IL",
+                project="DSR final results" if self.cfg.final else "Dataset Reduction for IL",
                 entity="daankrol",
                 name=name,
                 config={
@@ -503,7 +503,6 @@ class TrainClassifier:
         # create embeddings for the train set
         if (
                 self.cfg.dataset.name in ["cifar10", "cifar100", "papilion", "cub200"]
-                and self.cfg.dss_args.type not in ["Full"]
                 and not self.cfg.no_tsne
         ):
             self.embedding_plotter = TSNEPlotter(

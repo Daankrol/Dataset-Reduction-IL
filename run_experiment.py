@@ -57,6 +57,12 @@ parser = argparse.ArgumentParser(
 )
 
 parser.add_argument(
+    "--final",
+    action='store_true',
+    help="Whether to upload to final results WandB project"
+)
+
+parser.add_argument(
     "--config",
     type=str,
     required=True,
@@ -147,6 +153,8 @@ if args.config is None:
     exit(1)
 
 cfg = load_config_data(args.config)
+
+cfg.final = args.final
 
 if args.name is not None:
     cfg.name = args.name
