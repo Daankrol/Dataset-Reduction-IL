@@ -32,8 +32,8 @@
 # python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_full.py --early_stopping # ok
 
 # ## papilion
-python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_uncertainty.py --fraction 0.2 --select_every 10 --selection_type LeastConfidence
-python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_uncertainty.py --fraction 0.2 --select_every 10 --selection_type Entropy
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_uncertainty.py --fraction 0.2 --select_every 10 --selection_type LeastConfidence # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_uncertainty.py --fraction 0.2 --select_every 10 --selection_type Entropy # ok
 # python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_gradmatch.py --fraction 0.2 --select_every 10 # ok
 # python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_gradmatchpb.py --fraction 0.2 --select_every 10 # ok
 # python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_glister.py --fraction 0.2 --select_every 10 # ok
@@ -83,60 +83,83 @@ python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_config
 # python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_super-cl.py --fraction 0.2 --select_every 10 --epochs 500 --kappa 0.3 # ok
 
 # ## offline dataset reduction: random, el2n, grand, prototypical, graph-cut, gradmatch. with fractions 0.5, 0.7, 0.9
-# python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/cub200/config_random.py --fraction 0.5 --nonadaptive
-# python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/cub200/config_random.py --fraction 0.7 --nonadaptive
-# python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/cub200/config_random.py --fraction 0.9 --nonadaptive
-# python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/cub200/config_el2n.py --fraction 0.5 --nonadaptive
-# python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/cub200/config_el2n.py --fraction 0.7 --nonadaptive
-# python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/cub200/config_el2n.py --fraction 0.9 --nonadaptive
-# python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/cub200/config_grand.py --fraction 0.5 --nonadaptive
-# python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/cub200/config_grand.py --fraction 0.7 --nonadaptive
-# python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/cub200/config_grand.py --fraction 0.9 --nonadaptive
-# python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/cub200/config_prototypical.py --fraction 0.5 --nonadaptive
-# python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/cub200/config_prototypical.py --fraction 0.7 --nonadaptive
-# python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/cub200/config_prototypical.py --fraction 0.9 --nonadaptive
-# python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/cub200/config_submodular.py --submod_function graph-cut --fraction 0.5 --nonadaptive
-# python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/cub200/config_submodular.py --submod_function graph-cut --fraction 0.7 --nonadaptive
-# python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/cub200/config_submodular.py --submod_function graph-cut --fraction 0.9 --nonadaptive
-# python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/cub200/config_gradmatch.py --fraction 0.5 --nonadaptive 
-# python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/cub200/config_gradmatch.py --fraction 0.7 --nonadaptive
-# python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/cub200/config_gradmatch.py --fraction 0.9 --nonadaptive
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_random.py --fraction 0.5 --nonadaptive # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_random.py --fraction 0.7 --nonadaptive # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_random.py --fraction 0.9 --nonadaptive # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_el2n.py --fraction 0.5 --nonadaptive # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_el2n.py --fraction 0.7 --nonadaptive # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_el2n.py --fraction 0.9 --nonadaptive # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_grand.py --fraction 0.5 --nonadaptive # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_grand.py --fraction 0.7 --nonadaptive # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_grand.py --fraction 0.9 --nonadaptive # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_prototypical.py --fraction 0.5 --nonadaptive # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_prototypical.py --fraction 0.7 --nonadaptive # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_prototypical.py --fraction 0.9 --nonadaptive # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_submodular.py --submod_function graph-cut --fraction 0.5 --nonadaptive # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_submodular.py --submod_function graph-cut --fraction 0.7 --nonadaptive # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_submodular.py --submod_function graph-cut --fraction 0.9 --nonadaptive # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_gradmatch.py --fraction 0.5 --nonadaptive # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_gradmatch.py --fraction 0.7 --nonadaptive # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_gradmatch.py --fraction 0.9 --nonadaptive # ok
 # ## offline on pap
-# python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/papilion/config_random.py --fraction 0.5 --nonadaptive
-# python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/papilion/config_random.py --fraction 0.7 --nonadaptive
-# python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/papilion/config_random.py --fraction 0.9 --nonadaptive
-# python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/papilion/config_el2n.py --fraction 0.5 --nonadaptive
-# python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/papilion/config_el2n.py --fraction 0.7 --nonadaptive
-# python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/papilion/config_el2n.py --fraction 0.9 --nonadaptive
-# python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/papilion/config_grand.py --fraction 0.5 --nonadaptive
-# python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/papilion/config_grand.py --fraction 0.7 --nonadaptive
-# python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/papilion/config_grand.py --fraction 0.9 --nonadaptive
-# python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/papilion/config_prototypical.py --fraction 0.5 --nonadaptive
-# python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/papilion/config_prototypical.py --fraction 0.7 --nonadaptive
-# python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/papilion/config_prototypical.py --fraction 0.9 --nonadaptive
-# python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/papilion/config_submodular.py --submod_function graph-cut --fraction 0.5 --nonadaptive
-# python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/papilion/config_submodular.py --submod_function graph-cut --fraction 0.7 --nonadaptive
-# python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/papilion/config_submodular.py --submod_function graph-cut --fraction 0.9 --nonadaptive
-# python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/papilion/config_gradmatch.py --fraction 0.5 --nonadaptive 
-# python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/papilion/config_gradmatch.py --fraction 0.7 --nonadaptive
-# python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/papilion/config_gradmatch.py --fraction 0.9 --nonadaptive
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_random.py --fraction 0.5 --nonadaptive # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_random.py --fraction 0.7 --nonadaptive # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_random.py --fraction 0.9 --nonadaptive # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_el2n.py --fraction 0.5 --nonadaptive # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_el2n.py --fraction 0.7 --nonadaptive # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_el2n.py --fraction 0.9 --nonadaptive # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_grand.py --fraction 0.5 --nonadaptive # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_grand.py --fraction 0.7 --nonadaptive # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_grand.py --fraction 0.9 --nonadaptive # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_prototypical.py --fraction 0.5 --nonadaptive # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_prototypical.py --fraction 0.7 --nonadaptive # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_prototypical.py --fraction 0.9 --nonadaptive # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_submodular.py --submod_function graph-cut --fraction 0.5 --nonadaptive # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_submodular.py --submod_function graph-cut --fraction 0.7 --nonadaptive # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_submodular.py --submod_function graph-cut --fraction 0.9 --nonadaptive # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_gradmatch.py --fraction 0.5 --nonadaptive # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_gradmatch.py --fraction 0.7 --nonadaptive # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_gradmatch.py --fraction 0.9 --nonadaptive # ok
 
 
 # #### TRANSFER LEARNING
 
 # ## all methods, cub and pap
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_gradmatchpb.py --fraction 0.2 --select_every 10 --pretrained --finetune --lr 0.005
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_glister.py --fraction 0.2 --select_every 10 --pretrained --finetune --lr 0.005
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_craigpb.py --fraction 0.2 --select_every 10  --pretrained --finetune --lr 0.005
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_random.py --fraction 0.2 --select_every 10 --pretrained --finetune --lr 0.005
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_super-cl.py --select_every 10 --fraction 0.2 --pretrained --finetune --lr 0.005
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_full.py --pretrained --finetune --lr 0.005
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_full.py --early_stopping --pretrained --finetune --lr 0.005
-# ## papilion 
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_gradmatchpb.py --fraction 0.2 --select_every 10 --pretrained --finetune --lr 0.005
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_glister.py --fraction 0.2 --select_every 10 --pretrained --finetune --lr 0.005
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_craigpb.py --fraction 0.2 --select_every 10 --pretrained --finetune --lr 0.005
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_random.py --fraction 0.2 --select_every 10 --pretrained --finetune --lr 0.005
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_super-cl.py --fraction 0.2 --select_every 10 --pretrained --finetune --lr 0.005
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_full.py --pretrained --finetune --lr 0.005
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_full.py --early_stopping --pretrained --finetune --lr 0.005
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_uncertainty.py --fraction 0.2 --select_every 10 --selection_type LeastConfidence --pretrained --finetune --lr 0.005 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_submodular.py --submod_function graph-cut --select_every 10 --fraction 0.2 --pretrained --finetune --lr 0.005 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_submodular.py --submod_function facility-location --select_every 10 --fraction 0.2 --pretrained --finetune --lr 0.005 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_gradmatch.py --fraction 0.2 --select_every 10 --pretrained --finetune --lr 0.005 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_gradmatchpb.py --fraction 0.2 --select_every 10 --pretrained --finetune --lr 0.005 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_glister.py --fraction 0.2 --select_every 10 --pretrained --finetune --lr 0.005 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_craigpb.py --fraction 0.2 --select_every 10  --pretrained --finetune --lr 0.005 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_random.py --fraction 0.2 --select_every 10 --pretrained --finetune --lr 0.005 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_super-cl.py --select_every 10 --fraction 0.2 --pretrained --finetune --lr 0.005 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_full.py --pretrained --finetune --lr 0.005 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_full.py --early_stopping --pretrained --finetune --lr 0.005 # ok
+
+
+## papilion
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_uncertainty.py --fraction 0.2 --select_every 10 --selection_type LeastConfidence --pretrained --finetune --lr 0.005 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_submodular.py --submod_function graph-cut --select_every 10 --fraction 0.2 --pretrained --finetune --lr 0.005 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_submodular.py --submod_function facility-location --select_every 10 --fraction 0.2 --pretrained --finetune --lr 0.005 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_gradmatch.py --fraction 0.2 --select_every 10 --pretrained --finetune --lr 0.005 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_gradmatchpb.py --fraction 0.2 --select_every 10 --pretrained --finetune --lr 0.005 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_glister.py --fraction 0.2 --select_every 10 --pretrained --finetune --lr 0.005 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_craigpb.py --fraction 0.2 --select_every 10  --pretrained --finetune --lr 0.005 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_random.py --fraction 0.2 --select_every 10 --pretrained --finetune --lr 0.005 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_super-cl.py --select_every 10 --fraction 0.2 --pretrained --finetune --lr 0.005 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_full.py --pretrained --finetune --lr 0.005 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_full.py --early_stopping --pretrained --finetune --lr 0.005 # ok
+
+### best methods with warm-up
+
+### best methods with extended training
+
+### best methods with extended training and warm up
+
+### best methods with inverse warm up (Post training Diversity Injection)
+
+### best methods with inverse warm up (Post training Diversity Injection) and extended training
+
+
+## TODO both datasets  with non-adaptive selection.
