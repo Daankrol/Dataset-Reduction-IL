@@ -416,6 +416,58 @@
 # python3 run_experiment.py --config ./exp_configs/papilion/config_grand.py --fraction 0.9 --nonadaptive --selection_type PerClass # ok
 # python3 run_experiment.py --config ./exp_configs/papilion/config_grand.py --fraction 0.8 --nonadaptive --selection_type PerClass # ok
 
+## test
+# python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --select_every 10 --fraction 0.2 --lr 0.01 --kappa 0.03 --epochs 500 --num_workers 12 --runs 3 # ok
+# python3 run_experiment.py --config ./exp_configs/inaturalist/config_gradmatchpb.py --select_every 10 --fraction 0.2 --lr 0.01 --kappa 0.03 --epochs 300 --num_workers 12 # ok
+# python3 run_experiment.py --config ./exp_configs/inaturalist/config_gradmatchpb.py --select_every 10 --fraction 0.2 --lr 0.01  --epochs 300 --num_workers 12 # ok
+# python3 run_experiment.py --config ./exp_configs/inaturalist/config_gradmatchpb.py --select_every 10 --fraction 0.2 --lr 0.01  --epochs 300 --num_workers 12 --do_not_pin_memory
+# python3 run_experiment.py --config ./exp_configs/inaturalist/config_gradmatchpb.py --select_every 10 --fraction 0.2 --lr 0.005  --epochs 300 --num_workers 12 --do_not_pin_memory --pretrained --finetune # ok
+
+# python3 run_experiment.py --config ./exp_configs/papilion/config_super-cl.py --pretrained --finetune --lr 0.005 --select_every 10 --fraction 0.2 --kappa 0.03 # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_super-cl.py --pretrained --finetune --lr 0.005 --select_every 10 --fraction 0.4 --kappa 0.03 # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_super-cl.py --pretrained --finetune --lr 0.005 --select_every 10 --fraction 0.3 # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_super-cl.py --pretrained --finetune --lr 0.005 --select_every 10 --fraction 0.4 # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_super-cl.py --pretrained --finetune --lr 0.005 --select_every 10 --fraction 0.5 # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_super-cl.py --pretrained --finetune --lr 0.005 --select_every 10 --fraction 0.2 --kappa 0.14 --inverse_warmup # ok
+
+# python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --pretrained --finetune --lr 0.005 --select_every 10 --fraction 0.2 # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --pretrained --finetune --lr 0.005 --select_every 10 --fraction 0.2 --kappa 0.14 --inverse_warmup # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --pretrained --finetune --lr 0.005 --select_every 10 --fraction 0.2 --kappa 0.10 --inverse_warmup # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --pretrained --finetune --lr 0.005 --select_every 10 --fraction 0.2 --kappa 0.8 --inverse_warmup # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_super-cl.py --pretrained --finetune --lr 0.005 --select_every 10 --fraction 0.4 --kappa 0.14 --inverse_warmup # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_super-cl.py --pretrained --finetune --lr 0.005 --select_every 10 --fraction 0.4 --kappa 0.10 --inverse_warmup # ok
+
+# python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --pretrained --finetune --lr 0.005 --select_every 10 --fraction 0.2 --kappa 0.03 # ok
+## inverse warmup without pretraining
+# python3 run_experiment.py --config ./exp_configs/papilion/config_super-cl.py --select_every 10 --fraction 0.2 --kappa 0.03 --inverse_warmup # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --select_every 10 --fraction 0.2 --kappa 0.03 --inverse_warmup # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_super-cl.py --select_every 10 --fraction 0.2 --kappa 0.06 --inverse_warmup # ok
+# python3 run_experiment.py --config ./exp_configs/papilion/config_gradmatchpb.py --select_every 10 --fraction 0.2 --kappa 0.06 --inverse_warmup # ok
+
+# python3 run_experiment.py --config ./exp_configs/cub200/config_super-cl.py --select_every 10 --fraction 0.2 --kappa 0.03 --inverse_warmup # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --select_every 10 --fraction 0.2 --kappa 0.03 --inverse_warmup # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_super-cl.py --select_every 10 --fraction 0.2 --kappa 0.06 --inverse_warmup # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --select_every 10 --fraction 0.2 --kappa 0.06 --inverse_warmup # ok
+
+## normal warmup on cubs. Around 50 epochs, the full training starts to converge. Start with targeted sampling at that point
+# python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --select_every 10 --fraction 0.2 --kappa 0.1 --epochs 500 # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_super-cl.py --select_every 10 --fraction 0.2 --kappa 0.1 --epochs 500 # ok
+
+
+### again with higher LR
+# python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --select_every 10 --fraction 0.2 --kappa 0.03 --inverse_warmup --lr 0.01 # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_super-cl.py --select_every 10 --fraction 0.2 --kappa 0.06 --inverse_warmup --lr 0.01 # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_super-cl.py --select_every 10 --fraction 0.2 --kappa 0.03 --inverse_warmup --lr 0.01 # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --select_every 10 --fraction 0.2 --kappa 0.06 --inverse_warmup --lr 0.01 # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_gradmatchpb.py --select_every 10 --fraction 0.2 --kappa 0.1 --epochs 500 --lr 0.01 # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_super-cl.py --select_every 10 --fraction 0.2 --kappa 0.1 --epochs 500 --lr 0.01 # ok
+
+## super cl en full op inaturalist
+#python3 run_experiment.py --config ./exp_configs/inaturalist/config_super-cl.py --pretrained --finetune --select_every 10 --fraction 0.2
+#python3 run_experiment.py --config ./exp_configs/inaturalist/config_full.py --pretrained --finetune
+#python3 run_experiment.py --config ./exp_configs/inaturalist/config_super-cl.py --pretrained --finetune --select_every 10 --fraction 0.2 --num_workers 8
+#python3 run_experiment.py --config ./exp_configs/inaturalist/config_full.py --pretrained --finetune --num_workers 8
+
 ## glister selection type test
 python3 run_experiment.py --config ./exp_configs/cifar10/config_glister.py --fraction 0.2 --select_every 10 --selection_type Supervised
 python3 run_experiment.py --config ./exp_configs/cifar10/config_glister.py --fraction 0.2 --select_every 10 --selection_type PerBatch

@@ -6,6 +6,7 @@ import time
 import numpy as np
 import torch.nn as nn
 import torch.optim as optim
+from cords.utils.utils import generate_run_name
 from dotmap import DotMap
 from ray import tune
 from torch.utils.data import Subset
@@ -96,39 +97,18 @@ class TrainClassifier:
         self.logger.propagate = False
 
         if self.cfg.wandb:
-            if self.cfg.dss_args.type == "Submodular":
-                name = self.cfg.dss_args.submod_func_type + "_" + self.cfg.dataset.name
-            else:
-                name = self.cfg.dss_args.type + "_" + self.cfg.dataset.name
-            if self.cfg.dss_args.fraction != DotMap():
-                name += f"_{str(self.cfg.dss_args.fraction)}"
-            if self.cfg.dss_args.select_every != DotMap() and self.cfg.dss_args.online:
-                name += f"_{str(self.cfg.dss_args.select_every)}"
-            if self.cfg.model.type == "pre-trained":
-                name += "_PT"
-            if self.cfg.model.fine_tune != DotMap() and self.cfg.model.fine_tune:
-                name += "_FT"
-            if self.cfg.early_stopping:
-                name += "_ES"
-            if not self.cfg.dss_args.online:
-                name += "_offline"
-            if self.cfg.scheduler.type is None and not self.cfg.early_stopping:
-                name += "_NoSched"
-            if self.cfg.scheduler.data_dependent:
-                name += "_dataScheduler"
-            if self.cfg.dss_args.kappa != DotMap() and self.cfg.dss_args.kappa > 0:
-                name += f"_k-{str(self.cfg.dss_args.kappa)}"
-
             if self.cfg.name is not None and self.cfg.name != DotMap():
                 name = self.cfg.name
+            else:
+                name = generate_run_name(self.cfg)
 
             try:
                 group_id = os.environ["WANDB_RUN_GROUP"]
-            except Exception:
+            except:
                 group_id = None
 
             wandb.init(
-                project="Dataset Reduction for IL",
+                project="DSR final results" if self.cfg.final else "Dataset Reduction for IL",
                 entity="daankrol",
                 name=name,
                 config={
@@ -399,9 +379,9 @@ class TrainClassifier:
         tst_batch_size = self.cfg.dataloader.batch_size
 
         if (
-            self.cfg.dataset.name == "sst2_facloc"
-            and self.count_pkl(self.cfg.dataset.ss_path) == 1
-            and self.cfg.dss_args.type == "FacLoc"
+                self.cfg.dataset.name == "sst2_facloc"
+                and self.count_pkl(self.cfg.dataset.ss_path) == 1
+                and self.cfg.dss_args.type == "FacLoc"
         ):
             self.cfg.dss_args.type = "Full"
             file_ss = open(self.cfg.dataset.ss_path, "rb")
@@ -522,9 +502,8 @@ class TrainClassifier:
 
         # create embeddings for the train set
         if (
-            self.cfg.dataset.name in ["cifar10", "cifar100", "papilion", "cub200"]
-            and self.cfg.dss_args.type not in ["Full"]
-            and not self.cfg.no_tsne
+                self.cfg.dataset.name in ["cifar10", "cifar100", "papilion", "cub200"]
+                and not self.cfg.no_tsne
         ):
             self.embedding_plotter = TSNEPlotter(
                 trainloader,
@@ -665,13 +644,13 @@ class TrainClassifier:
 
             # construct t-SNE plots if data has been resampled
             if (
-                self.cfg.dss_args.type != "Full"
-                and dataloader.resampled
-                and self.embedding_plotter is not None
+                    self.cfg.dss_args.type != "Full"
+                    and dataloader.resampled
+                    and self.embedding_plotter is not None
             ):
                 if self.cfg.dss_args.online or (
-                    not self.cfg.dss_args.online
-                    and not self.embedding_plotter.has_plotted
+                        not self.cfg.dss_args.online
+                        and not self.embedding_plotter.has_plotted
                 ):
                     self.logger.info(
                         f"EMBEDDING - dataloader is resampled. Epoch: {epoch}"
@@ -685,7 +664,7 @@ class TrainClassifier:
             """
 
             if ((epoch + 1) % self.cfg.train_args.print_every == 0) or (
-                epoch == self.cfg.train_args.num_epochs - 1
+                    epoch == self.cfg.train_args.num_epochs - 1
             ):
                 trn_loss = 0
                 trn_correct = 0
@@ -937,7 +916,7 @@ class TrainClassifier:
                         metrics["val_acc"] = val_acc[-1]
                     if arg == "val_recall":
                         print_str += (
-                            " , " + "Validation Recall: " + str(val_recalls[-1])
+                                " , " + "Validation Recall: " + str(val_recalls[-1])
                         )
                         metrics["val_recall"] = val_recalls[-1]
 
@@ -989,9 +968,9 @@ class TrainClassifier:
                 metrics["current_lr"] = current_lr
                 # report metric to ray for hyperparameter optimization
                 if (
-                    "report_tune" in self.cfg
-                    and self.cfg.report_tune
-                    and len(dataloader)
+                        "report_tune" in self.cfg
+                        and self.cfg.report_tune
+                        and len(dataloader)
                 ):
                     tune.report(mean_accuracy=val_acc[-1])
 
@@ -1142,16 +1121,16 @@ class TrainClassifier:
         wandb.finish()
 
     def create_dataloader(
-        self,
-        model,
-        criterion_nored,
-        trainloader,
-        valloader,
-        logger,
-        trainset,
-        validset,
-        optimizer,
-        criterion,
+            self,
+            model,
+            criterion_nored,
+            trainloader,
+            valloader,
+            logger,
+            trainset,
+            validset,
+            optimizer,
+            criterion,
     ):
         if "collate_fn" not in self.cfg.dss_args:
             self.cfg.dss_args.collate_fn = None
@@ -1300,8 +1279,8 @@ class TrainClassifier:
                 num_workers=self.cfg.dataloader.num_workers,
             )
             if (
-                self.cfg.dataset.name == "sst2_facloc"
-                and self.count_pkl(self.cfg.dataset.ss_path) < 1
+                    self.cfg.dataset.name == "sst2_facloc"
+                    and self.count_pkl(self.cfg.dataset.ss_path) < 1
             ):
 
                 ss_indices = dataloader.subset_indices
@@ -1406,3 +1385,4 @@ class TrainClassifier:
             is_selcon = False
 
         return dataloader, is_selcon
+

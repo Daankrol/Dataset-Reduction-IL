@@ -1,37 +1,12 @@
 # Dataset reduction using CORDS
 from train_sl import TrainClassifier
 from cords.utils.config_utils import load_config_data
+from cords.utils.utils import generate_run_name
 import argparse
 import copy
 import os
 from dotmap import DotMap
 import wandb
-
-
-def generate_run_name(cfg):
-    if cfg.dss_args.type == "Submodular":
-        name = cfg.dss_args.submod_func_type + "_" + cfg.dataset.name
-    else:
-        name = cfg.dss_args.type + "_" + cfg.dataset.name
-    if cfg.dss_args.fraction != DotMap():
-        name += f"_{str(cfg.dss_args.fraction)}"
-    if cfg.dss_args.select_every != DotMap() and cfg.dss_args.online:
-        name += f"_{str(cfg.dss_args.select_every)}"
-    if cfg.model.type == "pre-trained":
-        name += "_PT"
-    if cfg.model.fine_tune != DotMap() and cfg.model.fine_tune:
-        name += "_FT"
-    if cfg.early_stopping:
-        name += "_ES"
-    if not cfg.dss_args.online:
-        name += "_offline"
-    if cfg.scheduler.type is None and not cfg.early_stopping:
-        name += "_NoSched"
-    if cfg.scheduler.data_dependent:
-        name += "_dataScheduler"
-    if cfg.dss_args.kappa != DotMap() and cfg.dss_args.kappa > 0:
-        name += f"_k-{str(cfg.dss_args.kappa)}"
-    return name
 
 
 def getCPUIDs():
@@ -79,6 +54,12 @@ def getCPUIDs():
 
 parser = argparse.ArgumentParser(
     description="Run experiments with config file\n ./configs/SL/config_gradmatch_cifar10.py"
+)
+
+parser.add_argument(
+    "--final",
+    action='store_true',
+    help="Whether to upload to final results WandB project"
 )
 
 parser.add_argument(
@@ -172,6 +153,8 @@ if args.config is None:
     exit(1)
 
 cfg = load_config_data(args.config)
+
+cfg.final = args.final
 
 if args.name is not None:
     cfg.name = args.name

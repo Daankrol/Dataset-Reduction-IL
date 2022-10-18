@@ -68,10 +68,8 @@ class AdaptiveDSSDataLoader(DSSDataLoader):
             # self.select_after =  int(dss_args.kappa * dss_args.num_epochs)
             # self.warmup_epochs = ceil(self.select_after * dss_args.fraction)
             self.warmup_epochs = int(dss_args.kappa * dss_args.num_epochs)
-            print(
-                f"Using {self.warmup_epochs} epochs for warm up out of {dss_args.num_epochs}."
-            )
-            self.logger.debug(f"Using {self.warmup_epochs} epochs for warm up.")
+
+            self.logger.info(f"Using {self.warmup_epochs} epochs for warm up.")
 
         else:
             # self.select_after = 0
@@ -85,43 +83,38 @@ class AdaptiveDSSDataLoader(DSSDataLoader):
         warmstart kappa value.
         """
         if self.online:
-
             if not self.inverse_warmup:
                 # Use normal warmup where warmup is training with all data and then switching to subset
                 self.initialized = True
                 if self.cur_epoch < self.warmup_epochs + 1:
-                    self.logger.debug(
-                        "Epoch: {0:d} using full dataset for warm-start.".format(
-                            self.cur_epoch, self.warmup_epochs
-                        )
+                    self.logger.info(
+                        f"Epoch: {self.cur_epoch} using full dataset for warm-start."
                     )
                     loader = self.wtdataloader
-                    print(
-                        "Epoch: {0:d} using full dataset for warm-start.".format(
-                            self.cur_epoch, self.warmup_epochs
-                        )
-                    )
-                    # print("Size: ", len(loader))
                     self.resampled = False
-                elif self.cur_epoch == self.warmup_epochs + 1:
-                    self.logger.info(
-                        f"Epoch: {self.cur_epoch} finished with warm up so forcing a resample."
-                    )
-                    self.resample()
-                    loader = self.subset_loader
+                # elif self.cur_epoch == self.warmup_epochs + 1:
+                #     self.logger.info(
+                #         f"Epoch: {self.cur_epoch} finished with warm up so forcing a resample."
+                #     )
+                #     self.resample()
+                #     loader = self.subset_loader
                 else:
                     self.logger.info(
-                        "Epoch: {0:d}, reading dataloader... ".format(self.cur_epoch)
+                        f"Epoch: {self.cur_epoch}, reading dataloader... {self.cur_epoch, self.select_every}"
                     )
-                    if (
-                        (self.cur_epoch + self.warmup_epochs) % self.select_every == 0
-                    ) and (self.cur_epoch > 1):
+                    if (self.cur_epoch - self.warmup_epochs - 1) % self.select_every == 0:
                         self.resample()
                     else:
                         self.resampled = False
+                    # if (
+                    #     (self.cur_epoch + self.warmup_epochs) % self.select_every == 0
+                    # ) and (self.cur_epoch > 1):
+                    #     self.resample()
+                    # else:
+                    #     self.resampled = False
                     loader = self.subset_loader
                     # print("Size: ", len(loader))
-                    self.logger.debug(
+                    self.logger.info(
                         "Epoch: {0:d}, finished reading dataloader. ".format(
                             self.cur_epoch
                         )
@@ -129,13 +122,12 @@ class AdaptiveDSSDataLoader(DSSDataLoader):
             else:
                 # Use inverse warmup where warmup is training with subset and then switching to full
                 if self.cur_epoch < self.warmup_epochs + 1:
-                    self.logger.debug(
+                    self.logger.info(
                         "Epoch: {0:d}, inverse warm-up, reading dataloader...".format(
                             self.cur_epoch, self.warmup_epochs
                         )
                     )
-                    if self.cur_epoch % self.select_every == 0:
-
+                    if (self.cur_epoch - 1) % self.select_every == 0:
                         self.resample()
                     else:
                         self.resampled = False
@@ -183,11 +175,11 @@ class AdaptiveDSSDataLoader(DSSDataLoader):
         """
         Returns the length of the current data loader
         """
-        if online:
-            if self.cur_epoch < self.warmup_epochs:
-                return len(self.wtdataloader)
+        if self.online:
+            if self.cur_epoch < self.warmup_epochs + 1:
+                return len(self.wtdataloader) if not self.inverse_warmup else len(self.subset_loader)
             else:
-                return len(self.subset_loader)
+                return len(self.subset_loader) if not self.inverse_warmup else len(self.wtdataloader)
         else:
             return len(self.subset_loader)
         #

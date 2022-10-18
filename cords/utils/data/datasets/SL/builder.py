@@ -2055,6 +2055,12 @@ def gen_dataset(datadir, dset_name, feature, isnumpy=False, **kwargs):
             trainset, valset = Subset(fullset, train_index), Subset(fullset, val_index)
             break
 
+        # frac = 0.3
+        # idxs = list(np.random.choice(np.arange(len(trainset)), size=int(len(fullset) * frac), replace=False))
+        # trainset = torch.utils.data.Subset(trainset, idxs)
+        # For each class keep only 10% of the samples
+        # print('size:', len(trainset))
+
         return trainset, valset, testset, num_cls
 
     elif dset_name == "cifar100":
