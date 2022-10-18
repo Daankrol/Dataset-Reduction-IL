@@ -467,3 +467,10 @@
 #python3 run_experiment.py --config ./exp_configs/inaturalist/config_full.py --pretrained --finetune
 #python3 run_experiment.py --config ./exp_configs/inaturalist/config_super-cl.py --pretrained --finetune --select_every 10 --fraction 0.2 --num_workers 8
 #python3 run_experiment.py --config ./exp_configs/inaturalist/config_full.py --pretrained --finetune --num_workers 8
+
+## 17-10 Inverse warm-up test with more epochs
+# python3 run_experiment.py --config ./exp_configs/cub200/config_super-cl.py --select_every 10 --fraction 0.2 --inverse_warmup --lr 0.01 --kappa 0.1 # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_super-cl.py --select_every 10 --fraction 0.2 --inverse_warmup --lr 0.01 --kappa 0.2 # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_super-cl.py --select_every 10 --fraction 0.2 --inverse_warmup --lr 0.01 --kappa 0.3 # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_super-cl.py --select_every 10 --fraction 0.2 --inverse_warmup --lr 0.01 --kappa 0.4 # ok
+# python3 run_experiment.py --config ./exp_configs/cub200/config_super-cl.py --select_every 10 --fraction 0.2 --inverse_warmup --lr 0.01 --kappa 0.5 # ok
