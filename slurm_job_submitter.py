@@ -9,7 +9,8 @@ from time import sleep
 # GPU ID: 7
 # Cpus_allowed_list:	39-41,49,95-97,105
 
-def run_jobs_slurm(jobs_path: str, partition: str = None, cluster: str = 'intel'):
+
+def run_jobs_slurm(jobs_path: str, partition: str = None, cluster: str = "intel"):
     """
     SLURM job runner
     Run in folder where you want to create jobs, e.g.
@@ -30,10 +31,10 @@ def run_jobs_slurm(jobs_path: str, partition: str = None, cluster: str = 'intel'
     :param cluster: cluster to submit to, can be 'intel' or 'rug'
     """
     if partition is None:
-        if cluster == 'intel':
-            partition = 'short'
+        if cluster == "intel":
+            partition = "short"
         else:
-            partition = 'gpu'
+            partition = "gpu"
 
     with open(jobs_path, "r") as f:
         lines = f.readlines()
@@ -42,8 +43,8 @@ def run_jobs_slurm(jobs_path: str, partition: str = None, cluster: str = 'intel'
     )  # force .sh and .out files to be stored in ~/jobs
     for line_num, line in enumerate(lines):
         if (
-                not line.startswith("#")  # comment or job already run
-                and not len(line.strip()) == 0  # empty line
+            not line.startswith("#")  # comment or job already run
+            and not len(line.strip()) == 0  # empty line
         ):
             line = line.strip()
             tokens = line.split("#")
@@ -61,19 +62,19 @@ def run_jobs_slurm(jobs_path: str, partition: str = None, cluster: str = 'intel'
 #SBATCH --cores=7
 #SBATCH --mem=100G
 """
-            if cluster == 'intel':
+            if cluster == "intel":
                 command += "#SBATCH --gres=gpu:1\n"
-                if partition == 'short':
+                if partition == "short":
                     command += "#SBATCH --time=23:00:00\n"
                 else:
-                    command += "#SBATCH --time=6-23:00:00\n"
+                    command += "#SBATCH --time=1-23:00:00\n"
                 command += f"""
 source ~/.bashrc
 source activate /home/daankrol/miniconda3/envs/DatasetReduction/
 cd ~/Dataset-Reduction-IL
 {python_command}"""
 
-            elif cluster == 'rug':
+            elif cluster == "rug":
                 command += f"""#SBATCH --gres=gpu:v100:1
 #SBATCH --mail-type=BEGIN,END,FAIL,REQUEUE
 #SBATCH --mail-user=d.j.krol.1@student.rug.nl
