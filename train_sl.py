@@ -480,12 +480,12 @@ class TrainClassifier:
         # Getting the optimizer and scheduler
         optimizer, scheduler = self.optimizer_with_scheduler(model)
 
-        # Early stopping
-        if self.cfg.early_stopping and scheduler is not None:
-            print(self.cfg.early_stopping, scheduler)
-            raise Exception("Do not use early stopping AND a lr scheduler")
+        # # Early stopping
+        # if self.cfg.early_stopping and scheduler is not None:
+        #     print(self.cfg.early_stopping, scheduler)
+        #     raise Exception("Do not use early stopping AND a lr scheduler")
         if self.cfg.early_stopping:
-            early_stopping = EarlyStopping(patience=15, min_delta=0, logger=logger)
+            early_stopping = EarlyStopping(patience=20, min_delta=0, logger=logger)
 
         ## Custom dataloaders
         dataloader, is_selcon = self.create_dataloader(

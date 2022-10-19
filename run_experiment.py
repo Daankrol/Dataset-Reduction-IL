@@ -186,7 +186,7 @@ if args.disable_scheduler:
     cfg.scheduler.type = None
 if args.early_stopping:
     cfg.early_stopping = True
-    cfg.scheduler.type = None
+    # cfg.scheduler.type = None
 if args.weighted is not None:
     if cfg.dss_args.weighted is not None and not cfg.dss_args.weighted:
         cfg.dss_args.weighted = args.weighted
