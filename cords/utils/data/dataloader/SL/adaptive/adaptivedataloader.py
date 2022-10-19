@@ -1,6 +1,8 @@
 import logging
 from abc import abstractmethod
+import time
 from torch.utils.data import DataLoader
+import wandb
 from ..dssdataloader import DSSDataLoader
 from math import ceil
 
@@ -102,7 +104,9 @@ class AdaptiveDSSDataLoader(DSSDataLoader):
                     self.logger.info(
                         f"Epoch: {self.cur_epoch}, reading dataloader... {self.cur_epoch, self.select_every}"
                     )
-                    if (self.cur_epoch - self.warmup_epochs - 1) % self.select_every == 0:
+                    if (
+                        self.cur_epoch - self.warmup_epochs - 1
+                    ) % self.select_every == 0:
                         self.resample()
                     else:
                         self.resampled = False
@@ -177,9 +181,17 @@ class AdaptiveDSSDataLoader(DSSDataLoader):
         """
         if self.online:
             if self.cur_epoch < self.warmup_epochs + 1:
-                return len(self.wtdataloader) if not self.inverse_warmup else len(self.subset_loader)
+                return (
+                    len(self.wtdataloader)
+                    if not self.inverse_warmup
+                    else len(self.subset_loader)
+                )
             else:
-                return len(self.subset_loader) if not self.inverse_warmup else len(self.wtdataloader)
+                return (
+                    len(self.subset_loader)
+                    if not self.inverse_warmup
+                    else len(self.wtdataloader)
+                )
         else:
             return len(self.subset_loader)
         #
@@ -204,7 +216,12 @@ class AdaptiveDSSDataLoader(DSSDataLoader):
         Function that resamples the subset indices and recalculates the subset weights
         """
         self.resampled = True
+        # start timing
+        start = time.time()
         self.subset_indices, self.subset_weights = self._resample_subset_indices()
+        # end timing
+        end = time.time()
+        wandb.log({"resample_duration": end - start})
         self.logger.debug("Subset indices length: %d", len(self.subset_indices))
         self._refresh_subset_loader()
         self.logger.debug(
