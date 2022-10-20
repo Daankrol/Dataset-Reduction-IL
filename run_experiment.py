@@ -58,8 +58,8 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument(
     "--final",
-    action='store_true',
-    help="Whether to upload to final results WandB project"
+    action="store_true",
+    help="Whether to upload to final results WandB project",
 )
 
 parser.add_argument(
@@ -124,7 +124,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--do_not_pin_memory", action="store_false", help="To disable memory pinning"
+    "--do_not_pin_memory", action="store_true", help="To disable memory pinning"
 )
 
 parser.add_argument(
