@@ -504,17 +504,20 @@
 # python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_super-cl.py --fraction 0.3 --select_every 20 --kappa 0.5
 
 ## kappa search non-PT
-python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_super-cl.py --fraction 0.1 --select_every 20 --kappa 0.1
-python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_super-cl.py --fraction 0.1 --select_every 20 --kappa 0.3
-python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_gradmatch.py --fraction 0.3 --select_every 20 --kappa 0.1
-python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_gradmatch.py --fraction 0.3 --select_every 20 --kappa 0.3
+# python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_super-cl.py --fraction 0.1 --select_every 20 --kappa 0.1 # ok
+# python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_super-cl.py --fraction 0.1 --select_every 20 --kappa 0.3 # ok
+# python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_gradmatch.py --fraction 0.3 --select_every 20 --kappa 0.1 # ok
+# python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_gradmatch.py --fraction 0.3 --select_every 20 --kappa 0.3 # ok
 
 ## kappa and max epoch search with PT.
-python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_gradmatch.py --fraction 0.2 --select_every 10 --epochs 150 --pretrained --finetune --kappa 0.5
-python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_gradmatch.py --fraction 0.2 --select_every 10 --epochs 150 --pretrained --finetune --kappa 0.3
-python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_gradmatch.py --fraction 0.2 --select_every 10 --epochs 150 --pretrained --finetune --kappa 0.1
-python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_super-cl.py --fraction 0.1 --select_every 20 --epochs 150 --pretrained --finetune --kappa 0.5 
-python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_super-cl.py --fraction 0.1 --select_every 20 --epochs 150 --pretrained --finetune --kappa 0.3
-python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_super-cl.py --fraction 0.1 --select_every 20 --epochs 150 --pretrained --finetune --kappa 0.1
-python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_super-cl.py --fraction 0.1 --select_every 20 --epochs 150 --pretrained --finetune --kappa 0.5 --inverse_warmup
-python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_super-cl.py --fraction 0.1 --select_every 20 --epochs 150 --pretrained --finetune --kappa 0.3 --inverse_warmup
+# python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_gradmatch.py --fraction 0.2 --select_every 10 --epochs 150 --pretrained --finetune --kappa 0.5 # ok
+# python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_gradmatch.py --fraction 0.2 --select_every 10 --epochs 150 --pretrained --finetune --kappa 0.3 # ok
+# python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_gradmatch.py --fraction 0.2 --select_every 10 --epochs 150 --pretrained --finetune --kappa 0.1 # ok
+# python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_super-cl.py --fraction 0.1 --select_every 20 --epochs 150 --pretrained --finetune --kappa 0.5 # ok
+# python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_super-cl.py --fraction 0.1 --select_every 20 --epochs 150 --pretrained --finetune --kappa 0.3 # ok
+# python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_super-cl.py --fraction 0.1 --select_every 20 --epochs 150 --pretrained --finetune --kappa 0.1 # ok
+# python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_super-cl.py --fraction 0.1 --select_every 20 --epochs 150 --pretrained --finetune --kappa 0.5 --inverse_warmup # ok
+# python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_super-cl.py --fraction 0.1 --select_every 20 --epochs 150 --pretrained --finetune --kappa 0.3 --inverse_warmup # ok
+# python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_super-cl.py --fraction 0.1 --select_every 10 --epochs 150 --pretrained --finetune --kappa 0.5 # ok
+# python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_super-cl.py --fraction 0.2 --select_every 10 --epochs 150 --pretrained --finetune --kappa 0.5 # ok
+# python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_super-cl.py --fraction 0.1 --select_every 10 --epochs 150 --pretrained --finetune --kappa 0.5 --inverse_warmup # ok
