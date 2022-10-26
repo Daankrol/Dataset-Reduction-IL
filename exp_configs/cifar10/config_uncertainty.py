@@ -18,6 +18,7 @@ config = dict(
         select_every=20,
         selection_type="LeastConfidence",
         kappa=0,
+        balancing=True
     ),
     train_args=dict(
         num_epochs=300,

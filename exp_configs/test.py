@@ -1,7 +1,7 @@
 # Learning setting
 config = dict(
     setting="SL",
-    measure_energy=False,
+    measure_energy=True,
     wandb=True,
     logging='DEBUG',
     no_tsne=True,
@@ -10,7 +10,7 @@ config = dict(
         name="cifar10", datadir="../data", feature="dss", type="image", img_size=32
     ),
     # dataset=dict(name="cub200", datadir="../data", feature="dss", type="image", img_size=224),
-    dataloader=dict(shuffle=True, batch_size=64, pin_memory=True, num_workers=8),
+    dataloader=dict(shuffle=True, batch_size=32, pin_memory=True, num_workers=8),
     model=dict(architecture="EfficientNet", type="pre-defined"),
     ckpt=dict(is_load=False, is_save=False, dir="results/", save_every=20),
     loss=dict(type="CrossEntropyLoss", use_sigmoid=False),
@@ -28,9 +28,9 @@ config = dict(
     # ),
     # dss_args=dict(
     #     type='Full',
-    #     fraction=0.1,
-    #     online=False,
-    #     select_every=1,
+    #     # fraction=0.1,
+    #     # online=False,
+    #     # select_every=1,
     #     kappa=0
     # ),
     # dss_args=dict(
@@ -42,16 +42,16 @@ config = dict(
     #     select_every=1,
     #     kappa=0
     # ),
-    dss_args=dict(
-        type="CAL",
-        fraction=0.2,
-        selection_type="PerBatch",
-        metric='euclidean',
-        weighted=False,
-        online=True,
-        select_every=1,
-        kappa=0
-    ),
+    # dss_args=dict(
+    #     type="CAL",
+    #     fraction=0.2,
+    #     selection_type="PerBatch",
+    #     metric='euclidean',
+    #     weighted=False,
+    #     online=True,
+    #     select_every=1,
+    #     kappa=0
+    # ),
     # dss_args=dict(
     #     type="Submodular",
     #     fraction=0.01,
@@ -64,10 +64,18 @@ config = dict(
     #     linear_layer=False,
     #     kappa=0,
     # ),
+    dss_args=dict(
+        type="Uncertainty",
+        fraction=0.1,
+        select_every=1,
+        selection_type='Entropy',
+        kappa=0,
+        balancing=True
+    ),
     # dss_args=dict(
     #     type="GradMatch",
-    #     fraction=0.2,
-    #     select_every=5,
+    #     fraction=0.3,
+    #     select_every=20,
     #     lam=0.5,
     #     selection_type="PerBatch",
     #     v1=True,
@@ -77,7 +85,7 @@ config = dict(
     #     linear_layer=True,
     # ),
     train_args=dict(
-        num_epochs=10,
+        num_epochs=300,
         device="cuda",
         print_every=1,
         results_dir="../results/",

@@ -9,14 +9,15 @@ config = dict(
     model=dict(architecture="EfficientNet", type="pre-defined", fine_tune=False),
     ckpt=dict(is_load=False, is_save=False, dir="results/", save_every=20),
     loss=dict(type="CrossEntropyLoss", use_sigmoid=False),
-    optimizer=dict(type="sgd", momentum=0.9, lr=0.005, weight_decay=5e-4, nesterov=False),
+    optimizer=dict(type="sgd", momentum=0.9, lr=0.01, weight_decay=5e-4, nesterov=False),
     scheduler=dict(type="cosine_annealing", T_max=300),
     dss_args=dict(
         type="Uncertainty",
         fraction=0.1,
         select_every=10,
         selection_type='LeastConfidence',
-        kappa=0
+        kappa=0,
+        balancing=True
     ),
     train_args=dict(
         num_epochs=300,

@@ -19,7 +19,7 @@ class UncertaintyStrategy(DataSelectionStrategy):
             device,
             selection_type,
             logger,
-            balance=False
+            balance=True
     ):
         super().__init__(
             trainloader,
@@ -37,6 +37,7 @@ class UncertaintyStrategy(DataSelectionStrategy):
         self.N_trn = len(trainloader.sampler.data_source)
         self.selection_type = selection_type
         self.balance = balance
+        self.logger.debug(f"Running Uncertainty selection in balancing mode: {balance}")
 
         if self.selection_type == "LeastConfidence":
             self.method = self.leastConfidenceSelection
@@ -108,7 +109,7 @@ class UncertaintyStrategy(DataSelectionStrategy):
                         torch.ones(preds.shape[0], dtype=bool), preds_sub_argmax]).cpu().numpy())
                 elif self.selection_type == "Entropy":
                     preds = torch.nn.functional.softmax(self.model(input.to(self.device)), dim=1).cpu()
-                    scores = np.append(scores, (np.log(preds + 1e-6) * preds).sum(axis=1))
+                    scores = np.append(scores, (np.log(preds + 1e-6) * (preds + 1e-6)).sum(axis=1))
         self.model.train()
         return scores
 

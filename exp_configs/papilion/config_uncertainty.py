@@ -16,7 +16,8 @@ config = dict(
         fraction=0.1,
         select_every=10,
         selection_type='LeastConfidence',
-        kappa=0
+        kappa=0,
+        balancing=True
     ),
     train_args=dict(
         num_epochs=300,

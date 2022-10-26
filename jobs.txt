@@ -521,3 +521,9 @@
 # python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_super-cl.py --fraction 0.1 --select_every 10 --epochs 150 --pretrained --finetune --kappa 0.5 # ok
 # python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_super-cl.py --fraction 0.2 --select_every 10 --epochs 150 --pretrained --finetune --kappa 0.5 # ok
 # python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_super-cl.py --fraction 0.1 --select_every 10 --epochs 150 --pretrained --finetune --kappa 0.5 --inverse_warmup # ok
+
+## 24-10 exps with higher LR (0.01) and less epochs (150)
+# python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/full.py --epochs 150 --pretrained --finetune --lr 0.01 # ok
+# python3 run_experiment.py --num_workers 8 --config ./exp_configs/cub200/full.py --epochs 150 --pretrained --finetune --lr 0.01 # ok
+# python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/full.py --epochs 150 --pretrained --finetune --lr 0.01 --early_stopping # ok
+# python3 run_experiment.py --num_workers 8 --config ./exp_configs/cub200/full.py --epochs 150 --pretrained --finetune --lr 0.01 --early_stopping # ok
