@@ -59,28 +59,28 @@
 # python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_super-cl.py --fraction 0.2 --select_every 10 --epochs 500 # ok
 
 # ## best methods with warm up. TODO FIND CORRECT KAPPA
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_gradmatchpb.py --fraction 0.2 --select_every 10 --kappa
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_random.py --fraction 0.2 --select_every 10 --kappa
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_craigpb.py --fraction 0.2 --select_every 10 --kappa
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_glister.py --fraction 0.2 --select_every 10 --kappa
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_super-cl.py --select_every 10 --fraction 0.2 --kappa
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_gradmatchpb.py --fraction 0.2 --select_every 10 --kappa
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_random.py --fraction 0.2 --select_every 10 --kappa
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_craigpb.py --fraction 0.2 --select_every 10 --kappa
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_glister.py --fraction 0.2 --select_every 10 --kappa
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_super-cl.py --fraction 0.2 --select_every 10 --kappa
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_gradmatchpb.py --fraction 0.2 --select_every 10 --kappa 0.5 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_random.py --fraction 0.2 --select_every 10 --kappa 0.5 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_craigpb.py --fraction 0.2 --select_every 10 --kappa 0.5 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_glister.py --fraction 0.2 --select_every 10 --kappa 0.5 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_super-cl.py --select_every 10 --fraction 0.2 --kappa 0.5 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_gradmatchpb.py --fraction 0.2 --select_every 10 --kappa 0.5 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_random.py --fraction 0.2 --select_every 10 --kappa 0.5 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_craigpb.py --fraction 0.2 --select_every 10 --kappa 0.5 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_glister.py --fraction 0.2 --select_every 10 --kappa 0.5 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_super-cl.py --fraction 0.2 --select_every 10 --kappa 0.5 # ok
 
 # ## best methods with warm up and extended training. TODO FIND CORRECT KAPPA (MAKE SURE THAT WARMUP EPOCHS IS THE SAME AS WITH EXTENDED TRAINING)
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_gradmatchpb.py --fraction 0.2 --select_every 10 --epochs 500 --kappa
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_random.py --fraction 0.2 --select_every 10 --epochs 500 --kappa
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_craigpb.py --fraction 0.2 --select_every 10 --epochs 500 --kappa
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_glister.py --fraction 0.2 --select_every 10 --epochs 500 --kappa
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_super-cl.py --select_every 10 --fraction 0.2 --epochs 500 --kappa
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_gradmatchpb.py --fraction 0.2 --select_every 10 --epochs 500 --kappa
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_random.py --fraction 0.2 --select_every 10 --epochs 500 --kappa
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_craigpb.py --fraction 0.2 --select_every 10 --epochs 500 --kappa
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_glister.py --fraction 0.2 --select_every 10 --epochs 500 --kappa
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_super-cl.py --fraction 0.2 --select_every 10 --epochs 500 --kappa
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_gradmatchpb.py --fraction 0.2 --select_every 10 --epochs 500 --kappa 0.3 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_random.py --fraction 0.2 --select_every 10 --epochs 500 --kappa 0.3 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_craigpb.py --fraction 0.2 --select_every 10 --epochs 500 --kappa 0.3 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_glister.py --fraction 0.2 --select_every 10 --epochs 500 --kappa 0.3 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_super-cl.py --select_every 10 --fraction 0.2 --epochs 500 --kappa 0.3 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_gradmatchpb.py --fraction 0.2 --select_every 10 --epochs 500 --kappa 0.3 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_random.py --fraction 0.2 --select_every 10 --epochs 500 --kappa 0.3 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_craigpb.py --fraction 0.2 --select_every 10 --epochs 500 --kappa 0.3 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_glister.py --fraction 0.2 --select_every 10 --epochs 500 --kappa 0.3 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_super-cl.py --fraction 0.2 --select_every 10 --epochs 500 --kappa 0.3 # ok
 
 # ## offline dataset reduction: random, el2n, grand, prototypical, graph-cut, gradmatch. with fractions 0.5, 0.7, 0.9
 # python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/cub200/config_random.py --fraction 0.5 --nonadaptive
