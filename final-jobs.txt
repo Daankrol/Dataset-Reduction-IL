@@ -31,9 +31,9 @@
 # python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_full.py # ok
 # python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_full.py --early_stopping # ok
 
-# ## papilion 
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_uncertainty.py --fraction 0.2 --select_every 10 --selection_type LeastConfidence # ok
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_uncertainty.py --fraction 0.2 --select_every 10 --selection_type Entropy # ok
+# ## papilion
+python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_uncertainty.py --fraction 0.2 --select_every 10 --selection_type LeastConfidence
+python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_uncertainty.py --fraction 0.2 --select_every 10 --selection_type Entropy
 # python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_gradmatch.py --fraction 0.2 --select_every 10 # ok
 # python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_gradmatchpb.py --fraction 0.2 --select_every 10 # ok
 # python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_glister.py --fraction 0.2 --select_every 10 # ok
