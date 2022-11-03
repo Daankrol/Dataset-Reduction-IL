@@ -92,12 +92,6 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
         )
         return np.sqrt(np.clip(x2 + x2.T - 2.0 * xy, 1e-12, None))
 
-    def find_knn_faiss(self):
-        if self.knn is not None:
-            return
-        self.knn = faiss.IndexFlatL2(self.pretrained_model.embDim)
-        self.knn.add(self.)
-
     @torch.no_grad()
     def find_knn(self):
         "Find k-nearest-neighbour datapoints based on feature embedding by a pretrained network"
@@ -127,21 +121,25 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
                     embedding = embedding.detach()
                     # Embedding is of shape (batch_size, embDim)
                     embeddings[
-                        i * self.trainloader.batch_size: (i * self.trainloader.batch_size + inputs.shape[0])] = embedding
+                        i
+                        * self.trainloader.batch_size : (
+                            i * self.trainloader.batch_size + inputs.shape[0]
+                        )
+                    ] = embedding
                     embeddings.append(embedding.flatten(1).cpu().numpy())
-                
+
                 # for each index, find k nearest neighbours
                 embeddings = np.concatenate(embeddings, axis=0)
                 index.add(embeddings)
                 D, I = index.search(embeddings, self.k + 1)
                 knn.append(I[:, 1:])
             self.knn = np.concatenate(knn, axis=0)
-                # embeddings = np.concatenate(embeddings, axis=0)
+            # embeddings = np.concatenate(embeddings, axis=0)
 
-                # calculate pairwise distance matrix
-                # dist = self.metric(embeddings)
-                # for each sample add the k nearest neighbours
-                # knn.append(np.argsort(dist, axis=1)[:, 1 : self.k + 1])
+            # calculate pairwise distance matrix
+            # dist = self.metric(embeddings)
+            # for each sample add the k nearest neighbours
+            # knn.append(np.argsort(dist, axis=1)[:, 1 : self.k + 1])
             self.logger.debug("Finished with computing embeddings and distances")
         else:
             # embeddings = torch.zeros((self.N_trn, self.pretrained_model.embDim)).to(self.device)
@@ -161,7 +159,7 @@ class ContrastiveActiveLearningStrategy(DataSelectionStrategy):
             )
             D, I = index.search(embeddings, self.k + 1)
             self.knn = I[:, 1:]
-            
+
             # knn = np.argsort(self.metric(embeddings), axis=1)[:, 1 : self.k + 1]
             self.logger.debug("Finished with computing embeddings and distances")
         del embeddings
