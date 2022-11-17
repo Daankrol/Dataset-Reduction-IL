@@ -550,3 +550,10 @@
 # python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_random.py --epochs 150 --pretrained --finetune --lr 0.005 --fraction 0.1 --select_every 20 --kappa 0.5 # ok
 # python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_random.py --epochs 150 --pretrained --finetune --lr 0.005 --fraction 0.2 --select_every 20 --kappa 0.3 # ok
 # python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_random.py --epochs 150 --pretrained --finetune --lr 0.005 --fraction 0.2 --select_every 20 --kappa 0.5 # ok
+
+python3 run_experiment.py --num_workers 8 --config ./exp_configs/cifar10/config_cal.py --fraction 0.2 --select_every 10
+python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_cal.py --fraction 0.2 --select_every 10
+python3 run_experiment.py --num_workers 8 --config ./exp_configs/cub200/config_cal.py --fraction 0.2 --select_every 10
+python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_cal.py --fraction 0.2 --select_every 10 --kappa 0.5
+python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_super-cl.py --epochs 150 --pretrained --finetune --lr 0.005 --fraction 0.2 --select_every 10
+python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_super-cl.py --epochs 150 --pretrained --finetune --lr 0.005 --fraction 0.2 --select_every 10 --kappa 0.3

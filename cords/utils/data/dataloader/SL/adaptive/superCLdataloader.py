@@ -1,9 +1,6 @@
 import copy
-from dotmap import DotMap
-
 from cords.selectionstrategies.SL.superCLstrategy import SupervisedContrastiveLearningStrategy
 from .adaptivedataloader import AdaptiveDSSDataLoader
-from cords.selectionstrategies.SL import ContrastiveActiveLearningStrategy
 import time
 
 
