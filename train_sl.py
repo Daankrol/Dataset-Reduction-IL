@@ -1241,6 +1241,11 @@ class TrainClassifier:
             )
 
         elif self.cfg.dss_args.type == "CAL":
+            if "k" not in self.cfg.dss_args.keys():
+                self.cfg.dss_args.k = 10
+            if "use_faiss" not in self.cfg.dss_args.keys():
+                self.cfg.dss_args.use_faiss = False
+
             dataloader = ContrastiveDataLoader(
                 trainloader,
                 valloader,
