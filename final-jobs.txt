@@ -139,19 +139,42 @@
 
 
 ## papilion
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_uncertainty.py --fraction 0.2 --select_every 10 --selection_type LeastConfidence --pretrained --finetune --lr 0.005 # ok
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_submodular.py --submod_function graph-cut --select_every 10 --fraction 0.2 --pretrained --finetune --lr 0.005 # ok
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_submodular.py --submod_function facility-location --select_every 10 --fraction 0.2 --pretrained --finetune --lr 0.005 # ok
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_gradmatch.py --fraction 0.2 --select_every 10 --pretrained --finetune --lr 0.005 # ok
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_gradmatchpb.py --fraction 0.2 --select_every 10 --pretrained --finetune --lr 0.005 # ok
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_glister.py --fraction 0.2 --select_every 10 --pretrained --finetune --lr 0.005 # ok
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_craigpb.py --fraction 0.2 --select_every 10  --pretrained --finetune --lr 0.005 # ok
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_random.py --fraction 0.2 --select_every 10 --pretrained --finetune --lr 0.005 # ok
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_super-cl.py --select_every 10 --fraction 0.2 --pretrained --finetune --lr 0.005 # ok
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_full.py --pretrained --finetune --lr 0.005 # ok
-# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_full.py --early_stopping --pretrained --finetune --lr 0.005 # ok
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_uncertainty.py --fraction 0.2 --select_every 10 --selection_type LeastConfidence --pretrained --finetune --lr 0.005
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_submodular.py --submod_function graph-cut --select_every 10 --fraction 0.2 --pretrained --finetune --lr 0.005
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_submodular.py --submod_function facility-location --select_every 10 --fraction 0.2 --pretrained --finetune --lr 0.005
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_gradmatch.py --fraction 0.2 --select_every 10 --pretrained --finetune --lr 0.005
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_gradmatchpb.py --fraction 0.2 --select_every 10 --pretrained --finetune --lr 0.005
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_glister.py --fraction 0.2 --select_every 10 --pretrained --finetune --lr 0.005
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_craigpb.py --fraction 0.2 --select_every 10  --pretrained --finetune --lr 0.005
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_random.py --fraction 0.2 --select_every 10 --pretrained --finetune --lr 0.005
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_super-cl.py --select_every 10 --fraction 0.2 --pretrained --finetune --lr 0.005
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_full.py --pretrained --finetune --lr 0.005
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_full.py --early_stopping --pretrained --finetune --lr 0.005
 
 ### best methods with warm-up
+# python3 grun_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_uncertainty.py --fraction 0.2 --select_every 10 --selection_type LeastConfidence --pretrained --finetune --lr 0.005 --kappa 0.5
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_submodular.py --submod_function graph-cut --select_every 10 --fraction 0.2 --pretrained --finetune --lr 0.005 --kappa 0.5
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_submodular.py --submod_function facility-location --select_every 10 --fraction 0.2 --pretrained --finetune --lr 0.005 --kappa 0.5
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_gradmatch.py --fraction 0.2 --select_every 10 --pretrained --finetune --lr 0.005 --kappa 0.5
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_gradmatchpb.py --fraction 0.2 --select_every 10 --pretrained --finetune --lr 0.005 --kappa 0.5
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_glister.py --fraction 0.2 --select_every 10 --pretrained --finetune --lr 0.005 --kappa 0.5
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_craigpb.py --fraction 0.2 --select_every 10  --pretrained --finetune --lr 0.005 --kappa 0.5
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_random.py --fraction 0.2 --select_every 10 --pretrained --finetune --lr 0.005 --kappa 0.5
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_super-cl.py --select_every 10 --fraction 0.2 --pretrained --finetune --lr 0.005 --kappa 0.5
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_full.py --pretrained --finetune --lr 0.005 --kappa 0.5
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/cub200/config_full.py --early_stopping --pretrained --finetune --lr 0.005 --kappa 0.5
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_uncertainty.py --fraction 0.2 --select_every 10 --selection_type LeastConfidence --pretrained --finetune --lr 0.005 --kappa 0.5
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_submodular.py --submod_function graph-cut --select_every 10 --fraction 0.2 --pretrained --finetune --lr 0.005 --kappa 0.5
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_submodular.py --submod_function facility-location --select_every 10 --fraction 0.2 --pretrained --finetune --lr 0.005 --kappa 0.5
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_gradmatch.py --fraction 0.2 --select_every 10 --pretrained --finetune --lr 0.005 --kappa 0.5
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_gradmatchpb.py --fraction 0.2 --select_every 10 --pretrained --finetune --lr 0.005 --kappa 0.5
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_glister.py --fraction 0.2 --select_every 10 --pretrained --finetune --lr 0.005 --kappa 0.5
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_craigpb.py --fraction 0.2 --select_every 10  --pretrained --finetune --lr 0.005 --kappa 0.5
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_random.py --fraction 0.2 --select_every 10 --pretrained --finetune --lr 0.005 --kappa 0.5
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_super-cl.py --select_every 10 --fraction 0.2 --pretrained --finetune --lr 0.005 --kappa 0.5
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_full.py --pretrained --finetune --lr 0.005 --kappa 0.5
+# python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_full.py --early_stopping --pretrained --finetune --lr 0.005 --kappa 0.5
+
 
 ### best methods with extended training
 

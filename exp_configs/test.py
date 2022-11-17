@@ -33,15 +33,15 @@ config = dict(
     #     # select_every=1,
     #     kappa=0
     # ),
-    # dss_args=dict(
-    #     type="Super-CL",
-    #     fraction=0.8,
-    #     selection_type="PerClass",  #  PerClass or PerBatch
-    #     weighted=True,
-    #     online=True,
-    #     select_every=1,
-    #     kappa=0
-    # ),
+    dss_args=dict(
+        type="Super-CL",
+        fraction=0.8,
+        selection_type="PerClass",  #  PerClass or PerBatch
+        weighted=True,
+        online=True,
+        select_every=1,
+        kappa=0
+    ),
     # dss_args=dict(
     #     type="CAL",
     #     fraction=0.2,
@@ -64,14 +64,14 @@ config = dict(
     #     linear_layer=False,
     #     kappa=0,
     # ),
-    dss_args=dict(
-        type="Uncertainty",
-        fraction=0.1,
-        select_every=1,
-        selection_type='Entropy',
-        kappa=0,
-        balancing=True
-    ),
+    # dss_args=dict(
+    #     type="Uncertainty",
+    #     fraction=0.1,
+    #     select_every=1,
+    #     selection_type='Entropy',
+    #     kappa=0,
+    #     balancing=True
+    # ),
     # dss_args=dict(
     #     type="GradMatch",
     #     fraction=0.3,
