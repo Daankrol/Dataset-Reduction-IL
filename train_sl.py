@@ -1258,6 +1258,10 @@ class TrainClassifier:
                 num_workers=self.cfg.dataloader.num_workers,
             )
         elif self.cfg.dss_args.type == "Super-CL":
+            if "k" not in self.cfg.dss_args.keys():
+                self.cfg.dss_args.k = 10
+            if "use_faiss" not in self.cfg.dss_args.keys():
+                self.cfg.dss_args.use_faiss = False
             dataloader = SupervisedContrastiveLearningDataLoader(
                 trainloader,
                 valloader,
