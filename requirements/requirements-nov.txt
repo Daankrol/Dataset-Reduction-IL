@@ -28,3 +28,4 @@ torchmetrics
 seaborn
 gdown
 umap-learn
+faiss

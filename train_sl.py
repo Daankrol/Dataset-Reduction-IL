@@ -481,9 +481,6 @@ class TrainClassifier:
         optimizer, scheduler = self.optimizer_with_scheduler(model)
 
         # # Early stopping
-        # if self.cfg.early_stopping and scheduler is not None:
-        #     print(self.cfg.early_stopping, scheduler)
-        #     raise Exception("Do not use early stopping AND a lr scheduler")
         if self.cfg.early_stopping:
             early_stopping = EarlyStopping(patience=20, min_delta=0, logger=logger)
 
@@ -589,12 +586,6 @@ class TrainClassifier:
                     loss = torch.dot(losses.view(-1), weights / (weights.sum()))
                 else:
                     loss = torch.dot(losses, weights / (weights.sum()))
-
-                # # check if gradients are changing and are not zero
-                # self.logger.debug('gradients before backward pass')
-                # for name, param in model.named_parameters():
-                #     if param.requires_grad:
-                #         self.logger.debug(f'{name} {param.grad}')
 
                 loss.backward()
                 subtrn_loss += loss.item() * weights.sum()
@@ -1370,7 +1361,7 @@ class TrainClassifier:
                 batch_size=self.cfg.dataloader.batch_size,
                 shuffle=self.cfg.dataloader.shuffle,
                 pin_memory=self.cfg.dataloader.pin_memory,
-                collate_fn=self.cfg.dss_args.collate_fn,
+                collate_fn=self.cfg.dss_args.collate_fn,s
                 num_workers=self.cfg.dataloader.num_workers,
             )
         elif self.cfg.dss_args.type in ["EL2N"]:

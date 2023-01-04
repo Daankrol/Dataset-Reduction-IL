@@ -1,1 +1,0 @@
-# python3 run_experiment.py --config ./exp_configs/cifar10/config_super-cl.py

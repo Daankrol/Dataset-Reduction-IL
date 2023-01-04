@@ -216,17 +216,6 @@
 # python3 run_experiment.py --final --runs 5 --num_workers 8 --config ./exp_configs/papilion/config_super-cl.py --select_every 10 --fraction 0.2 --pretrained --finetune --lr 0.005 --kappa 0.3 --epochs 150 # ok
 
 
-
-### best methods with extended training
-
-### best methods with extended training and warm up
-
-### best methods with inverse warm up (Post training Diversity Injection)
-
-### best methods with inverse warm up (Post training Diversity Injection) and extended training
-
-
-
 ##### ablation studies
 ## Effect of kappa: cifar10, super-cl and gradmatchpb. kappas: [0, 0.16667, 0.33333, 0.5, 0.6666667, 0.8333333 ]
 # python3 run_experiment.py --final --runs 3 --num_workers 8 --config ./exp_configs/cifar10/config_gradmatchpb.py --fraction 0.2 --select_every 10 # ok
