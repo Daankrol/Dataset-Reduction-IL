@@ -605,3 +605,24 @@
 # python3 run_experiment.py --num_workers 8 --config ./exp_configs/cub200/config_cal.py --epochs 150 --pretrained --finetune --lr 0.005 --fraction 0.2 --select_every 10 --kappa 0.15 # ok
 # python3 run_experiment.py --num_workers 8 --config ./exp_configs/cub200/config_cal.py --epochs 150 --pretrained --finetune --lr 0.005 --fraction 0.2 --select_every 10 --kappa 0.05 # ok
 # python3 run_experiment.py --num_workers 8 --config ./exp_configs/cub200/config_cal.py --epochs 150 --pretrained --finetune --lr 0.005 --fraction 0.2 --select_every 10 --kappa 0.01 # ok
+
+## checking fractions with frequency of gradmatch paper
+# python3 run_experiment.py --num_workers 8 --config ./exp_configs/cifar10/config_gradmatchpb.py --select_every 20 --fraction 0.1 # ok
+# python3 run_experiment.py --num_workers 8 --config ./exp_configs/cifar10/config_gradmatchpb.py --select_every 20 --fraction 0.2 # ok
+# python3 run_experiment.py --num_workers 8 --config ./exp_configs/cifar10/config_gradmatchpb.py --select_every 20 --fraction 0.3 # ok
+# python3 run_experiment.py --num_workers 8 --config ./exp_configs/cifar10/config_super-cl.py --select_every 20 --fraction 0.1 # ok
+# python3 run_experiment.py --num_workers 8 --config ./exp_configs/cifar10/config_super-cl.py --select_every 20 --fraction 0.2 # ok
+# python3 run_experiment.py --num_workers 8 --config ./exp_configs/cifar10/config_super-cl.py --select_every 20 --fraction 0.3 # ok
+# python3 run_experiment.py --num_workers 8 --config ./exp_configs/cifar10/config_cal.py --select_every 20 --fraction 0.1 # ok
+# python3 run_experiment.py --num_workers 8 --config ./exp_configs/cifar10/config_cal.py --select_every 20 --fraction 0.2 # ok
+# python3 run_experiment.py --num_workers 8 --config ./exp_configs/cifar10/config_cal.py --select_every 20 --fraction 0.3 # ok
+
+# python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_gradmatchpb.py --select_every 20 --fraction 0.1 # ok
+# python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_gradmatchpb.py --select_every 20 --fraction 0.2 # ok
+# python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_gradmatchpb.py --select_every 20 --fraction 0.3 # ok
+# python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_super-cl.py --select_every 20 --fraction 0.1 # ok
+# python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_super-cl.py --select_every 20 --fraction 0.2 # ok
+# python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_super-cl.py --select_every 20 --fraction 0.3 # ok
+# python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_cal.py --select_every 20 --fraction 0.1 # ok
+# python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_cal.py --select_every 20 --fraction 0.2 # ok
+# python3 run_experiment.py --num_workers 8 --config ./exp_configs/papilion/config_cal.py --select_every 20 --fraction 0.3 # ok
