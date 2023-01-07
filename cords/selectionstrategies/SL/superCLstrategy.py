@@ -6,8 +6,7 @@ from .dataselectionstrategy import DataSelectionStrategy
 from sklearn.metrics import pairwise_distances
 import time
 from cords.utils.models.efficientnet import EfficientNetB0_PyTorch
-import pickle 
-import os
+import faiss
 
 
 class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
@@ -34,7 +33,7 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
     """
 
     def __init__(self, trainloader, valloader, model, loss,
-                 device, num_classes, selection_type, logger, k=10, weighted=True):
+                 device, num_classes, selection_type, logger, k=10, weighted=True, use_faiss=True):
         super().__init__(trainloader, valloader, model, num_classes, None, loss, device, logger)
         self.selection_type = selection_type
         self.weighted = weighted
@@ -47,6 +46,11 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
             param.requires_grad = False
         self.pretrained_model.eval()
         self.first_epoch_done = False
+        self.use_faiss = use_faiss
+        if self.use_faiss:
+            self.logger.debug('USING FAISS')
+            # build an index for each class
+            self.faiss_index = [faiss.IndexFlatL2(self.pretrained_model.embDim) for c in range(self.num_classes)]
 
 
 
@@ -62,33 +66,63 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
         # for each sample in a class, compute distance in feature space to all other sample in the same class
         # and find the k-nearest-neighbours
 
-        # knn like: knn[class][sample] = [k-nearest-neighbours], which can be variable length vector of indices in the original dataset
+        if self.use_faiss:
+            knn = []
+            for c in range(self.num_classes):
+                knn.append([])
+                embeddings = []
+                class_indices = np.where(self.trn_lbls == c)[0]
+                loader = torch.utils.data.DataLoader(
+                    torch.utils.data.Subset(self.trainloader.dataset, class_indices),
+                    batch_size=self.trainloader.batch_size,
+                    pin_memory=self.trainloader.pin_memory,
+                    num_workers=self.trainloader.num_workers,
+                    shuffle=False)
+                for i, (inputs, _) in enumerate(loader):
+                    inputs = inputs.to(self.device)
+                    _, e = self.pretrained_model(inputs, last=True, freeze=True)
+                    embeddings.append(e.detach().flatten(1).cpu().numpy())
+                embeddings = np.concatenate(embeddings, axis=0)
+                self.logger.debug(f"Constructed feature space. Now building Faiss index for class {c}")
+                self.faiss_index[c].add(embeddings)
+                D,I = self.faiss_index[c].search(embeddings, self.k+1)
+                # add the KNN list. Do check the size of the class.
+                # what to do if |c| < k?
+                nn = I[:, 1:self.k+1]
+                knn[c].append(nn)
+                print(f"class {c} with {len(class_indices)}:", knn[c])
+                exit()
+            self.logger.debug(f"Index built. Starting knn search with Faiss. K={self.k}")
+            self.knn = knn
+            print('\n',knn)
+            exit()
+        else:
+            # knn like: knn[class][sample] = [k-nearest-neighbours], which can be variable length vector of indices in the original dataset
+            knn = []
+            for c in range(self.num_classes):
+                # add new empty list to knn for the current class
+                knn.append([])
+                class_indices = np.where(self.trn_lbls == c)[0]
+                embeddings = torch.zeros((len(class_indices), self.pretrained_model.embDim)).to(self.device)
+                loader = torch.utils.data.DataLoader(
+                    torch.utils.data.Subset(self.trainloader.dataset, class_indices),
+                    batch_size=self.trainloader.batch_size,
+                    pin_memory=self.trainloader.pin_memory, num_workers=self.trainloader.num_workers)
+                for i, (inputs, _) in enumerate(loader):
+                    inputs = inputs.to(self.device)
+                    _, e = self.pretrained_model(inputs, last=True, freeze=True)
+                    embeddings[i * self.trainloader.batch_size:(i + 1) * self.trainloader.batch_size] = e.detach()
 
-        knn = []
-        for c in range(self.num_classes):
-            # add new empty list to knn for the current class 
-            knn.append([])
-            class_indices = np.where(self.trn_lbls == c)[0]
-            embeddings = torch.zeros((len(class_indices), self.pretrained_model.embDim)).to(self.device)
-            loader = torch.utils.data.DataLoader(
-                torch.utils.data.Subset(self.trainloader.dataset, class_indices),
-                batch_size=self.trainloader.batch_size,
-                pin_memory=self.trainloader.pin_memory, num_workers=self.trainloader.num_workers)
-            for i, (inputs, _) in enumerate(loader):
-                inputs = inputs.to(self.device)
-                _, e = self.pretrained_model(inputs, last=True, freeze=True)
-                embeddings[i * self.trainloader.batch_size:(i + 1) * self.trainloader.batch_size] = e.detach()
+                # calculate pairwise distances and for each sample, find the k-nearest-neighbours, add their indices sorted by their distance
+                dist = pairwise_distances(embeddings.cpu().numpy())
 
-            # calculate pairwise distances and for each sample, find the k-nearest-neighbours, add their indices sorted by their distance
-            dist = pairwise_distances(embeddings.cpu().numpy())
+                for i in range(len(class_indices)):
+                    # can happen that we have less than k samples in a class, then we just take all samples
+                    neighbours = np.argsort(dist[i])[1:self.k + 1].astype(np.int32)
+                    knn[c].append(list(neighbours))
 
-            for i in range(len(class_indices)):
-                # can happen that we have less than k samples in a class, then we just take all samples
-                neighbours = np.argsort(dist[i])[1:self.k + 1].astype(np.int32)
-                knn[c].append(list(neighbours))
-
-        del self.pretrained_model  # only need this at the start.
-        self.knn = knn
+            del self.pretrained_model  # only need this at the start.
+            self.knn = knn
 
 
     @torch.no_grad()
@@ -96,56 +130,69 @@ class SupervisedContrastiveLearningStrategy(DataSelectionStrategy):
         # We use the current training model to determine the probabilities
         self.logger.info('Calculating probabilities for divergence')
         self.model.eval()
-        probs = []
-        # probs[c][class_indexed sample] = [prob vector]
-        # knn[c][class_indexed sample] = [class_indexed k-nearest-neighbours]
 
-        for c in range(self.num_classes):
-            probs.append([])
-            class_indices = np.where(self.trn_lbls == c)[0]
-            loader = torch.utils.data.DataLoader(
-                torch.utils.data.Subset(self.trainloader.dataset, class_indices),
-                batch_size=self.trainloader.batch_size,
-                pin_memory=self.trainloader.pin_memory, num_workers=self.trainloader.num_workers)
-            for i, (inputs, _) in enumerate(loader):
-                inputs = inputs.to(self.device)
-                outputs = self.model(inputs, freeze=True)
-                outputs = F.softmax(outputs, dim=1).detach().cpu().numpy()
-                # calculate probs for this batch. Add all vectors in dim 0 to probs without flattening
-                # have to use python lists as they have variable length.
-                probs[c] += list(outputs)
+        if self.use_faiss:
+            # a class with 2 samples has this knn matrix:
+            # [1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+            # [ 0, -1, -1, -1, -1, -1, -1, -1, -1, -1]]
+            # for each class,
+            #   calculate sample probabilities
+            #   for each sample, get number of neighbours
+            #   calculate divergence to the neighbours
+            #   rank on divergence, transform local inter-class index to global dataset index and add to list.
+            pass
+        else:
+            probs = []
+            # probs[c][class_indexed sample] = [prob vector]
+            # knn[c][class_indexed samp
+            # le] = [class_indexed k-nearest-neighbours]
 
-        self.logger.debug('Calculated probabilities, now computing divergence')
-        # calculate divergence
-        divergence = np.zeros(len(self.trn_lbls))
-        for c in range(self.num_classes):
-            # Calculate KL-divergence between sample PDF and all neighbours of the same class.
-            # Average the divergence scores over all neighbours.
-            class_indices = np.where(self.trn_lbls == c)[0]
-            for i in range(len(class_indices)):
-                aa = np.array(probs[c][i])
-                # Some samples have no neighbours since the classes can be heavily imbalanced.
-                # Use a high divergence such that they will always get picked.
-                neighbours = np.array(self.knn[c][i])
-                if len(neighbours) == 0:
-                    divergence[class_indices[i]] = np.inf
-                    continue
-                else:
-                    neighbour_probs = np.array(probs[c])[neighbours] # use a np array s.t. we can use multiple indices
-                    # replace zero values to circumvent underflow and zero division errors
-                    neighbour_probs[neighbour_probs == 0] = 1e-6
-                    aa[aa == 0] = 1e-6
-                    try:
-                        with np.errstate(under='ignore', over='ignore'): # ignore low precision underflow errors
-                            # note that overflows will return inf which is replaced later on. 
-                            kl_div = np.mean(np.sum(neighbour_probs * np.log(neighbour_probs / aa),
-                                                                      axis=1 if neighbour_probs.ndim > 1 else 0))
-                    except Exception as e:
-                        print(e)
-                        print(aa.shape, neighbours.shape, neighbour_probs.shape, '\n')
-                        print(aa, '\n', neighbour_probs)
-                        raise e
-                    divergence[class_indices[i]] = kl_div
+            for c in range(self.num_classes):
+                probs.append([])
+                class_indices = np.where(self.trn_lbls == c)[0]
+                loader = torch.utils.data.DataLoader(
+                    torch.utils.data.Subset(self.trainloader.dataset, class_indices),
+                    batch_size=self.trainloader.batch_size,
+                    pin_memory=self.trainloader.pin_memory, num_workers=self.trainloader.num_workers, shuffle=False)
+                for i, (inputs, _) in enumerate(loader):
+                    inputs = inputs.to(self.device)
+                    outputs = self.model(inputs, freeze=True)
+                    outputs = F.softmax(outputs, dim=1).detach().cpu().numpy()
+                    # calculate probs for this batch. Add all vectors in dim 0 to probs without flattening
+                    # have to use python lists as they have variable length.
+                    probs[c] += list(outputs)
+
+            self.logger.debug('Calculated probabilities, now computing divergence')
+            # calculate divergence
+            divergence = np.zeros(len(self.trn_lbls))
+            for c in range(self.num_classes):
+                # Calculate KL-divergence between sample PDF and all neighbours of the same class.
+                # Average the divergence scores over all neighbours.
+                class_indices = np.where(self.trn_lbls == c)[0]
+                for i in range(len(class_indices)):
+                    aa = np.array(probs[c][i])
+                    # Some samples have no neighbours since the classes can be heavily imbalanced.
+                    # Use a high divergence such that they will always get picked.
+                    neighbours = np.array(self.knn[c][i])
+                    if len(neighbours) == 0:
+                        divergence[class_indices[i]] = np.inf
+                        continue
+                    else:
+                        neighbour_probs = np.array(probs[c])[neighbours] # use a np array s.t. we can use multiple indices
+                        # replace zero values to circumvent underflow and zero division errors
+                        neighbour_probs[neighbour_probs == 0] = 1e-6
+                        aa[aa == 0] = 1e-6
+                        try:
+                            with np.errstate(under='ignore', over='ignore'): # ignore low precision underflow errors
+                                # note that overflows will return inf which is replaced later on.
+                                kl_div = np.mean(np.sum(neighbour_probs * np.log(neighbour_probs / aa),
+                                                                          axis=1 if neighbour_probs.ndim > 1 else 0))
+                        except Exception as e:
+                            print(e)
+                            print(aa.shape, neighbours.shape, neighbour_probs.shape, '\n')
+                            print(aa, '\n', neighbour_probs)
+                            raise e
+                        divergence[class_indices[i]] = kl_div
 
         self.model.train()
         self.logger.debug('Divergence calculated.')

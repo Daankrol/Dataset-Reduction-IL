@@ -37,10 +37,10 @@ class SupervisedContrastiveLearningDataLoader(AdaptiveDSSDataLoader):
         self.train_model = dss_args.model
         self.strategy = SupervisedContrastiveLearningStrategy(train_loader, val_loader, copy.deepcopy(dss_args.model),
                                                           dss_args.loss, dss_args.device, dss_args.num_classes,
-                                                          dss_args.selection_type, logger,dss_args.k, dss_args.weighted)
+                                                          dss_args.selection_type, logger,dss_args.k, dss_args.weighted,dss_args.use_faiss)
 
         self.logger.debug("Supervised Contrastive Learning dataloader initialized.")
-        self.logger.debug(f"Using {dss_args.selection_type}, weights based on divergence: {dss_args.weighted}")
+        self.logger.debug(f"Using {dss_args.selection_type} {'with Fais' if dss_args.use_faiss else ''}, weights based on divergence: {dss_args.weighted}")
 
     def _resample_subset_indices(self):
         """

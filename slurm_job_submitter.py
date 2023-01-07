@@ -17,14 +17,7 @@ def run_jobs_slurm(jobs_path: str, partition: str = None, cluster: str = "intel"
     `python slurm_jobs_runner.py --jobs_path old_jobs.txt --conda_env ote-det`
     Make sure your ~/.bashrc contains the following lines:
     export PATH="/home2/<user>/miniconda3/bin:$PATH"
-    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home2/<user>/miniconda3/lib
-    `jobs_path` should contain a list of jobs, for example
-    python scripts/run_experiment2.py --task classification --dataset pap --epochs 30 --rounds -1 --runs 5 --debug --active_learning_sample_size 50 --disable_output_embedding --active_learning random
-    python scripts/run_experiment2.py --task classification --dataset pap --epochs 30 --rounds -1 --runs 5 --debug --active_learning_sample_size 50 --disable_output_embedding --active_learning uncertainty_exploration
-    after a job is submitted to SLURM it is commented out
-    # python scripts/run_experiment2.py --task classification --dataset pap --epochs 30 --rounds -1 --runs 5 --debug --active_learning_sample_size 50 --disable_output_embedding --active_learning random # ok
-    python scripts/run_experiment2.py --task classification --dataset pap --epochs 30 --rounds -1 --runs 5 --debug --active_learning_sample_size 50 --disable_output_embedding --active_learning uncertainty_exploration
-    job files are created in the current directory as job<line_number>.sh, where line_number refers to `jobs_path`
+    `jobs_path` should contain a list of jobs. For an example see jobs.txt
     :param jobs_path: path to txt file containing jobs
     :param conda_environment: path to conda env
     :param partition: partition to submit to. E.g. 'gpu', 'gpushort'
