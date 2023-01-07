@@ -1,6 +1,6 @@
 # Dataset Reduction Methods for Data and Energy Efficient Deep Learning
 
-This repository contains the code for the MSc Thesis "Dataset Reduction Methods for Data and Energy Efficient Deep Learning" by Daan Krol. It contains the code for all non-adaptive and adaptive data subset selection methods. The code is based on the [CORDS library](https://github.com/decile-team/cords). It is extended with several other dataset reduction methods, both adaptive and non-adaptive. In addition to that, it contains energy consumption tracking, feature space visualization, subset sampling visualization, biodiversity datasets, W&B logging, possibility to run with pre-trained networks and a framework for running experiments.
+This repository contains the code for the MSc Thesis "Dataset Reduction Methods for Data and Energy Efficient Deep Learning" by Daan Krol. It contains the code for all non-adaptive and adaptive data subset selection methods. The code is based on the [CORDS library](https://github.com/decile-team/cords). It is extended with several other dataset reduction methods, both adaptive and non-adaptive. In addition to that, it contains energy consumption tracking, feature space visualization (t-SNE and UMAP), subset sampling visualization, biodiversity datasets, W&B logging, possibility to run with pre-trained networks and a framework for running experiments.
 
 ## Setup
 To install the requirements, run the following command in the root directory of the project:
